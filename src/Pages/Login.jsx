@@ -27,7 +27,7 @@
 //   const fetchDropdowns = async () => {
 //     setIsLoading(true);
 //     try {
-//       const response = await fetch('https://bugbuster-backend.vercel.app/api/auth/dropdowns', {
+//       const response = await fetch('https://bug-buster-backend.vercel.app/api/auth/dropdowns', {
 //         headers: { 'Content-Type': 'application/json' },
 //       });
 
@@ -72,7 +72,7 @@
 
 //     try {
 //       if (isLogin) {
-//         const response = await fetch('https://bugbuster-backend.vercel.app/api/auth/login', {
+//         const response = await fetch('https://bug-buster-backend.vercel.app/api/auth/login', {
 //           method: 'POST',
 //           headers: { 'Content-Type': 'application/json' },
 //           body: JSON.stringify({ email, password }),
@@ -101,7 +101,7 @@
 //           department: roles.ServiceProvider ? department : undefined,
 //         };
 
-//         const response = await fetch('https://bugbuster-backend.vercel.app/api/auth/signup', {
+//         const response = await fetch('https://bug-buster-backend.vercel.app/api/auth/signup', {
 //           method: 'POST',
 //           headers: { 'Content-Type': 'application/json' },
 //           body: JSON.stringify(body),
@@ -116,7 +116,7 @@
 //         setTimer(40);
 //         setIsTimerActive(true);
 //       } else {
-//         const response = await fetch('https://bugbuster-backend.vercel.app/api/auth/verify-otp', {
+//         const response = await fetch('https://bug-buster-backend.vercel.app/api/auth/verify-otp', {
 //           method: 'POST',
 //           headers: { 'Content-Type': 'application/json' },
 //           body: JSON.stringify({ email: verifiedEmail, otp }),
@@ -170,7 +170,7 @@
 //         department: roles.ServiceProvider ? department : undefined,
 //       };
 
-//       const response = await fetch('https://bugbuster-backend.vercel.app/api/auth/signup', {
+//       const response = await fetch('https://bug-buster-backend.vercel.app/api/auth/signup', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify(body),
