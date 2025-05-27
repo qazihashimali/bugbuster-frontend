@@ -97,7 +97,7 @@ export default function IssueDesk() {
           if (!token) throw new Error("No authentication token found");
 
           const dropdownResponse = await fetch(
-            "https://bug-buster-backend.vercel.app/api/issues/dropdowns",
+            "https://bugbuster-backend.vercel.app/api/issues/dropdowns",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -134,7 +134,7 @@ export default function IssueDesk() {
           if (userData) {
             const parsedUser = JSON.parse(userData);
             const issuesResponse = await fetch(
-              "https://bug-buster-backend.vercel.app/api/issues",
+              "https://bugbuster-backend.vercel.app/api/issues",
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -227,7 +227,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/issues",
+        "https://bugbuster-backend.vercel.app/api/issues",
         {
           method: "POST",
           headers: {
@@ -311,7 +311,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
+        `https://bugbuster-backend.vercel.app/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -369,7 +369,7 @@ export default function IssueDesk() {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${issue._id}`,
+        `https://bugbuster-backend.vercel.app/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {
@@ -399,7 +399,7 @@ export default function IssueDesk() {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bug-buster-backend.vercel.app/${attachment}`;
+    return `https://bugbuster-backend.vercel.app/${attachment}`;
   };
 
   const truncateDescription = (description) => {

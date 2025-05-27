@@ -40,7 +40,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Dashboard",
       icon: <FaTachometerAlt />,
       route: "/dashboard",
-      allowedRoles: ["SuperAdmin", "Admin", "EndUser", "Service Provider"], // All roles can access
+      allowedRoles: ["SuperAdmin", "Admin", "EndUser", "ServiceProvider"], // All roles can access
     },
     {
       name: "Branch",
@@ -64,19 +64,19 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Issue Desk",
       icon: <FaQuestionCircle />,
       route: "/issue-desk",
-      allowedRoles: ["Admin", "EndUser", "Service Provider", "SuperAdmin"], // All roles can access
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "My Tasks",
       icon: <FaTasks />,
       route: "/my-tasks",
-      allowedRoles: ["Admin", "EndUser", "Service Provider", "SuperAdmin"], // All roles can access
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "Assigned Tasks",
       icon: <SiGoogletasks />,
       route: "/assigned-tasks",
-      allowedRoles: ["Admin", "EndUser", "Service Provider", "SuperAdmin"], // All roles can access
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "Users",
@@ -94,7 +94,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Logout",
       icon: <FaSignOutAlt />,
       route: "/logout",
-      allowedRoles: ["Admin", "EndUser", "Service Provider", "SuperAdmin"], // All roles can access
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
   ];
 

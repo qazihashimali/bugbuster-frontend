@@ -20,7 +20,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-backend.vercel.app/api/departments', {
+      const response = await fetch('https://bugbuster-backend.vercel.app/api/departments', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-backend.vercel.app/api/departments', {
+      const response = await fetch('https://bugbuster-backend.vercel.app/api/departments', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,7 +104,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-backend.vercel.app/api/departments/${selectedDepartment._id}`, {
+      const response = await fetch(`https://bugbuster-backend.vercel.app/api/departments/${selectedDepartment._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,7 +139,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-backend.vercel.app/api/departments/${department._id}`, {
+      const response = await fetch(`https://bugbuster-backend.vercel.app/api/departments/${department._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
