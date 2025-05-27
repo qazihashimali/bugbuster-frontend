@@ -19,7 +19,7 @@ const MyTasks = () => {
       if (!userData) throw new Error("No user data found");
 
       const user = JSON.parse(userData);
-      const response = await fetch("https://bugbuster-backend.vercel.app/api/issues", {
+      const response = await fetch("https://bug-buster-backend.vercel.app/api/issues", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const MyTasks = () => {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        `https://bugbuster-backend.vercel.app/api/issues/${issue._id}`,
+        `https://bug-buster-backend.vercel.app/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {

@@ -307,7 +307,7 @@ const Dashboard = () => {
         throw new Error("No authentication token found");
       }
 
-      const response = await fetch("https://bugbuster-backend.vercel.app/api/issues", {
+      const response = await fetch("https://bug-buster-backend.vercel.app/api/issues", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -419,7 +419,7 @@ const Dashboard = () => {
       }
 
       const response = await fetch(
-        `https://bugbuster-backend.vercel.app/api/issues/${selectedIssue._id}`,
+        `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -517,7 +517,7 @@ const Dashboard = () => {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bugbuster-backend.vercel.app/${attachment}`;
+    return `https://bug-buster-backend.vercel.app/${attachment}`;
   };
 
   const truncateDescription = (description) => {

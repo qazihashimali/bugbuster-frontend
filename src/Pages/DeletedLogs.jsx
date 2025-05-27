@@ -16,7 +16,7 @@ const DeletedLogs = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch("https://bugbuster-backend.vercel.app/api/logs/deleted", {
+      const response = await fetch("https://bug-buster-backend.vercel.app/api/logs/deleted", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -50,7 +50,7 @@ const DeletedLogs = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch(`https://bugbuster-backend.vercel.app/api/logs/restore/${log._id}`, {
+      const response = await fetch(`https://bug-buster-backend.vercel.app/api/logs/restore/${log._id}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

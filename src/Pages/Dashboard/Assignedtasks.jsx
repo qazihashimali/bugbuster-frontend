@@ -33,7 +33,7 @@ const Assignedtasks = () => {
         throw new Error('No authentication token or user ID found. Please log in again.');
       }
 
-      const response = await fetch(`https://bugbuster-backend.vercel.app/api/issues?createdBy=${user._id}`, {
+      const response = await fetch(`https://bug-buster-backend.vercel.app/api/issues?createdBy=${user._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const Assignedtasks = () => {
         throw new Error('Unauthorized to update this issue');
       }
 
-      const response = await fetch(`https://bugbuster-backend.vercel.app/api/issues/${selectedIssue._id}`, {
+      const response = await fetch(`https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -136,7 +136,7 @@ const Assignedtasks = () => {
         throw new Error('Unauthorized to delete this issue');
       }
 
-      const response = await fetch(`https://bugbuster-backend.vercel.app/api/issues/${issue._id}`, {
+      const response = await fetch(`https://bug-buster-backend.vercel.app/api/issues/${issue._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
