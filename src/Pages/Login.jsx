@@ -1435,7 +1435,7 @@ const Auth = () => {
           alignItems: 'center',
           backgroundColor: '#34076b',
         }}>
-          <img src="../../public/logo (2).png" 
+          <img src="logo (2).png" 
                alt="Logo" 
                style={{ width: '100px', height: '40px', marginRight: '60px', marginTop: '10px' }} />
         </div>
