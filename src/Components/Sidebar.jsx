@@ -10,7 +10,7 @@ import {
   FaTasks,
   FaUsers,
 } from "react-icons/fa";
-import { MdDeleteSweep } from "react-icons/md";
+import { MdDeleteSweep, MdFeedback, MdReviews } from "react-icons/md";
 import { LuBlocks } from "react-icons/lu";
 import { SiGoogletasks } from "react-icons/si";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -67,6 +67,18 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
+      name: "Feedback",
+      icon: <MdFeedback />,
+      route: "/feedback",
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
+    },
+    {
+      name: "Reviews",
+      icon: <MdReviews />,
+      route: "/reviews",
+      allowedRoles: ["Admin",  "SuperAdmin"], // All roles can access
+    },
+    {
       name: "My Tasks",
       icon: <FaTasks />,
       route: "/my-tasks",
@@ -90,12 +102,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/deleted-logs",
       allowedRoles: ["SuperAdmin"], // All roles can access
     },
-    {
-      name: "Logout",
-      icon: <FaSignOutAlt />,
-      route: "/logout",
-      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
-    },
+    // {
+    //   name: "Logout",
+    //   icon: <FaSignOutAlt />,
+    //   route: "/logout",
+    //   allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
+    // },
   ];
 
   // Filter menu items based on user role

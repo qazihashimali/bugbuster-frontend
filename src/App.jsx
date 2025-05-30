@@ -14,6 +14,8 @@ import Mytasks from "./Pages/Dashboard/Mytasks";
 import Assignedtasks from "./Pages/Dashboard/Assignedtasks";
 import Users from "./Pages/Users";
 import DeletedLogs from "./Pages/DeletedLogs";
+import Feedback from "./Pages/Dashboard/Feedback";
+import Reviews from "./Pages/Dashboard/Reviews";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +60,10 @@ function App() {
             <Route path="/assigned-tasks" element={<Assignedtasks />} />
             <Route path="/users" element={<Users />} />
             <Route path="/deleted-logs" element={<DeletedLogs />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/reviews" element={<Reviews />} />
+
+
 
 
 

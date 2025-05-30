@@ -7,11 +7,13 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { RiColorFilterFill } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [userName, setUserName] = useState("User"); // Default fallback name
+  const navigate = useNavigate();
 
   // Retrieve user name from localStorage on component mount
   useEffect(() => {
@@ -101,10 +103,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     console.log("Logout");
-    // Optionally clear localStorage and redirect
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    window.location.href = '/login'; // Adjust the redirect path as needed
+    navigate("/")
+    
   };
 
   return (

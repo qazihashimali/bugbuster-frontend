@@ -46,6 +46,8 @@ export default function IssueDesk() {
     users: [],
     filteredUsers: [],
   });
+  
+  
   const [issues, setIssues] = useState([]);
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
   const [isLoading, setIsLoading] = useState(false);
@@ -254,7 +256,10 @@ export default function IssueDesk() {
         status: "pending",
       });
       const attachmentInput = document.getElementById("attachment");
-      attachmentInput.value = "";
+      if(attachmentInput){
+        attachmentInput.value = null;
+      }
+      
       if (Date.now() - start < 2000)
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
