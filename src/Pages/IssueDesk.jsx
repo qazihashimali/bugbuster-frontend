@@ -46,8 +46,7 @@ export default function IssueDesk() {
     users: [],
     filteredUsers: [],
   });
-  
-  
+
   const [issues, setIssues] = useState([]);
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
   const [isLoading, setIsLoading] = useState(false);
@@ -256,10 +255,10 @@ export default function IssueDesk() {
         status: "pending",
       });
       const attachmentInput = document.getElementById("attachment");
-      if(attachmentInput){
+      if (attachmentInput) {
         attachmentInput.value = null;
       }
-      
+
       if (Date.now() - start < 2000)
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
@@ -420,7 +419,7 @@ export default function IssueDesk() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100 min-h-screen mx-auto">
       <div
         className={`bg-white shadow-md rounded-lg 
           ${isLoading || isSubmitting ? "blur-sm" : ""}
@@ -438,9 +437,9 @@ export default function IssueDesk() {
         </div>
 
         <div className="p-6">
-            <div className="bg-primary text-white p-3">
-              <h2 className="text-lg font-semibold">Details</h2>
-            </div>
+          <div className="bg-primary text-white p-3">
+            <h2 className="text-lg font-semibold">Details</h2>
+          </div>
           <div className="bg-white shadow rounded-lg overflow-auto">
             <table className="w-full">
               <thead className="bg-gray-100">

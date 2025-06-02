@@ -257,6 +257,8 @@ const Auth = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Something went wrong");
 
+      console.log(data)
+
       setResendAttempts(data.resendAttempts);
       setTimer(40);
       setIsTimerActive(true);
@@ -266,7 +268,10 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
+    
   };
+
+  
 
   return (
     <div

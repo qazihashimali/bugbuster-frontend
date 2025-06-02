@@ -76,7 +76,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Reviews",
       icon: <MdReviews />,
       route: "/reviews",
-      allowedRoles: ["Admin",  "SuperAdmin"], // All roles can access
+      allowedRoles: ["Admin", "SuperAdmin"], // All roles can access
     },
     {
       name: "My Tasks",
@@ -102,12 +102,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/deleted-logs",
       allowedRoles: ["SuperAdmin"], // All roles can access
     },
-    // {
-    //   name: "Logout",
-    //   icon: <FaSignOutAlt />,
-    //   route: "/logout",
-    //   allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
-    // },
+    {
+      name: "Logout",
+      icon: <FaSignOutAlt />,
+      route: "/logout",
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
+    },
   ];
 
   // Filter menu items based on user role

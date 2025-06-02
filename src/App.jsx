@@ -25,30 +25,31 @@ function App() {
     localStorage.removeItem("token");
   };
 
-  // Check if current route is the login/signup page
   const isAuthPage = location.pathname === "/";
   const token = localStorage.getItem("token");
   if (!token) {
     return <Auth />;
   }
-  
+
   return (
-    <div className="min-h-screen w-screen flex">
-      {/* Conditional Sidebar Rendering */}
+    <div className="min-h-screen w-full flex flex-col sm:flex-row">
+      {/* Sidebar */}
       {!isAuthPage && (
         <Sidebar
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           onLogout={handleLogout}
+          className={`fixed sm:static inset-y-0 left-0 z-50 w-64 sm:w-64 bg-white transform ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          } sm:translate-x-0 transition-transform duration-300 ease-in-out`}
         />
       )}
 
-      {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col ${!isAuthPage ? "" : "w-full"}`}>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col w-full sm:w-[75%] mx-auto">
         {!isAuthPage && <Navbar />}
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-gray-100">
           <Routes>
             <Route path="/" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -62,13 +63,8 @@ function App() {
             <Route path="/deleted-logs" element={<DeletedLogs />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/reviews" element={<Reviews />} />
-
-
-
-
-
           </Routes>
-        </div>
+        </main>
 
         {!isAuthPage && <Footer />}
       </div>

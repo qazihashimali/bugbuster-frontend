@@ -1,34 +1,76 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaCog,
-  FaBell,
-  FaUserCircle,
-  FaUserAlt,
-  FaSignOutAlt,
-} from "react-icons/fa";
-import { RiColorFilterFill } from "react-icons/ri";
-import { useNavigate } from "react-router-dom";
+import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [userName, setUserName] = useState("User"); // Default fallback name
-  const navigate = useNavigate();
+  const [showUserInfo, setShowUserInfo] = useState(false);
+  const [userData, setUserData] = useState({
+    name: "User",
+    email: "",
+    roles: [],
+    _id: "",
+  });
+  const [averageRating, setAverageRating] = useState(null);
+  // const navigate = useNavigate();
 
-  // Retrieve user name from localStorage on component mount
+  // Base URL for API
+  const API_BASE_URL = "https://bug-buster-backend.vercel.app";
+
+  // Retrieve user data from localStorage on component mount
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem("user");
     if (userData) {
       try {
         const user = JSON.parse(userData);
-        if (user && user.name) {
-          setUserName(user.name);
+        if (user) {
+          setUserData({
+            name: user.name || "User",
+            email: user.email || "",
+            roles: user.roles || [],
+            _id: user._id || "",
+          });
         }
       } catch (err) {
-        console.error('Failed to parse user data:', err);
+        console.error("Failed to parse user data:", err);
       }
     }
   }, []);
+
+  // Fetch average rating when userData._id is available
+  useEffect(() => {
+    if (userData._id) {
+      const fetchAverageRating = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(`${API_BASE_URL}/api/issues/ratings/${userData._id}/average`, {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : undefined,
+              "Content-Type": "application/json",
+            },
+          });
+          console.log("API Response:", response);
+
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("Non-JSON response received:", text);
+            throw new Error("Response is not JSON");
+          }
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setAverageRating(data.averageRating || "N/A");
+        } catch (err) {
+          console.error("Error fetching average rating:", err);
+          setAverageRating("N/A");
+        }
+      };
+      fetchAverageRating();
+    }
+  }, [userData._id]);
 
   const notifications = [
     {
@@ -73,12 +115,7 @@ const Navbar = () => {
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
-    if (showProfileDropdown) setShowProfileDropdown(false);
-  };
-
-  const toggleProfileDropdown = () => {
-    setShowProfileDropdown(!showProfileDropdown);
-    if (showNotifications) setShowNotifications(false);
+    if (showUserInfo) setShowUserInfo(false);
   };
 
   const markAllAsRead = () => {
@@ -97,22 +134,12 @@ const Navbar = () => {
     console.log("View all notifications");
   };
 
-  const handleProfileClick = () => {
-    console.log("Navigate to profile");
-  };
-
-  const handleLogout = () => {
-    console.log("Logout");
-    navigate("/")
-    
-  };
-
   return (
     <div className="text-white p-4 flex justify-between items-center shadow-lg w-full bg-primary">
       {/* Left Side */}
       <div className="flex items-center space-x-3">
         <h1 className="text-lg font-semibold">
-          Welcome, {userName} to BUGBUSTER
+          Welcome, {userData.name} to BUGBUSTER
         </h1>
       </div>
 
@@ -232,32 +259,31 @@ const Navbar = () => {
         {/* Vertical Separator */}
         <div className="h-9 border-l border-white opacity-50"></div>
 
-        {/* Profile Dropdown */}
+        {/* User Info Dropdown */}
         <div className="relative">
           <div
             className="cursor-pointer hover:text-blue-300 transition-colors duration-200"
-            onClick={toggleProfileDropdown}
+            onMouseEnter={() => setShowUserInfo(true)}
+            onMouseLeave={() => setShowUserInfo(false)}
           >
             <FaUserCircle className="text-2xl" />
           </div>
 
-          {showProfileDropdown && (
-            <div className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20">
-              <div className="py-1">
-                <button
-                  onClick={handleProfileClick}
-                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center"
-                >
-                  <FaUserAlt className="mr-3 text-gray-500" />
-                  <span>Profile</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 flex items-center"
-                >
-                  <FaSignOutAlt className="mr-3 text-gray-500" />
-                  <span>Logout</span>
-                </button>
+          {showUserInfo && (
+            <div
+              className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20"
+              onMouseEnter={() => setShowUserInfo(true)}
+              onMouseLeave={() => setShowUserInfo(false)}
+            >
+              <div className="py-3 px-4 text-gray-800">
+                <div className="font-semibold">{userData.name}</div>
+                <div className="text-sm text-gray-600">{userData.email}</div>
+                <div className="text-sm text-gray-600">
+                  {userData.roles.join(", ")}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Average Rating: {averageRating} / 5
+                </div>
               </div>
             </div>
           )}
