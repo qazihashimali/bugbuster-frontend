@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserInfo, setShowUserInfo] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [userData, setUserData] = useState({
     name: "User",
     email: "",
@@ -11,12 +12,9 @@ const Navbar = () => {
     _id: "",
   });
   const [averageRating, setAverageRating] = useState(null);
-  // const navigate = useNavigate();
 
-  // Base URL for API
   const API_BASE_URL = "https://bug-buster-backend.vercel.app";
 
-  // Retrieve user data from localStorage on component mount
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -36,31 +34,29 @@ const Navbar = () => {
     }
   }, []);
 
-  // Fetch average rating when userData._id is available
   useEffect(() => {
     if (userData._id) {
       const fetchAverageRating = async () => {
         try {
           const token = localStorage.getItem("token");
-          const response = await fetch(`${API_BASE_URL}/api/issues/ratings/${userData._id}/average`, {
-            headers: {
-              Authorization: token ? `Bearer ${token}` : undefined,
-              "Content-Type": "application/json",
-            },
-          });
-          console.log("API Response:", response);
-
+          const response = await fetch(
+            `${API_BASE_URL}/api/issues/ratings/${userData._id}/average`,
+            {
+              headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+                "Content-Type": "application/json",
+              },
+            }
+          );
           const contentType = response.headers.get("content-type");
           if (!contentType || !contentType.includes("application/json")) {
             const text = await response.text();
             console.error("Non-JSON response received:", text);
             throw new Error("Response is not JSON");
           }
-
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-
           const data = await response.json();
           setAverageRating(data.averageRating || "N/A");
         } catch (err) {
@@ -115,8 +111,15 @@ const Navbar = () => {
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
-    if (showUserInfo) setShowUserInfo(false);
+    if (showProfileModal) setShowProfileModal(false);
   };
+
+  const toggleProfileModal = () => {
+    setShowProfileModal(!showProfileModal);
+    if (showNotifications) setShowNotifications(false);
+  };
+
+ 
 
   const markAllAsRead = () => {
     console.log("Marked all as read");
@@ -136,16 +139,13 @@ const Navbar = () => {
 
   return (
     <div className="text-white p-4 flex justify-between items-center shadow-lg w-full bg-primary">
-      {/* Left Side */}
       <div className="flex items-center space-x-3">
         <h1 className="text-lg font-semibold">
           Welcome, {userData.name} to BUGBUSTER
         </h1>
       </div>
 
-      {/* Right Side */}
       <div className="flex items-center space-x-6">
-        {/* Icons Group */}
         <div className="flex items-center space-x-6">
           <div className="cursor-pointer hover:text-blue-300 transition-colors duration-200">
             <FaCog className="text-xl" />
@@ -256,34 +256,84 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Vertical Separator */}
         <div className="h-9 border-l border-white opacity-50"></div>
 
-        {/* User Info Dropdown */}
         <div className="relative">
           <div
             className="cursor-pointer hover:text-blue-300 transition-colors duration-200"
-            onMouseEnter={() => setShowUserInfo(true)}
-            onMouseLeave={() => setShowUserInfo(false)}
+            onClick={toggleProfileModal}
           >
             <FaUserCircle className="text-2xl" />
           </div>
 
-          {showUserInfo && (
-            <div
-              className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20"
-              onMouseEnter={() => setShowUserInfo(true)}
-              onMouseLeave={() => setShowUserInfo(false)}
-            >
-              <div className="py-3 px-4 text-gray-800">
-                <div className="font-semibold">{userData.name}</div>
-                <div className="text-sm text-gray-600">{userData.email}</div>
-                <div className="text-sm text-gray-600">
-                  {userData.roles.join(", ")}
+          {showProfileModal && (
+            <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl overflow-hidden z-20 text-gray-800">
+              <div className="p-4 flex items-center bg-gradient-to-r from-blue-100 to-white">
+                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+                  {userData.name.charAt(0)}
                 </div>
-                <div className="text-sm text-gray-600">
-                  Average Rating: {averageRating} / 5
+                <div className="ml-3">
+                  <div className="font-semibold text-lg">{userData.name}</div>
+                  <div className="text-sm text-gray-500">
+                    {userData.roles.join(", ") || "No roles"}
+                  </div>
+                  
+                  <div className="text-xs text-gray-600 truncate">
+                    {userData.email}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500">
+                    Rating: {averageRating} / 5
+                  </div>
                 </div>
+              </div>
+              <div className="border-t border-gray-100 h-[220px]">
+              <button className="w-40 bg-primary items-center justify-center text-white hover:bg-primary/80 py-2 px-4 text-center font-semibold transition duration-200 rounded-2xl mt-2 block mx-auto">
+  View Profile
+</button>
+
+                {/* <div className="text-sm text-gray-500 px-4 py-2">
+                  Viewing as: Creative{" "}
+                  <span className="text-blue-600 cursor-pointer hover:underline">
+                    Switch to Hirer
+                  </span>
+                </div> */}
+                <Link
+                  to="/issue-desk"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                  Create New Issue
+                </Link>
+                <Link
+                  to="/my-tasks"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                 My Tasks
+                </Link>
+                <Link
+                  to="/assigned-tasks"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                  Assigned Tasks
+                </Link>
+                <Link
+                  to="/feedback"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                 Give FeedBacks
+                </Link>
+                {/* <a
+                  href="#"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                  Manage Freelance Projects
+                </a>
+                <a
+                  href="#"
+                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
+                >
+                  Purchases
+                </a> */}
               </div>
             </div>
           )}

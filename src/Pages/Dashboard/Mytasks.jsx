@@ -72,7 +72,7 @@ const MyTasks = () => {
           },
         }
       );
-      console.log(response)
+      console.log(response);
 
       if (!response.ok) {
         const text = await response.text();
@@ -218,6 +218,8 @@ const MyTasks = () => {
                   <th className="p-3 text-left">Department</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3 text-left">Priority</th>
+                  <th className="p-3 text-left">Description</th>
+
                   <th className="p-3 text-center">Actions</th>
                 </tr>
               </thead>
@@ -238,6 +240,8 @@ const MyTasks = () => {
                     </td>
                     <td className="p-3">{issue.status || "N/A"}</td>
                     <td className="p-3">{issue.priority || "N/A"}</td>
+                    <td className="p-3">{issue.description || "N/A"}</td>
+
                     <td className="p-3 flex justify-center space-x-2">
                       <button
                         onClick={() => handleViewIssue(issue)}

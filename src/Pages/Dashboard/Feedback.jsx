@@ -112,7 +112,7 @@ export default function Feedback() {
 
           // Fetch dropdowns
           const dropdownResponse = await fetch(
-            "https://bug-buster-backend.vercel.app/api/issues/dropdowns",
+            "https://bug-buster-backend.vercel.app/api/feedback/dropdowns",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
