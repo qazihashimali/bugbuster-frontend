@@ -54,12 +54,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/department",
       allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
     },
-    {
-      name: "Block",
-      icon: <LuBlocks />,
-      route: "/block",
-      allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
-    },
+    // {
+    //   name: "Block",
+    //   icon: <LuBlocks />,
+    //   route: "/block",
+    //   allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
+    // },
     {
       name: "Issue Desk",
       icon: <FaQuestionCircle />,

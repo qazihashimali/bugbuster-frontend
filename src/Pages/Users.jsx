@@ -1324,8 +1324,8 @@ const Users = () => {
                       <th className="p-3 text-left text-sm font-medium">Email</th>
                       <th className="p-3 text-left text-sm font-medium">Roles</th>
                       <th className="p-3 text-left text-sm font-medium">Phone</th>
-                      <th className="p-3 text-left text-sm font-medium">House No</th>
-                      <th className="p-3 text-left text-sm font-medium">Block</th>
+                      {/* <th className="p-3 text-left text-sm font-medium">House No</th>
+                      <th className="p-3 text-left text-sm font-medium">Block</th> */}
                       <th className="p-3 text-left text-sm font-medium">Branch</th>
                       <th className="p-3 text-left text-sm font-medium">Department</th>
                       <th className="p-3 text-center text-sm font-medium">Actions</th>
@@ -1340,10 +1340,10 @@ const Users = () => {
                           {user.roles?.length > 0 ? user.roles.join(", ") : "N/A"}
                         </td>
                         <td className="p-3 text-sm">{user.phone || "N/A"}</td>
-                        <td className="p-3 text-sm">{user.houseNo || "N/A"}</td>
+                        {/* <td className="p-3 text-sm">{user.houseNo || "N/A"}</td>
                         <td className="p-3 text-sm">
                           {user.block ? `(${user.block.blockCode}) ${user.block.blockName}` : "N/A"}
-                        </td>
+                        </td> */}
                         <td className="p-3 text-sm">
                           {user.branch ? `(${user.branch.branchCode}) ${user.branch.branchName}` : "N/A"}
                         </td>

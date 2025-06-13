@@ -9,6 +9,7 @@ import {
   FaStar,
 } from "react-icons/fa";
 import Loading from "../Components/Loading";
+import { FaStarHalfStroke } from "react-icons/fa6";
 
 const Alert = ({ type, message, onClose }) => {
   const alertStyles = {
@@ -64,17 +65,24 @@ export default function IssueDesk() {
   };
 
   const renderStars = (rating) => {
-    if (!rating) return "N/A";
+    if (!rating || rating === 0) return "N/A";
     return (
       <div className="flex">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <FaStar
-            key={star}
-            className={`w-4 h-4 ${
-              star <= rating ? "text-yellow-400" : "text-gray-300"
-            }`}
-          />
-        ))}
+        {[1, 2, 3, 4, 5].map((star) => {
+          const isFull = rating >= star;
+          const isHalf = rating >= star - 0.5 && rating < star;
+          return (
+            <span key={star}>
+              {isFull ? (
+                <FaStar className="w-4 h-4 text-yellow-400" />
+              ) : isHalf ? (
+                <FaStarHalfStroke className="w-4 h-4 text-yellow-400" />
+              ) : (
+                <FaStar className="w-4 h-4 text-gray-300" />
+              )}
+            </span>
+          );
+        })}
       </div>
     );
   };
@@ -265,6 +273,7 @@ export default function IssueDesk() {
         );
       showAlert("success", "Issue submitted successfully!");
     } catch (err) {
+      console.error(err);
       showAlert("error", err.message);
     } finally {
       setIsSubmitting(false);
@@ -495,32 +504,34 @@ export default function IssueDesk() {
                       )}
                     </td>
                     <td className="p-3">{renderStars(issue.rating)}</td>
-                    <td className="p-3 flex justify-center space-x-2">
-                      <button
-                        onClick={() => handleViewIssue(issue)}
-                        className="text-orange-600 hover:text-orange-800"
-                        title="View"
-                      >
-                        <FaEye />
-                      </button>
-                      {isAuthorized(issue) && (
-                        <>
-                          <button
-                            onClick={() => handleEditIssue(issue)}
-                            className="text-orange-600 hover:text-orange-800"
-                            title="Edit"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteIssue(issue)}
-                            className="text-orange-600 hover:text-orange-800"
-                            title="Delete"
-                          >
-                            <FaTrash />
-                          </button>
-                        </>
-                      )}
+                    <td className="">
+                      <div className="p-3 flex justify-center my-auto space-x-2">
+                        <button
+                          onClick={() => handleViewIssue(issue)}
+                          className="text-orange-600 hover:text-orange-800"
+                          title="View"
+                        >
+                          <FaEye />
+                        </button>
+                        {isAuthorized(issue) && (
+                          <>
+                            <button
+                              onClick={() => handleEditIssue(issue)}
+                              className="text-orange-600 hover:text-orange-800"
+                              title="Edit"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIssue(issue)}
+                              className="text-orange-600 hover:text-orange-800"
+                              title="Delete"
+                            >
+                              <FaTrash />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
