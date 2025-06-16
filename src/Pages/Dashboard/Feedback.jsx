@@ -50,28 +50,33 @@ export default function Feedback() {
 
   const renderEditableStars = (rating, onStarClick) => {
     return (
-      <div className="flex justify-center p-2 bg-gray-50 rounded-md">
-        {[0, 1, 2, 3, 4].map((index) => {
-          const starValue = index + 1;
-          const isFull = rating >= starValue;
-          const isHalf = rating >= starValue - 0.5 && rating < starValue;
-          return (
-            <button
-              key={index}
-              type="button"
-              onClick={() => onStarClick(index)}
-              className="focus:outline-none mx-2 transition-transform hover:scale-110 hover:drop-shadow-md"
-            >
-              {isFull ? (
-                <FaStar className="w-9 h-9 text-[#FFD700]" />
-              ) : isHalf ? (
-                <FaStarHalfStroke className="w-9 h-9 text-[#FFD700]" />
-              ) : (
-                <FaStar className="w-9 h-9 text-gray-300" />
-              )}
-            </button>
-          );
-        })}
+      <div className="p-4 rounded-lg text-center bg-primary text-white w-full max-w-xs h-[193px] flex flex-col justify-center">
+        <div className="text-5xl font-bold mb-2">
+          {rating.toFixed(1)}/5
+        </div>
+        <div className="flex justify-center space-x-1">
+          {[0, 1, 2, 3, 4].map((index) => {
+            const starValue = index + 1;
+            const isFull = rating >= starValue;
+            const isHalf = rating >= starValue - 0.5 && rating < starValue;
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => onStarClick(index)}
+                className="focus:outline-none transition-transform hover:scale-110"
+              >
+                {isFull ? (
+                  <FaStar className="w-6 h-6 text-yellow-400" />
+                ) : isHalf ? (
+                  <FaStarHalfStroke className="w-6 h-6 text-yellow-400" />
+                ) : (
+                  <FaStar className="w-6 h-6 text-gray-400" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -110,7 +115,6 @@ export default function Feedback() {
           const token = localStorage.getItem("token");
           if (!token) throw new Error("No authentication token found");
 
-          // Fetch dropdowns
           const dropdownResponse = await fetch(
             "https://bug-buster-backend.vercel.app/api/feedback/dropdowns",
             {
@@ -416,39 +420,45 @@ export default function Feedback() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4">
-                {renderEditableStars(formData.rating, handleStarClick)}
-              </div>
 
-              <div className="mt-4">
-                <label
-                  htmlFor="feedback"
-                  className="block text-sm font-medium mb-1"
-                  style={{
-                    backgroundColor: "white",
-                    width: "fit-content",
-                    position: "relative",
-                    top: "13px",
-                    marginLeft: "14px",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    zIndex: "20",
-                    marginBottom: "0px",
-                  }}
-                >
-                  Feedback
-                </label>
-                <textarea
-                  id="feedback"
-                  name="feedback"
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  rows="4"
-                  value={formData.feedback}
-                  onChange={handleInputChange}
-                  placeholder="Enter feedback"
-                  maxLength={500}
-                  required
-                ></textarea>
+              {/* Rating and Feedback Section - Side by Side */}
+              <div className="mt-6 flex gap-6 items-start">
+                {/* Rating Section */}
+                <div className="flex-shrink-0">
+                  {renderEditableStars(formData.rating, handleStarClick)}
+                </div>
+
+                {/* Feedback Textarea Section */}
+                <div className="flex-1">
+                  <label
+                    htmlFor="feedback"
+                    className="block text-sm font-medium mb-1"
+                    style={{
+                      backgroundColor: "white",
+                      width: "fit-content",
+                      position: "relative",
+                      top: "13px",
+                      marginLeft: "14px",
+                      paddingLeft: "4px",
+                      paddingRight: "4px",
+                      zIndex: "16",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Feedback
+                  </label>
+                  <textarea
+                    id="feedback"
+                    name="feedback"
+                    className="w-full  px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    rows="6"
+                    value={formData.feedback}
+                    onChange={handleInputChange}
+                    placeholder="Enter feedback"
+                    maxLength={500}
+                    required
+                  ></textarea>
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end space-x-4">

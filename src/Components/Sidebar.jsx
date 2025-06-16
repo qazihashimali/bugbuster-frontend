@@ -9,11 +9,16 @@ import {
   FaRegArrowAltCircleRight,
   FaTasks,
   FaUsers,
+  FaCommentMedical,
+  FaCommentDots,
 } from "react-icons/fa";
-import { MdDeleteSweep, MdFeedback, MdReviews } from "react-icons/md";
-import { LuBlocks } from "react-icons/lu";
+import { MdDashboard, MdDeleteSweep, MdFeedback, MdReviews } from "react-icons/md";
+import { LuBlocks, LuGitBranchPlus } from "react-icons/lu";
 import { SiGoogletasks } from "react-icons/si";
 import { useNavigate, useLocation } from "react-router-dom";
+import { RiBug2Fill } from "react-icons/ri";
+import { BsFillBugFill } from "react-icons/bs";
+import { TiThList } from "react-icons/ti";
 
 const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   const navigate = useNavigate();
@@ -38,19 +43,19 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   const allMenuItems = [
     {
       name: "Dashboard",
-      icon: <FaTachometerAlt />,
+      icon: <MdDashboard />,
       route: "/dashboard",
       allowedRoles: ["SuperAdmin", "Admin", "EndUser", "ServiceProvider"], // All roles can access
     },
     {
       name: "Branch",
-      icon: <FaBuilding />,
+      icon: <LuGitBranchPlus />,
       route: "/branch",
       allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
     },
     {
       name: "Department",
-      icon: <FaProjectDiagram />,
+      icon: <FaBuilding />,
       route: "/department",
       allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
     },
@@ -62,25 +67,25 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
     // },
     {
       name: "Issue Desk",
-      icon: <FaQuestionCircle />,
+      icon: <BsFillBugFill />,
       route: "/issue-desk",
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "Feedback",
-      icon: <MdFeedback />,
+      icon: <FaCommentMedical />,
       route: "/feedback",
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "Reviews",
-      icon: <MdReviews />,
+      icon: <FaCommentDots />,
       route: "/reviews",
       allowedRoles: ["Admin", "SuperAdmin"], // All roles can access
     },
     {
       name: "My Tasks",
-      icon: <FaTasks />,
+      icon: <TiThList />,
       route: "/my-tasks",
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },

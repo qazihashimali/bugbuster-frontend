@@ -24,6 +24,7 @@ import {
 } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { IoChevronDown } from "react-icons/io5";
+import { MdCancel } from "react-icons/md";
 
 // Register Chart.js components
 ChartJS.register(
@@ -186,73 +187,6 @@ const activityLogData = [
   },
 ];
 
-const subscriptionData = {
-  ALL: [
-    {
-      reference: "Microsoft Office 365",
-      name: "Per User",
-      createdDate: "150",
-      nextRun: "150",
-      status: "150",
-    },
-    {
-      reference: "Adobe Photoshop",
-      name: "Per Device",
-      createdDate: "75",
-      nextRun: "75",
-      status: "75",
-    },
-    {
-      reference: "Zoom Pro",
-      name: "Per User",
-      createdDate: "120",
-      nextRun: "120",
-      status: "120",
-    },
-    {
-      reference: "GitHub Enterprise",
-      name: "Per User",
-      createdDate: "180",
-      nextRun: "180",
-      status: "180",
-    },
-  ],
-  Invoices: [
-    {
-      reference: "Invoice #001",
-      name: "Client A",
-      createdDate: "2025-04-01",
-      nextRun: "2025-05-01",
-      status: "Pending",
-    },
-    {
-      reference: "Invoice #002",
-      name: "Client B",
-      createdDate: "2025-04-10",
-      nextRun: "2025-05-10",
-      status: "Paid",
-    },
-  ],
-  Bills: [
-    {
-      reference: "Bill #101",
-      name: "Vendor X",
-      createdDate: "2025-04-05",
-      nextRun: "2025-05-05",
-      status: "Due",
-    },
-  ],
-  "Simple Bills": [
-    {
-      reference: "Simple Bill #201",
-      name: "Supplier Y",
-      createdDate: "2025-04-15",
-      nextRun: "2025-05-15",
-      status: "Pending",
-    },
-  ],
-};
-
 const Alert = ({ type, message, onClose }) => {
   const alertStyles = {
     success: "bg-green-100 border-green-500 text-green-700",
@@ -313,12 +247,11 @@ const Dashboard = () => {
     status: "",
     rating: 0,
     feedback: "",
-    comment: "", // New field for comment input
+    comment: "",
   });
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [reopenIssue, setReopenIssue] = useState();
 
-  const [activeTab, setActiveTab] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("All");
 
   const showAlert = (type, message) => {
@@ -426,23 +359,22 @@ const Dashboard = () => {
       status: issue.status || "",
       rating: issue.rating || 0,
       feedback: issue.feedback || "",
-      // comment: issue.comments || "",
-      comment: "", // Reset comment field when viewing an issue
+      comment: "",
     });
     setIsModalOpen(true);
   };
 
   const handleStarClick = (starIndex) => {
     const currentRating = formData.rating;
-    const starValue = starIndex + 1; // 1-based index for stars
+    const starValue = starIndex + 1;
     let newRating;
 
     if (currentRating === starValue) {
-      newRating = starValue - 0.5; // Toggle to half star
+      newRating = starValue - 0.5;
     } else if (currentRating === starValue - 0.5) {
-      newRating = starValue; // Toggle to full star
+      newRating = starValue;
     } else {
-      newRating = starValue - 0.5; // Start with half star
+      newRating = starValue - 0.5;
     }
 
     setFormData((prev) => ({ ...prev, rating: newRating }));
@@ -496,7 +428,6 @@ const Dashboard = () => {
 
       console.log("Payload being sent to API:", payload);
 
-      // Perform the update
       const response = await fetch(
         `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
         {
@@ -517,7 +448,6 @@ const Dashboard = () => {
         );
       }
 
-      // Update the issues state with the new data
       setIssues((prevIssues) => {
         const updated = data?.issue;
         if (!updated?._id) return prevIssues;
@@ -533,12 +463,11 @@ const Dashboard = () => {
         }
       });
 
-      // Check if rating is 2.5 or below and show reopen modal
       const effectiveRating =
         payload.rating !== undefined ? payload.rating : currentRating;
       if (effectiveRating <= 2.5 && payload.rating !== undefined) {
         setShowConfirmation(true);
-        setReopenIssue(data.issue); // Use the updated issue
+        setReopenIssue(data.issue);
       } else {
         setIsModalOpen(false);
         setFormData({ status: "", rating: 0, feedback: "", comment: "" });
@@ -562,7 +491,6 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No authentication token found");
 
-        // Call the reopen endpoint
         const response = await fetch(
           `https://bug-buster-backend.vercel.app/api/issues/${reopenIssue._id}/reopen`,
           {
@@ -606,7 +534,6 @@ const Dashboard = () => {
       }
     }
 
-    // Close the modal and reset form regardless of reopen choice
     setIsModalOpen(false);
     setFormData({ status: "", rating: 0, feedback: "", comment: "" });
     setSelectedIssue(null);
@@ -662,10 +589,6 @@ const Dashboard = () => {
       customersChart.destroy();
     };
   }, []);
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-  };
 
   const filteredIssues =
     filterStatus === "All"
@@ -752,7 +675,6 @@ const Dashboard = () => {
         </h2>
       </div>
       <main className="p-6">
-        {/* Task Table Section */}
         <div className="bg-white rounded-lg shadow mb-6">
           <div className="bg-primary text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
             <h3 className="text-lg font-semibold">Tasks</h3>
@@ -785,120 +707,125 @@ const Dashboard = () => {
           )}
           <div className="p-6">
             <div className="bg-white shadow rounded-lg overflow-hidden">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-100">
-                  <tr className="text-left text-gray-400">
-                    <th className="p-3">Assigned By</th>
-                    <th className="p-3">Branch</th>
-                    <th className="p-3">Department</th>
-                    <th className="p-3">Assigned To</th>
-                    <th className="p-3">Description</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Priority</th>
-                    <th className="p-3">Attachment</th>
-                    <th className="p-3">FeedBack</th>
-                    <th className="p-3">Rating</th>
-                    <th className="p-3">Comments</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredIssues.map((issue) =>
-                    issue ? (
-                      <tr
-                        key={issue._id}
-                        className="border-b border-gray-100 cursor-pointer hover:bg-gray-50"
-                        onClick={() => handleViewIssue(issue)}
-                      >
-                        <td className="p-3 text-gray-600">
-                          {issue.createdBy?.name || "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.branch
-                            ? `(${issue.branch.branchCode}) ${issue.branch.branchName}`
-                            : "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.department
-                            ? `(${issue.department.departmentCode}) ${issue.department.departmentName}`
-                            : "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.assignedTo
-                            ? `${issue.assignedTo.name} (${issue.assignedTo.email})`
-                            : "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {truncateDescription(issue.description) || "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.status || "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.priority ? (
-                            <span
-                              className={`inline-block w-20 text-center px-2 py-1 rounded text-white text-xs ${
-                                issue.priority === "High"
-                                  ? "bg-[#BE2C30]"
-                                  : issue.priority === "Medium"
-                                  ? "bg-[#CC610B]"
-                                  : issue.priority === "Low"
-                                  ? "bg-[#2E8310]"
-                                  : "bg-gray-500"
-                              }`}
-                            >
-                              {issue.priority}
-                            </span>
-                          ) : (
-                            "N/A"
-                          )}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.attachment ? (
-                            <a
-                              href={getAttachmentUrl(issue.attachment)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              Download
-                            </a>
-                          ) : (
-                            "None"
-                          )}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.feedback || "N/A"}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {renderStars(issue.rating)}
-                        </td>
-                        <td className="p-3 text-gray-600">
-                          {issue.comments ? `${issue.comments}` : "None"}
-                        </td>
-                      </tr>
-                    ) : null
-                  )}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs min-w-[1200px]">
+                  <thead className="bg-gray-100">
+                    <tr className="text-left text-gray-400">
+                      <th className="p-3">Assigned By</th>
+                      <th className="p-3">Branch</th>
+                      <th className="p-3">Department</th>
+                      <th className="p-3">Assigned To</th>
+                      <th className="p-3">Description</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Priority</th>
+                      <th className="p-3">Attachment</th>
+                      <th className="p-3">FeedBack</th>
+                      <th className="p-3">Rating</th>
+                      <th className="p-3">Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredIssues.map((issue) =>
+                      issue ? (
+                        <tr
+                          key={issue._id}
+                          className={`border-b border-gray-100 cursor-pointer  ${
+                            issue.status === "resolved"
+                              ? "bg-[#8b68b7] text-white"
+                              : ""
+                          }`}
+                          onClick={() => handleViewIssue(issue)}
+                        >
+                          <td className="p-3">
+                            {issue.createdBy?.name || "N/A"}
+                          </td>
+                          <td className="p-3">
+                            {issue.branch
+                              ? `(${issue.branch.branchCode}) ${issue.branch.branchName}`
+                              : "N/A"}
+                          </td>
+                          <td className="p-3">
+                            {issue.department
+                              ? `(${issue.department.departmentCode}) ${issue.department.departmentName}`
+                              : "N/A"}
+                          </td>
+                          <td className="p-3">
+                            {issue.assignedTo
+                              ? `${issue.assignedTo.name} (${issue.assignedTo.email})`
+                              : "N/A"}
+                          </td>
+                          <td className="p-3">
+                            {truncateDescription(issue.description) || "N/A"}
+                          </td>
+                          <td className="p-3">{issue.status || "N/A"}</td>
+                          <td className="p-3">
+                            {issue.priority ? (
+                              <span
+                                className={`inline-block w-20 text-center px-2 py-1 rounded text-xs ${
+                                  issue.priority === "High"
+                                    ? "bg-[#BE2C30] text-white"
+                                    : issue.priority === "Medium"
+                                    ? "bg-[#CC610B] text-white"
+                                    : issue.priority === "Low"
+                                    ? "bg-[#2E8310] text-white"
+                                    : "bg-gray-500 text-white"
+                                }`}
+                              >
+                                {issue.priority}
+                              </span>
+                            ) : (
+                              "N/A"
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {issue.attachment ? (
+                              <a
+                                href={getAttachmentUrl(issue.attachment)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`hover:underline ${
+                                  issue.status === "resolved"
+                                    ? "text-white"
+                                    : "text-blue-600"
+                                }`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Download
+                              </a>
+                            ) : (
+                              "None"
+                            )}
+                          </td>
+                          <td className="p-3">{issue.feedback || "N/A"}</td>
+                          <td className="p-3">
+                            {renderStars(issue.rating)}
+                          </td>
+                          <td className="p-3">
+                            {issue.comments ? `${issue.comments}` : "None"}
+                          </td>
+                        </tr>
+                      ) : null
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Modal for Task Details */}
         {isModalOpen && selectedIssue && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
           >
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <div className="bg-white rounded-lg px-6 py-4 w-full max-w-3xl h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Task Details</h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="text-gray-600 hover:text-gray-800"
                 >
-                  <FaClock />
+                  <MdCancel size={24} className="color-primary" />
                 </button>
               </div>
               <div>
@@ -959,7 +886,6 @@ const Dashboard = () => {
                   <strong>Feedback:</strong>{" "}
                   {selectedIssue.feedback || "No feedback provided"}
                 </p>
-                {/* Comments Section */}
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold mb-2">Comments</h3>
                   {selectedIssue.comments ? (
@@ -991,7 +917,7 @@ const Dashboard = () => {
                     const canUpdateStatus = isSuperAdminOrAdmin || isAssignee;
                     const canUpdateRating = isSuperAdminOrAdmin || isCreator;
                     const canUpdateFeedback = isSuperAdminOrAdmin || isCreator;
-                    const canAddComment = isAssignee; // Only assignee can add comments
+                    const canAddComment = isAssignee;
 
                     return (
                       <form onSubmit={handleUpdateIssue} className="mt-4">
@@ -1158,7 +1084,6 @@ const Dashboard = () => {
           message="Do you want to reopen this task due to low rating?"
         />
 
-        {/* Top Section: General Tasks, Advance Task, Payment Snapshot */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
@@ -1257,7 +1182,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Middle Section: Revenue and Expense, Vendors */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
@@ -1292,7 +1216,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bottom Section: Activity Log, Customers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
@@ -1335,54 +1258,6 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Subscription Section */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="bg-primary text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Welcome to NITSEL</h3>
-          </div>
-          <div className="p-6">
-            <div className="flex space-x-4 mb-4">
-              {["ALL", "Invoices", "Bills", "Simple Bills"].map((tab) => (
-                <button
-                  key={tab}
-                  className={`border-b-2 pb-1 ${
-                    activeTab === tab
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-gray-600"
-                  }`}
-                  onClick={() => handleTabClick(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-left text-gray-400 border-b border-gray-200">
-                  <th className="pb-3 w-1/4">Reference</th>
-                  <th className="pb-3 w-1/4">Name</th>
-                  <th className="pb-3 w-1/6">Created Date</th>
-                  <th className="pb-3 w-1/6">Date next run</th>
-                  <th className="pb-3 w-1/6">Status</th>
-                  <th className="pb-3 w-1/6">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subscriptionData[activeTab].map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100">
-                    <td className="py-4 text-gray-600">{item.reference}</td>
-                    <td className="py-4 text-gray-600">{item.name}</td>
-                    <td className="py-4 text-gray-600">{item.createdDate}</td>
-                    <td className="py-4 text-gray-600">{item.nextRun}</td>
-                    <td className="py-4 text-gray-600">{item.status}</td>
-                    <td className="py-4 text-gray-600"></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </main>

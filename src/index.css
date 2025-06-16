@@ -29,6 +29,8 @@ html, body, #root {
     display: none; /* Chrome, Safari, and Opera */
   }
 
+  
+
   @theme{
     --color-primary: #34076b;
 }
