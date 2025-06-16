@@ -51,6 +51,7 @@ export default function Feedback() {
   const renderEditableStars = (rating, onStarClick) => {
     return (
       <div className="p-4 rounded-lg text-center bg-primary text-white w-full max-w-xs h-[201px] flex flex-col justify-center mt-4">
+        <h3 className="text-lg font-semibold pb-4">Rating</h3>
         <div className="text-5xl font-bold mb-2">
           {rating.toFixed(1)}/5
         </div>
