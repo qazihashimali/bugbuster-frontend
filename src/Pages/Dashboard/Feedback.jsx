@@ -50,7 +50,7 @@ export default function Feedback() {
 
   const renderEditableStars = (rating, onStarClick) => {
     return (
-      <div className="p-4 rounded-lg text-center bg-primary text-white w-full max-w-xs h-[193px] flex flex-col justify-center">
+      <div className="p-4 rounded-lg text-center bg-primary text-white w-full max-w-xs h-[201px] flex flex-col justify-center mt-4">
         <div className="text-5xl font-bold mb-2">
           {rating.toFixed(1)}/5
         </div>
@@ -451,7 +451,7 @@ export default function Feedback() {
                     id="feedback"
                     name="feedback"
                     className="w-full  px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    rows="6"
+                    rows="7"
                     value={formData.feedback}
                     onChange={handleInputChange}
                     placeholder="Enter feedback"
