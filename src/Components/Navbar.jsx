@@ -119,8 +119,6 @@ const Navbar = () => {
     if (showNotifications) setShowNotifications(false);
   };
 
- 
-
   const markAllAsRead = () => {
     console.log("Marked all as read");
   };
@@ -267,73 +265,72 @@ const Navbar = () => {
           </div>
 
           {showProfileModal && (
-            <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl overflow-hidden z-20 text-gray-800">
-              <div className="p-4 flex items-center bg-gradient-to-r from-blue-100 to-white">
-                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden border border-white z-20 text-gray-800">
+              <div className="p-3 flex items-center bg-primary">
+                <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md">
                   {userData.name.charAt(0)}
                 </div>
-                <div className="ml-3">
-                  <div className="font-semibold text-lg">{userData.name}</div>
-                  <div className="text-sm text-gray-500">
+                <div className="ml-2">
+                  <div className="font-semibold text-base text-white">
+                    {userData.name}
+                  </div>
+                  <div className="text-xs text-white/80">
                     {userData.roles.join(", ") || "No roles"}
                   </div>
-                  
-                  <div className="text-xs text-gray-600 truncate">
+                  <div className="text-xs text-white/80 truncate">
                     {userData.email}
                   </div>
-                  
-                  <div className="text-xs text-gray-500">
-                    Rating: {averageRating} / 5
+                  <div className="text-xs text-white/80 flex items-center">
+                    <span className="mr-1">Rating:</span>
+                    {[...Array(5)].map((_, i) => {
+                      const rating =
+                        averageRating === "N/A" ? 0 : parseFloat(averageRating);
+                      return (
+                        <svg
+                          key={i}
+                          className={`w-3 h-3 ${
+                            i < Math.floor(rating)
+                              ? "text-yellow-400"
+                              : i < rating && rating % 1 >= 0.5
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                          fill={
+                            i < Math.floor(rating) ||
+                            (i < rating && rating % 1 >= 0.5)
+                              ? "currentColor"
+                              : "none"
+                          }
+                          stroke={
+                            i < rating &&
+                            rating % 1 >= 0.5 &&
+                            i === Math.floor(rating)
+                              ? "currentColor"
+                              : "none"
+                          }
+                          viewBox="0 0 20 20"
+                        >
+                          {i < rating &&
+                          rating % 1 >= 0.5 &&
+                          i === Math.floor(rating) ? (
+                            <path d="M10 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-.588-.176V2.927z" />
+                          ) : (
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.84-.197-1.54-1.118l1.287-3.97a1 1 0 00-.364-1.118L2.73 9.397c-.784-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.97z" />
+                          )}
+                        </svg>
+                      );
+                    })}
+
+                    <div className="text-xs text-white/80 ml-2">
+                      (<span>{averageRating}</span>)
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="border-t border-gray-100 h-[220px]">
-              <button className="w-40 bg-primary items-center justify-center text-white hover:bg-primary/80 py-2 px-4 text-center font-semibold transition duration-200 rounded-2xl mt-2 block mx-auto">
-  View Profile
-</button>
-
-                {/* <div className="text-sm text-gray-500 px-4 py-2">
-                  Viewing as: Creative{" "}
-                  <span className="text-blue-600 cursor-pointer hover:underline">
-                    Switch to Hirer
-                  </span>
-                </div> */}
-                <Link
-                  to="/issue-desk"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                  Create New Issue
-                </Link>
-                <Link
-                  to="/my-tasks"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                 My Tasks
-                </Link>
-                <Link
-                  to="/assigned-tasks"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                  Assigned Tasks
-                </Link>
-                <Link
-                  to="/feedback"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                 Give FeedBacks
-                </Link>
-                {/* <a
-                  href="#"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                  Manage Freelance Projects
-                </a>
-                <a
-                  href="#"
-                  className="block hover:bg-gray-50 py-2 px-4 text-gray-700 font-medium transition duration-200"
-                >
-                  Purchases
-                </a> */}
+              <div className="border-t border-gray-100 h-[74px] flex items-center justify-center ">
+                <button className="w-60 bg-primary text-white hover:bg-primary/80 py-2 px-4 text-base font-medium transition duration-200 rounded-3xl mb-4">
+                  Logout
+                </button>
               </div>
             </div>
           )}

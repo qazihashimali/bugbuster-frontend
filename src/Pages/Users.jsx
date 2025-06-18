@@ -1179,8 +1179,8 @@ const Users = () => {
       email: user.email || "",
       roles: user.roles || [],
       phone: user.phone || "",
-      houseNo: user.houseNo || "",
-      block: user.block?._id || "",
+      // houseNo: user.houseNo || "",
+      // block: user.block?._id || "",
       branch: user.branch?._id || "",
       department: user.department?._id || "",
     });
@@ -1197,9 +1197,9 @@ const Users = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      if (formData.roles.includes("EndUser") && (!formData.houseNo || !formData.block)) {
-        throw new Error("House number and block are required for EndUser");
-      }
+      // if (formData.roles.includes("EndUser") && (!formData.houseNo || !formData.block)) {
+      //   throw new Error("House number and block are required for EndUser");
+      // }
       if ((formData.roles.includes("EndUser") || formData.roles.includes("ServiceProvider")) && !formData.phone) {
         throw new Error("Phone is required for EndUser or ServiceProvider");
       }
@@ -1222,7 +1222,9 @@ const Users = () => {
       if (!data.user) throw new Error("Invalid response: user data missing");
       setUsers(users.map((u) => (u._id === selectedUser._id ? data.user : u)));
       setIsModalOpen(false);
-      setFormData({ name: "", email: "", roles: [], phone: "", houseNo: "", block: "", branch: "", department: "" });
+      // setFormData({ name: "", email: "", roles: [], phone: "", houseNo: "", block: "", branch: "", department: "" });
+      setFormData({ name: "", email: "", roles: [], phone: "",  branch: "", department: "" });
+
       if (Date.now() - start < 2000)
         await new Promise((resolve) => setTimeout(resolve, 2000 - (Date.now() - start)));
     } catch (err) {
@@ -1543,7 +1545,7 @@ const Users = () => {
                       />
                     </div>
                   )}
-                  {formData.roles.includes("EndUser") && (
+                  {/* {formData.roles.includes("EndUser") && (
                     <>
                       <div>
                         <label htmlFor="houseNo" className="block text-sm font-medium mb-1">
@@ -1580,7 +1582,7 @@ const Users = () => {
                         </select>
                       </div>
                     </>
-                  )}
+                  )} */}
                   {formData.roles.includes("ServiceProvider") && (
                     <>
                       <div>
