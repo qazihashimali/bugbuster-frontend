@@ -41,7 +41,7 @@
 // //       const token = localStorage.getItem("token");
 // //       if (!token) throw new Error("No authentication token found. Please log in.");
 
-// //       const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/users", {
+// //       const response = await fetch("https://bug-buster-server.vercel.app/api/auth/users", {
 // //         headers: {
 // //           Authorization: `Bearer ${token}`,
 // //           "Content-Type": "application/json",
@@ -71,7 +71,7 @@
 // //       const token = localStorage.getItem("token");
 // //       if (!token) throw new Error("No authentication token found.");
 
-// //       const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/dropdowns", {
+// //       const response = await fetch("https://bug-buster-server.vercel.app/api/auth/dropdowns", {
 // //         headers: {
 // //           Authorization: `Bearer ${token}`,
 // //           "Content-Type": "application/json",
@@ -143,7 +143,7 @@
 // //         throw new Error("Branch and department are required for ServiceProvider");
 // //       }
 
-// //       const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${selectedUser._id}`, {
+// //       const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${selectedUser._id}`, {
 // //         method: "PUT",
 // //         headers: {
 // //           Authorization: `Bearer ${token}`,
@@ -178,7 +178,7 @@
 // //       const token = localStorage.getItem("token");
 // //       if (!token) throw new Error("No authentication token found");
 
-// //       const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${user._id}`, {
+// //       const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${user._id}`, {
 // //         method: "DELETE",
 // //         headers: {
 // //           Authorization: `Bearer ${token}`,
@@ -574,7 +574,7 @@
 //       const token = localStorage.getItem("token");
 //       if (!token) throw new Error("No authentication token found. Please log in.");
 
-//       const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/users", {
+//       const response = await fetch("https://bug-buster-server.vercel.app/api/auth/users", {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //           "Content-Type": "application/json",
@@ -604,7 +604,7 @@
 //       const token = localStorage.getItem("token");
 //       if (!token) throw new Error("No authentication token found.");
 
-//       const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/dropdowns", {
+//       const response = await fetch("https://bug-buster-server.vercel.app/api/auth/dropdowns", {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //           "Content-Type": "application/json",
@@ -676,7 +676,7 @@
 //         throw new Error("Branch and department are required for ServiceProvider");
 //       }
 
-//       const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${selectedUser._id}`, {
+//       const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${selectedUser._id}`, {
 //         method: "PUT",
 //         headers: {
 //           Authorization: `Bearer ${token}`,
@@ -711,7 +711,7 @@
 //       const token = localStorage.getItem("token");
 //       if (!token) throw new Error("No authentication token found");
 
-//       const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${user._id}`, {
+//       const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${user._id}`, {
 //         method: "DELETE",
 //         headers: {
 //           Authorization: `Bearer ${token}`,
@@ -1106,7 +1106,7 @@ const Users = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found. Please log in.");
 
-      const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/users", {
+      const response = await fetch("https://bug-buster-server.vercel.app/api/auth/users", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -1136,7 +1136,7 @@ const Users = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found.");
 
-      const response = await fetch("https://bug-buster-backend.vercel.app/api/auth/dropdowns", {
+      const response = await fetch("https://bug-buster-server.vercel.app/api/auth/dropdowns", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -1207,7 +1207,7 @@ const Users = () => {
         throw new Error("Branch and department are required for ServiceProvider");
       }
 
-      const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${selectedUser._id}`, {
+      const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${selectedUser._id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1244,7 +1244,7 @@ const Users = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch(`https://bug-buster-backend.vercel.app/api/auth/users/${user._id}`, {
+      const response = await fetch(`https://bug-buster-server.vercel.app/api/auth/users/${user._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

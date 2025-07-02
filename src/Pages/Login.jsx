@@ -40,7 +40,7 @@
 //     setIsLoading(true);
 //     try {
 //       const response = await fetch(
-//         "https://bug-buster-backend.vercel.app/api/auth/dropdowns",
+//         "https://bug-buster-server.vercel.app/api/auth/dropdowns",
 //         {
 //           headers: { "Content-Type": "application/json" },
 //         }
@@ -88,7 +88,7 @@
 //     try {
 //       if (isLogin) {
 //         const response = await fetch(
-//           "https://bug-buster-backend.vercel.app/api/auth/login",
+//           "https://bug-buster-server.vercel.app/api/auth/login",
 //           {
 //             method: "POST",
 //             headers: { "Content-Type": "application/json" },
@@ -108,7 +108,7 @@
 //           throw new Error("Email is required");
 //         }
 //         const response = await fetch(
-//           "https://bug-buster-backend.vercel.app/api/auth/forgot-password",
+//           "https://bug-buster-server.vercel.app/api/auth/forgot-password",
 //           {
 //             method: "POST",
 //             headers: { "Content-Type": "application/json" },
@@ -131,7 +131,7 @@
 //           throw new Error("New password is required");
 //         }
 //         const response = await fetch(
-//           "https://bug-buster-backend.vercel.app/api/auth/reset-password",
+//           "https://bug-buster-server.vercel.app/api/auth/reset-password",
 //           {
 //             method: "POST",
 //             headers: { "Content-Type": "application/json" },
@@ -180,7 +180,7 @@
 //         };
 
 //         const response = await fetch(
-//           "https://bug-buster-backend.vercel.app/api/auth/signup",
+//           "https://bug-buster-server.vercel.app/api/auth/signup",
 //           {
 //             method: "POST",
 //             headers: { "Content-Type": "application/json" },
@@ -199,7 +199,7 @@
 //         setIsTimerActive(true);
 //       } else {
 //         const response = await fetch(
-//           "https://bug-buster-backend.vercel.app/api/auth/verify-otp",
+//           "https://bug-buster-server.vercel.app/api/auth/verify-otp",
 //           {
 //             method: "POST",
 //             headers: { "Content-Type": "application/json" },
@@ -246,7 +246,7 @@
 
 //     try {
 //       const response = await fetch(
-//         "https://bug-buster-backend.vercel.app/api/auth/resend-otp",
+//         "https://bug-buster-server.vercel.app/api/auth/resend-otp",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
@@ -985,7 +985,7 @@ const Auth = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/auth/dropdowns",
+        "https://bug-buster-server.vercel.app/api/auth/dropdowns",
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -1033,7 +1033,7 @@ const Auth = () => {
     try {
       if (isLogin) {
         const response = await fetch(
-          "https://bug-buster-backend.vercel.app/api/auth/login",
+          "https://bug-buster-server.vercel.app/api/auth/login",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1053,7 +1053,7 @@ const Auth = () => {
           throw new Error("Email is required");
         }
         const response = await fetch(
-          "https://bug-buster-backend.vercel.app/api/auth/forgot-password",
+          "https://bug-buster-server.vercel.app/api/auth/forgot-password",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1076,7 +1076,7 @@ const Auth = () => {
           throw new Error("New password is required");
         }
         const response = await fetch(
-          "https://bug-buster-backend.vercel.app/api/auth/reset-password",
+          "https://bug-buster-server.vercel.app/api/auth/reset-password",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1121,7 +1121,7 @@ const Auth = () => {
         };
 
         const response = await fetch(
-          "https://bug-buster-backend.vercel.app/api/auth/signup",
+          "https://bug-buster-server.vercel.app/api/auth/signup",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1140,7 +1140,7 @@ const Auth = () => {
         setIsTimerActive(true);
       } else {
         const response = await fetch(
-          "https://bug-buster-backend.vercel.app/api/auth/verify-otp",
+          "https://bug-buster-server.vercel.app/api/auth/verify-otp",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1185,7 +1185,7 @@ const Auth = () => {
 
     try {
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/auth/resend-otp",
+        "https://bug-buster-server.vercel.app/api/auth/resend-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

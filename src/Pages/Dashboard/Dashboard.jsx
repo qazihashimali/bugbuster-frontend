@@ -350,7 +350,7 @@ const Dashboard = () => {
       }
 
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/issues",
+        "https://bug-buster-server.vercel.app/api/issues",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -499,7 +499,7 @@ const Dashboard = () => {
 
       // Perform the update
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
+        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -565,7 +565,7 @@ const Dashboard = () => {
 
         // Call the reopen endpoint
         const response = await fetch(
-          `https://bug-buster-backend.vercel.app/api/issues/${reopenIssue._id}/reopen`,
+          `https://bug-buster-server.vercel.app/api/issues/${reopenIssue._id}/reopen`,
           {
             method: "PUT",
             headers: {
@@ -626,7 +626,7 @@ const Dashboard = () => {
       console.error("Chart canvas context not found");
       return;
     }
-
+   
     const commonOptions = {
       responsive: true,
       maintainAspectRatio: false,
@@ -676,7 +676,7 @@ const Dashboard = () => {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bug-buster-backend.vercel.app/${attachment}`;
+    return `https://bug-buster-server.vercel.app/${attachment}`;
   };
 
   const truncateDescription = (description) => {
@@ -780,7 +780,7 @@ const Dashboard = () => {
               onClose={() => setAlert({ type: "", message: "", show: false })}
             />
           )}
-          
+
           <div className="p-6">
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto no-scrollbar">
@@ -812,28 +812,64 @@ const Dashboard = () => {
                           }`}
                           onClick={() => handleViewIssue(issue)}
                         >
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.createdBy?.name || "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.branch
                               ? `(${issue.branch.branchCode}) ${issue.branch.branchName}`
                               : "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.department
                               ? `(${issue.department.departmentCode}) ${issue.department.departmentName}`
                               : "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.assignedTo
                               ? `${issue.assignedTo.name} (${issue.assignedTo.email})`
                               : "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {truncateDescription(issue.description) || "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.status || "N/A"}
                           </td>
                           <td className="p-3 text-gray-600">
@@ -870,13 +906,31 @@ const Dashboard = () => {
                               "None"
                             )}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.feedback || "N/A"}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {renderStars(issue.rating)}
                           </td>
-                          <td className={`p-3 ${issue.status === "resolved" ? "text-white" : "text-gray-600" } `}>
+                          <td
+                            className={`p-3 ${
+                              issue.status === "resolved"
+                                ? "text-white"
+                                : "text-gray-600"
+                            } `}
+                          >
                             {issue.comments ? `${issue.comments}` : "None"}
                           </td>
                         </tr>
@@ -885,10 +939,14 @@ const Dashboard = () => {
                   </tbody>
                 </table>
               </div>
-              {isLoading && <div className="p-4 text-gray-600 text-center">Loading...</div>}
-          {!isLoading && filteredIssues.length === 0 && (
-            <div className="p-4 text-gray-600 text-center">No tasks available</div>
-          )}
+              {isLoading && (
+                <div className="p-4 text-gray-600 text-center">Loading...</div>
+              )}
+              {!isLoading && filteredIssues.length === 0 && (
+                <div className="p-4 text-gray-600 text-center">
+                  No tasks available
+                </div>
+              )}
             </div>
           </div>
         </div>

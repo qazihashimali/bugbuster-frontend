@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -13,7 +13,22 @@ const Navbar = () => {
   });
   const [averageRating, setAverageRating] = useState(null);
 
-  const API_BASE_URL = "https://bug-buster-backend.vercel.app";
+  const API_BASE_URL = "https://bug-buster-server.vercel.app";
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUserData({
+      name: "User",
+      email: "",
+      roles: [],
+      _id: "",
+    });
+    setShowProfileModal(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -328,7 +343,10 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="border-t border-gray-100 h-[74px] flex items-center justify-center ">
-                <button className="w-60 bg-primary text-white hover:bg-primary/80 py-2 px-4 text-base font-medium transition duration-200 rounded-3xl mb-4">
+                <button
+                  onClick={handleLogout}
+                  className="w-60 bg-primary text-white  py-2 px-4 text-base font-medium transition duration-200 rounded-3xl mb-4 cursor-pointer"
+                >
                   Logout
                 </button>
               </div>

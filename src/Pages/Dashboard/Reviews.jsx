@@ -96,8 +96,8 @@
 
 //       // Conditionally set the API endpoint based on user role
 //       const endpoint = isAdmin
-//         ? "https://bug-buster-backend.vercel.app/api/feedback"
-//         : `https://bug-buster-backend.vercel.app/api/feedback?user=${user._id}`;
+//         ? "https://bug-buster-server.vercel.app/api/feedback"
+//         : `https://bug-buster-server.vercel.app/api/feedback?user=${user._id}`;
 
 //       const response = await fetch(endpoint, {
 //         headers: {
@@ -394,7 +394,7 @@ const Reviews = () => {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/feedback/dropdowns",
+        "https://bug-buster-server.vercel.app/api/feedback/dropdowns",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -443,8 +443,8 @@ const Reviews = () => {
         user.roles?.includes("Admin") || user.roles?.includes("SuperAdmin");
 
       const endpoint = isAdmin
-        ? "https://bug-buster-backend.vercel.app/api/feedback"
-        : `https://bug-buster-backend.vercel.app/api/feedback?user=${user._id}`;
+        ? "https://bug-buster-server.vercel.app/api/feedback"
+        : `https://bug-buster-server.vercel.app/api/feedback?user=${user._id}`;
 
       const response = await fetch(endpoint, {
         headers: {

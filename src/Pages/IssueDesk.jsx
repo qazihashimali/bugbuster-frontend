@@ -106,7 +106,7 @@ export default function IssueDesk() {
           if (!token) throw new Error("No authentication token found");
 
           const dropdownResponse = await fetch(
-            "https://bug-buster-backend.vercel.app/api/issues/dropdowns",
+            "https://bug-buster-server.vercel.app/api/issues/dropdowns",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -143,7 +143,7 @@ export default function IssueDesk() {
           if (userData) {
             const parsedUser = JSON.parse(userData);
             const issuesResponse = await fetch(
-              "https://bug-buster-backend.vercel.app/api/issues",
+              "https://bug-buster-server.vercel.app/api/issues",
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -236,7 +236,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/issues",
+        "https://bug-buster-server.vercel.app/api/issues",
         {
           method: "POST",
           headers: {
@@ -324,7 +324,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
+        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -382,7 +382,7 @@ export default function IssueDesk() {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${issue._id}`,
+        `https://bug-buster-server.vercel.app/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {
@@ -412,7 +412,7 @@ export default function IssueDesk() {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bug-buster-backend.vercel.app/${attachment}`;
+    return `https://bug-buster-server.vercel.app/${attachment}`;
   };
 
   const truncateDescription = (description) => {
@@ -449,7 +449,7 @@ export default function IssueDesk() {
           <div className="bg-primary text-white p-3">
             <h2 className="text-lg font-semibold">Details</h2>
           </div>
-          <div className="bg-white shadow rounded-lg overflow-auto">
+          <div className="bg-white shadow rounded-lg overflow-auto no-scrollbar">
             <table className="w-full">
               <thead className="bg-gray-100">
                 <tr>

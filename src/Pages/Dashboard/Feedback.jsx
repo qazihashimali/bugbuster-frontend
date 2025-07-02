@@ -117,7 +117,7 @@ export default function Feedback() {
           if (!token) throw new Error("No authentication token found");
 
           const dropdownResponse = await fetch(
-            "https://bug-buster-backend.vercel.app/api/feedback/dropdowns",
+            "https://bug-buster-server.vercel.app/api/feedback/dropdowns",
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -222,7 +222,7 @@ export default function Feedback() {
       };
 
       const response = await fetch(
-        "https://bug-buster-backend.vercel.app/api/feedback",
+        "https://bug-buster-server.vercel.app/api/feedback",
         {
           method: "POST",
           headers: {

@@ -36,7 +36,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues?createdBy=${user._id}`,
+        `https://bug-buster-server.vercel.app/api/issues?createdBy=${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -114,7 +114,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${selectedIssue._id}`,
+        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -170,7 +170,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-backend.vercel.app/api/issues/${issue._id}`,
+        `https://bug-buster-server.vercel.app/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {
