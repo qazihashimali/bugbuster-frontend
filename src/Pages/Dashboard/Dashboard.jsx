@@ -418,6 +418,9 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchIssues();
+      setInterval(() => {
+        fetchIssues();
+      }, 60000);
     }
   }, [user]);
 
@@ -626,7 +629,7 @@ const Dashboard = () => {
       console.error("Chart canvas context not found");
       return;
     }
-   
+
     const commonOptions = {
       responsive: true,
       maintainAspectRatio: false,

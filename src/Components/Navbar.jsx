@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [error, setError] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [userData, setUserData] = useState({
     name: "User",
     email: "",
@@ -16,6 +19,53 @@ const Navbar = () => {
   const API_BASE_URL = "https://bug-buster-server.vercel.app";
 
   const navigate = useNavigate();
+
+  const fetchApiLogs = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      // console.log("Token:", token);
+      // console.log("User ID:", userData._id);
+      if (!token || !userData._id) {
+        setError("Missing token or user ID");
+        return;
+      }
+      const response = await fetch(
+        `${API_BASE_URL}/api/issues/${userData._id}/activities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response Status:", response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! Status: ${response.status}, Response: ${errorText}`
+        );
+      }
+      const data = await response.json();
+      console.log("API Response:", data);
+
+      setNotifications(data.logs || []);
+      setUnreadCount(data.unreadCount || 0);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching API logs:", error);
+      setError(error.message);
+      setNotifications([]);
+    }
+  };
+
+  useEffect(() => {
+    if (userData._id) {
+      fetchApiLogs();
+      setInterval(() => {
+        fetchApiLogs();
+      }, 60000);
+    }
+  }, [userData._id]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -83,47 +133,6 @@ const Navbar = () => {
     }
   }, [userData._id]);
 
-  const notifications = [
-    {
-      id: 1,
-      user: "Polly",
-      avatar:
-        "https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg",
-      message: "Polly's license is expired",
-      time: "6 mins ago",
-      isOnline: true,
-      hasAction: false,
-    },
-    {
-      id: 2,
-      user: "Charlie",
-      avatar: "https://img.freepik.com/free-photo/artist-white_1368-3546.jpg",
-      message: "Charlie's license is expired",
-      time: "10 mins ago",
-      isOnline: true,
-      hasAction: false,
-    },
-    {
-      id: 3,
-      user: "Tom",
-      avatar:
-        "https://img.freepik.com/free-photo/portrait-friendly-looking-happy-attractive-male-model-with-moustache-beard-wearing-trendy-transparent-glasses-smiling-broadly-while-listening-interesting-story-waiting-mom-give-meal_176420-22400.jpg",
-      message: "Tom send you Approval Request",
-      time: "36 mins ago",
-      isOnline: true,
-      hasAction: true,
-    },
-    {
-      id: 4,
-      user: "Ketty",
-      avatar: null,
-      message: "Ketty's license is renewed",
-      time: "36 mins ago",
-      isOnline: false,
-      hasAction: false,
-    },
-  ];
-
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
     if (showProfileModal) setShowProfileModal(false);
@@ -134,20 +143,61 @@ const Navbar = () => {
     if (showNotifications) setShowNotifications(false);
   };
 
-  const markAllAsRead = () => {
-    console.log("Marked all as read");
-  };
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token || !userData._id) {
+        setError("Missing token or user ID");
+        return;
+      }
 
-  const handleAccept = (id) => {
-    console.log(`Accepted notification ${id}`);
-  };
+      const response = await fetch(
+        `${API_BASE_URL}/api/issues/activities/mark-all-as-read`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-  const handleDecline = (id) => {
-    console.log(`Declined notification ${id}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error! Status: ${response.status}, Response: ${errorText}`
+        );
+      }
+
+      fetchApiLogs();
+
+      console.log("All notifications marked as read");
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+      setError(error.message);
+    }
   };
 
   const viewAllNotifications = () => {
     console.log("View all notifications");
+  };
+
+  // Format time from ISO string to readable format
+  const formatTime = (isoString) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} mins ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    } else {
+      return `${diffInDays} days ago`;
+    }
   };
 
   return (
@@ -170,18 +220,20 @@ const Navbar = () => {
               onClick={toggleNotifications}
             >
               <FaBell className="text-xl" />
-              <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
             </div>
 
             {showNotifications && (
               <div className="absolute right-0 mt-3 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20">
                 <div className="px-4 py-3 text-gray-800 flex justify-between border-b border-gray-200">
-                  <h3 className="font-semibold">Mention List</h3>
+                  <h3 className="font-semibold">Activity Feed</h3>
                   <button
                     onClick={markAllAsRead}
-                    className="text-sm text-gray-600 hover:text-gray-900"
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
                   >
                     Mark all as read
                   </button>
@@ -190,71 +242,65 @@ const Navbar = () => {
                 <div className="py-2">
                   <div className="flex border-b border-gray-200">
                     <button className="flex-1 px-2 py-2 text-gray-800 border-b-2 border-blue-500">
-                      Inbox
-                      <span className="bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
-                        3
-                      </span>
-                    </button>
-                    <button className="flex-1 px-2 py-2 text-gray-600">
-                      General
-                      <span className="bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
-                        1
-                      </span>
-                    </button>
-                    <button className="flex-1 px-2 py-2 text-gray-600">
-                      Archived
+                      Activities
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
+                          {unreadCount}
+                        </span>
+                      )}
                     </button>
                   </div>
 
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="flex items-start py-4 px-4 border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <div className="relative mr-3">
-                          {notification.avatar ? (
-                            <img
-                              src={notification.avatar}
-                              alt={notification.user}
-                              className="w-10 h-10 rounded-full"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
-                              {notification.user.charAt(0)}
-                            </div>
-                          )}
-                          {notification.isOnline && (
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-800">
-                            {notification.message}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {notification.time}
-                          </p>
-                          {notification.hasAction && (
-                            <div className="flex mt-3 space-x-2">
-                              <button
-                                onClick={() => handleDecline(notification.id)}
-                                className="px-4 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
-                              >
-                                Decline
-                              </button>
-                              <button
-                                onClick={() => handleAccept(notification.id)}
-                                className="px-4 py-1 bg-blue-900 text-white rounded-md hover:bg-blue-800 text-sm"
-                              >
-                                Accept
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        <div className="w-2 h-2 bg-blue-900 rounded-full"></div>
+                    {error && (
+                      <div className="px-4 py-2 text-red-600 text-sm">
+                        Error: {error}
                       </div>
-                    ))}
+                    )}
+
+                    {notifications.length === 0 && !error ? (
+                      <div className="px-4 py-8 text-center text-gray-500">
+                        No notifications available
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification._id}
+                          className={`flex items-start py-4 px-4 border-b border-gray-200 hover:bg-gray-50 ${
+                            notification?.read?.includes(userData._id)
+                              ? "opacity-70"
+                              : ""
+                          }`}
+                        >
+                          <div className="relative mr-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
+                              {notification.performedBy?.name?.charAt(0) || "U"}
+                            </div>
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center mb-1">
+                              <span className="font-medium text-gray-800 text-sm">
+                                {notification.performedBy?.name ||
+                                  "Unknown User"}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {notification.action}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatTime(notification.performedAt)}
+                            </p>
+                          </div>
+                          {!notification?.read?.includes(userData._id) && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   <div
