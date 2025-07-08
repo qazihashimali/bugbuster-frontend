@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import {
@@ -106,7 +107,7 @@ export default function IssueDesk() {
           if (!token) throw new Error("No authentication token found");
 
           const dropdownResponse = await fetch(
-            "https://bug-buster-server.vercel.app/api/issues/dropdowns",
+            `${import.meta.env.VITE_BACKEND_URL}/api/issues/dropdowns`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -143,7 +144,7 @@ export default function IssueDesk() {
           if (userData) {
             const parsedUser = JSON.parse(userData);
             const issuesResponse = await fetch(
-              "https://bug-buster-server.vercel.app/api/issues",
+              `${import.meta.env.VITE_BACKEND_URL}/api/issues`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -236,7 +237,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        "https://bug-buster-server.vercel.app/api/issues",
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues`,
         {
           method: "POST",
           headers: {
@@ -324,7 +325,7 @@ export default function IssueDesk() {
       }
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -382,7 +383,7 @@ export default function IssueDesk() {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${issue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {
@@ -412,7 +413,7 @@ export default function IssueDesk() {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bug-buster-server.vercel.app/${attachment}`;
+    return `${import.meta.env.VITE_BACKEND_URL}/${attachment}`;
   };
 
   const truncateDescription = (description) => {

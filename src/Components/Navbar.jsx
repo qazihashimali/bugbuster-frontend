@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -16,15 +16,14 @@ const Navbar = () => {
   });
   const [averageRating, setAverageRating] = useState(null);
 
-  const API_BASE_URL = "https://bug-buster-server.vercel.app";
-
+  const notificationRef = useRef(null);
+  const profileRef = useRef(null);
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
   const fetchApiLogs = async () => {
     try {
       const token = localStorage.getItem("token");
-      // console.log("Token:", token);
-      // console.log("User ID:", userData._id);
       if (!token || !userData._id) {
         setError("Missing token or user ID");
         return;
@@ -38,7 +37,6 @@ const Navbar = () => {
           },
         }
       );
-      console.log("Response Status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
@@ -46,8 +44,7 @@ const Navbar = () => {
         );
       }
       const data = await response.json();
-      console.log("API Response:", data);
-
+      console.log(data);
       setNotifications(data.logs || []);
       setUnreadCount(data.unreadCount || 0);
       setError(null);
@@ -61,9 +58,10 @@ const Navbar = () => {
   useEffect(() => {
     if (userData._id) {
       fetchApiLogs();
-      setInterval(() => {
+      const interval = setInterval(() => {
         fetchApiLogs();
       }, 60000);
+      return () => clearInterval(interval);
     }
   }, [userData._id]);
 
@@ -150,7 +148,6 @@ const Navbar = () => {
         setError("Missing token or user ID");
         return;
       }
-
       const response = await fetch(
         `${API_BASE_URL}/api/issues/activities/mark-all-as-read`,
         {
@@ -161,28 +158,19 @@ const Navbar = () => {
           },
         }
       );
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
           `HTTP error! Status: ${response.status}, Response: ${errorText}`
         );
       }
-
       fetchApiLogs();
-
-      console.log("All notifications marked as read");
     } catch (error) {
       console.error("Error marking notifications as read:", error);
       setError(error.message);
     }
   };
 
-  const viewAllNotifications = () => {
-    console.log("View all notifications");
-  };
-
-  // Format time from ISO string to readable format
   const formatTime = (isoString) => {
     const date = new Date(isoString);
     const now = new Date();
@@ -199,6 +187,25 @@ const Navbar = () => {
       return `${diffInDays} days ago`;
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfileModal(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="text-white p-4 flex justify-between items-center shadow-lg w-full bg-primary">
@@ -228,12 +235,15 @@ const Navbar = () => {
             </div>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20">
+              <div
+                ref={notificationRef}
+                className="absolute right-0 mt-3 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20"
+              >
                 <div className="px-4 py-3 text-gray-800 flex justify-between border-b border-gray-200">
                   <h3 className="font-semibold">Activity Feed</h3>
                   <button
                     onClick={markAllAsRead}
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                    className="text-sm cursor-pointer text-gray-600 hover:text-gray-900 transition-colors duration-200"
                   >
                     Mark all as read
                   </button>
@@ -302,13 +312,6 @@ const Navbar = () => {
                       ))
                     )}
                   </div>
-
-                  <div
-                    className="text-center py-3 text-gray-700 hover:text-gray-900 cursor-pointer border-t border-gray-200"
-                    onClick={viewAllNotifications}
-                  >
-                    <span>All Notifications →</span>
-                  </div>
                 </div>
               </div>
             )}
@@ -326,7 +329,10 @@ const Navbar = () => {
           </div>
 
           {showProfileModal && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden border border-white z-20 text-gray-800">
+            <div
+              ref={profileRef}
+              className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden border border-white z-20 text-gray-800"
+            >
               <div className="p-3 flex items-center bg-primary">
                 <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md">
                   {userData.name.charAt(0)}
@@ -381,17 +387,16 @@ const Navbar = () => {
                         </svg>
                       );
                     })}
-
                     <div className="text-xs text-white/80 ml-2">
                       (<span>{averageRating}</span>)
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="border-t border-gray-100 h-[74px] flex items-center justify-center ">
+              <div className="border-t border-gray-100 h-[74px] flex items-center justify-center">
                 <button
                   onClick={handleLogout}
-                  className="w-60 bg-primary text-white  py-2 px-4 text-base font-medium transition duration-200 rounded-3xl mb-4 cursor-pointer"
+                  className="w-60 bg-primary text-white py-2 px-4 text-base font-medium transition duration-200 rounded-3xl mb-4 cursor-pointer"
                 >
                   Logout
                 </button>

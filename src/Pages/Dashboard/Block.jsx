@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FaEye, FaEdit, FaTrash, FaPlusCircle, FaTimes } from 'react-icons/fa';
 import Loading from '../../Components/Loading';
@@ -20,7 +21,7 @@ const Block = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/blocks', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/blocks`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const Block = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/blocks', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/blocks`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,7 +105,7 @@ const Block = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/blocks/${selectedBlock._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/blocks/${selectedBlock._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,7 +140,7 @@ const Block = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/blocks/${block._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/blocks/${block._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

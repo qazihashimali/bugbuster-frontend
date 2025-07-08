@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTimes } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
@@ -64,7 +65,7 @@ const MyTasks = () => {
 
       const user = JSON.parse(userData);
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues?assignedTo=${user._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues?assignedTo=${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -128,7 +129,7 @@ const MyTasks = () => {
       if (!token) throw new Error("No authentication token found");
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {

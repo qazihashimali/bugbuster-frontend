@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FaEye, FaEdit, FaTrash, FaPlusCircle, FaTimes } from 'react-icons/fa';
 import Loading from '../../Components/Loading';
@@ -20,7 +21,7 @@ const Branch = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/branches', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const Branch = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/branches', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -103,7 +104,7 @@ const Branch = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/branches/${selectedBranch._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches/${selectedBranch._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -137,7 +138,7 @@ const Branch = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/branches/${branch._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches/${branch._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

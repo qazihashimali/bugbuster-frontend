@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { FaEye, FaTimes, FaUndo } from "react-icons/fa";
 import Loading from "../Components/Loading";
@@ -16,7 +17,7 @@ const DeletedLogs = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch("https://bug-buster-server.vercel.app/api/logs/deleted", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logs/deleted`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -50,7 +51,7 @@ const DeletedLogs = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token found");
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/logs/restore/${log._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logs/restore/${log._id}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

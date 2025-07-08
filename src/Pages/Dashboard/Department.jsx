@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FaEye, FaEdit, FaTrash, FaPlusCircle, FaTimes } from 'react-icons/fa';
 import Loading from '../../Components/Loading';
@@ -20,7 +21,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/departments', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/departments`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch('https://bug-buster-server.vercel.app/api/departments', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/departments`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -104,7 +105,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/departments/${selectedDepartment._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/departments/${selectedDepartment._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -139,7 +140,7 @@ const Department = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No authentication token found');
 
-      const response = await fetch(`https://bug-buster-server.vercel.app/api/departments/${department._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/departments/${department._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

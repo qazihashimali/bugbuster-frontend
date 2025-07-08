@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import Loading from "../../Components/Loading";
@@ -36,7 +37,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues?createdBy=${user._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues?createdBy=${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -114,7 +115,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -170,7 +171,7 @@ const Assignedtasks = () => {
       }
 
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${issue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${issue._id}`,
         {
           method: "DELETE",
           headers: {

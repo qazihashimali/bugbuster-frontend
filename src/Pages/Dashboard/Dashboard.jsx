@@ -13,18 +13,22 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { AiFillProduct } from "react-icons/ai";
+
 import {
-  FaPerson,
+ 
   FaScaleBalanced,
   FaClock,
-  FaFileInvoice,
+ 
   FaStar,
   FaStarHalfStroke,
 } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { IoChevronDown } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { BsFillBugFill } from "react-icons/bs";
+import { SiGoogletasks } from "react-icons/si";
+import { TiThList } from "react-icons/ti";
 
 // Register Chart.js components
 ChartJS.register(
@@ -118,16 +122,40 @@ const customersData = {
 
 const generalTasksData = [
   {
-    icon: <AiFillProduct className="w-6 h-6 text-blue-500" />,
-    text: "You don't have any Products. Click here to add one",
+    icon: <BsFillBugFill className="w-6 h-6 text-blue-500" />,
+    text: (
+      <span>
+        You don't have any tasks.{" "}
+        <Link to={"/issue-desk"} className="underline cursor-pointer">
+          Click here
+        </Link>{" "}
+        to add one.
+      </span>
+    ),
   },
   {
-    icon: <FaPerson className="w-6 h-6 text-blue-500" />,
-    text: "You don't have any Customers. Click here to add one",
+    icon: <SiGoogletasks className="w-6 h-6 text-blue-500" />,
+    text: (
+      <span>
+        Want to view tasks you assigned to others?{" "}
+        <Link to={"/assigned-tasks"} className="underline cursor-pointer">
+          Click here
+        </Link>
+        .
+      </span>
+    ),
   },
   {
-    icon: <FaFileInvoice className="w-6 h-6 text-blue-500" />,
-    text: "You don't have any Invoices. Click here to add one",
+    icon: <TiThList className="w-6 h-6 text-blue-500" />,
+    text: (
+      <span>
+        Want to view tasks assigned to you?{" "}
+        <Link to={"/my-tasks"} className="underline cursor-pointer">
+          Click here
+        </Link>
+        .
+      </span>
+    ),
   },
 ];
 
@@ -160,32 +188,7 @@ const paymentSnapshotData = {
   ],
 };
 
-const activityLogData = [
-  {
-    email: "AI554@gmail.com",
-    activity: "Working",
-    module: "HR",
-    dateTime: "2025-04-24 10:00 AM",
-  },
-  {
-    email: "waleed000@gmail.com",
-    activity: "On leave",
-    module: "Finance",
-    dateTime: "2025-04-24 09:30 AM",
-  },
-  {
-    email: "Qasim687@gmail.com",
-    activity: "Working",
-    module: "IT",
-    dateTime: "2025-04-24 08:45 AM",
-  },
-  {
-    email: "AlMasood@gmail.com",
-    activity: "Working",
-    module: "Sales",
-    dateTime: "2025-04-24 11:15 AM",
-  },
-];
+
 
 // const subscriptionData = {
 //   ALL: [
@@ -321,6 +324,7 @@ const Dashboard = () => {
 
   // const [activeTab, setActiveTab] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [assignedTasks, setAssignedTasks] = useState([]);
 
   const showAlert = (type, message) => {
     setAlert({ type, message, show: true });
@@ -350,7 +354,7 @@ const Dashboard = () => {
       }
 
       const response = await fetch(
-        "https://bug-buster-server.vercel.app/api/issues",
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -415,14 +419,74 @@ const Dashboard = () => {
     }
   };
 
+  const fetchAssignedTasks = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!token || !user?._id) {
+        throw new Error(
+          "No authentication token or user ID found. Please log in again."
+        );
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues?createdBy=${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error(
+          "Assigned tasks response status:",
+          response.status,
+          "Response text:",
+          text
+        );
+        throw new Error(
+          `Failed to fetch assigned tasks: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Fetched assigned tasks:", data);
+      const filteredIssues = Array.isArray(data) ? data : data.issues || [];
+      setAssignedTasks(filteredIssues);
+    } catch (err) {
+      console.error("Fetch assigned tasks error:", err);
+      showAlert("error", err.message || "Failed to fetch assigned tasks");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchIssues();
+      fetchAssignedTasks();
       setInterval(() => {
         fetchIssues();
+        fetchAssignedTasks();
       }, 60000);
     }
   }, [user]);
+
+  const combinedActivityLogData = assignedTasks.map((issue) => ({
+    email: issue.assignedTo?.email || "N/A",
+    activity: `Assigned Task: ${issue.userName || "N/A"}`,
+    module: issue.department?.departmentName || "N/A",
+    dateTime: issue.createdAt
+      ? new Date(issue.createdAt).toLocaleString()
+      : "N/A",
+  }));
+
+
+  
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
@@ -453,7 +517,7 @@ const Dashboard = () => {
   };
 
   const handleUpdateIssue = async (e) => {
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
     if (!user) {
       showAlert("error", "You must be logged in to perform this action");
       return;
@@ -478,7 +542,11 @@ const Dashboard = () => {
       if (!token) throw new Error("No authentication token found");
 
       const payload = {};
-      if (formData.status && formData.status !== selectedIssue.status) {
+      if (
+        formData.status &&
+        formData.status !== selectedIssue.status &&
+        e !== "reopen"
+      ) {
         payload.status = formData.status;
       }
       const currentRating = selectedIssue.rating ?? 0;
@@ -502,7 +570,7 @@ const Dashboard = () => {
 
       // Perform the update
       const response = await fetch(
-        `https://bug-buster-server.vercel.app/api/issues/${selectedIssue._id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${selectedIssue._id}`,
         {
           method: "PUT",
           headers: {
@@ -537,12 +605,13 @@ const Dashboard = () => {
         }
       });
 
-      // Check if rating is 2.5 or below and show reopen modal
       const effectiveRating =
         payload.rating !== undefined ? payload.rating : currentRating;
       if (effectiveRating <= 2.5 && payload.rating !== undefined) {
-        setShowConfirmation(true);
-        setReopenIssue(data.issue); // Use the updated issue
+        if (e !== "reopen") {
+          setShowConfirmation(true);
+          setReopenIssue(data.issue); // Use the updated issue
+        }
       } else {
         setIsModalOpen(false);
         setFormData({ status: "", rating: 0, feedback: "", comment: "" });
@@ -568,7 +637,9 @@ const Dashboard = () => {
 
         // Call the reopen endpoint
         const response = await fetch(
-          `https://bug-buster-server.vercel.app/api/issues/${reopenIssue._id}/reopen`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/issues/${
+            reopenIssue._id
+          }/reopen`,
           {
             method: "PUT",
             headers: {
@@ -586,20 +657,7 @@ const Dashboard = () => {
           );
         }
 
-        setIssues((prevIssues) => {
-          const updated = data?.issue;
-          if (!updated?._id) return prevIssues;
-
-          const exists = prevIssues.some((issue) => issue._id === updated._id);
-
-          if (exists) {
-            return prevIssues.map((issue) =>
-              issue._id === updated._id ? updated : issue
-            );
-          } else {
-            return [...prevIssues, updated];
-          }
-        });
+        handleUpdateIssue("reopen");
 
         showAlert("success", "Task reopened successfully!");
       } catch (err) {
@@ -679,7 +737,7 @@ const Dashboard = () => {
   const getAttachmentUrl = (attachment) => {
     if (!attachment) return null;
     if (attachment.startsWith("http")) return attachment;
-    return `https://bug-buster-server.vercel.app/${attachment}`;
+    return `${import.meta.env.VITE_BACKEND_URL}/${attachment}`;
   };
 
   const truncateDescription = (description) => {
@@ -1234,7 +1292,7 @@ const Dashboard = () => {
             </div>
             <div className="p-6">
               <p className="text-sm text-gray-500 mb-4">
-                (These are to help you start using NITSEL)
+                (These are to help you start using BUGBUSTER)
               </p>
               <ul className="space-y-4">
                 {generalTasksData.map((task, index) => (
@@ -1364,7 +1422,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Activity Log</h3>
+              <h3 className="text-lg font-semibold">Assigned Tasks</h3>
             </div>
             <div className="p-6">
               <table className="w-full text-xs table-fixed">
@@ -1377,14 +1435,22 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {activityLogData.map((log, index) => (
-                    <tr key={index} className="border-b border-gray-100">
-                      <td className="py-4">{log.email}</td>
-                      <td className="py-4 text-gray-600">{log.activity}</td>
-                      <td className="py-4 text-gray-600">{log.module}</td>
-                      <td className="py-4 text-gray-600">{log.dateTime}</td>
+                  {combinedActivityLogData.length > 0 ? (
+                    combinedActivityLogData.map((log, index) => (
+                      <tr key={index} className="border-b border-gray-100">
+                        <td className="py-4">{log.email}</td>
+                        <td className="py-4 text-gray-600">{log.activity}</td>
+                        <td className="py-4 text-gray-600">{log.module}</td>
+                        <td className="py-4 text-gray-600">{log.dateTime}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="py-4 text-gray-600 text-center">
+                        No activities available
+                      </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

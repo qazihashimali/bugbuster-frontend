@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { FaTimes, FaStar } from "react-icons/fa";
@@ -117,7 +118,7 @@ export default function Feedback() {
           if (!token) throw new Error("No authentication token found");
 
           const dropdownResponse = await fetch(
-            "https://bug-buster-server.vercel.app/api/feedback/dropdowns",
+            `${import.meta.env.VITE_BACKEND_URL}/api/feedback/dropdowns`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -222,7 +223,7 @@ export default function Feedback() {
       };
 
       const response = await fetch(
-        "https://bug-buster-server.vercel.app/api/feedback",
+        `${import.meta.env.VITE_BACKEND_URL}/api/feedback`,
         {
           method: "POST",
           headers: {
