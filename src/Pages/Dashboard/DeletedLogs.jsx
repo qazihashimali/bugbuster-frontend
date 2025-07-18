@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { FaEye, FaTimes, FaUndo } from "react-icons/fa";
-import Loading from "../Components/Loading";
+import Loading from "../../Components/Loading";
 
 const DeletedLogs = () => {
   const [logs, setLogs] = useState([]);

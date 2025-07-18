@@ -349,44 +349,65 @@ const Navbar = () => {
                   </div>
                   <div className="text-xs text-white/80 flex items-center">
                     <span className="mr-1">Rating:</span>
-                    {[...Array(5)].map((_, i) => {
-                      const rating =
-                        averageRating === "N/A" ? 0 : parseFloat(averageRating);
-                      return (
-                        <svg
-                          key={i}
-                          className={`w-3 h-3 ${
-                            i < Math.floor(rating)
-                              ? "text-yellow-400"
-                              : i < rating && rating % 1 >= 0.5
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                          fill={
-                            i < Math.floor(rating) ||
-                            (i < rating && rating % 1 >= 0.5)
-                              ? "currentColor"
-                              : "none"
-                          }
-                          stroke={
-                            i < rating &&
-                            rating % 1 >= 0.5 &&
-                            i === Math.floor(rating)
-                              ? "currentColor"
-                              : "none"
-                          }
-                          viewBox="0 0 20 20"
-                        >
-                          {i < rating &&
-                          rating % 1 >= 0.5 &&
-                          i === Math.floor(rating) ? (
-                            <path d="M10 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-.588-.176V2.927z" />
-                          ) : (
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.97c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.84-.197-1.54-1.118l1.287-3.97a1 1 0 00-.364-1.118L2.73 9.397c-.784-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.97z" />
-                          )}
-                        </svg>
-                      );
-                    })}
+                    <div className="flex items-center space-x-[2px]">
+                      {[...Array(5)].map((_, i) => {
+                        const rating =
+                          averageRating === "N/A"
+                            ? 0
+                            : parseFloat(averageRating);
+                        const fillPercent =
+                          i + 1 <= rating
+                            ? 100
+                            : i < rating
+                            ? (rating - i) * 100
+                            : 0;
+
+                        return (
+                          <div key={i} className="relative w-3 h-3">
+                            {/* Gray base star */}
+                            <svg
+                              className="absolute top-0 left-0 w-full h-full text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 
+              1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 
+              2.44a1 1 0 00-.364 1.118l1.287 
+              3.97c.3.921-.755 1.688-1.54 
+              1.118l-3.357-2.44a1 1 0 00-1.175 
+              0l-3.357 2.44c-.784.57-1.84-.197-1.54-1.118l1.287-3.97a1 
+              1 0 00-.364-1.118L2.73 
+              9.397c-.784-.57-.38-1.81.588-1.81h4.15a1 1 
+              0 00.95-.69l1.286-3.97z"
+                              />
+                            </svg>
+
+                            {/* Yellow clipped star */}
+                            <svg
+                              className="absolute top-0 left-0 w-full h-full text-yellow-400"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              style={{
+                                clipPath: `inset(0 ${100 - fillPercent}% 0 0)`,
+                              }}
+                            >
+                              <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 
+              1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 
+              2.44a1 1 0 00-.364 1.118l1.287 
+              3.97c.3.921-.755 1.688-1.54 
+              1.118l-3.357-2.44a1 1 0 00-1.175 
+              0l-3.357 2.44c-.784.57-1.84-.197-1.54-1.118l1.287-3.97a1 
+              1 0 00-.364-1.118L2.73 
+              9.397c-.784-.57-.38-1.81.588-1.81h4.15a1 1 
+              0 00.95-.69l1.286-3.97z"
+                              />
+                            </svg>
+                          </div>
+                        );
+                      })}
+                    </div>
                     <div className="text-xs text-white/80 ml-2">
                       (<span>{averageRating}</span>)
                     </div>

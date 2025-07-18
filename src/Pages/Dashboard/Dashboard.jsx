@@ -15,10 +15,8 @@ import {
 } from "chart.js";
 
 import {
- 
   FaScaleBalanced,
   FaClock,
- 
   FaStar,
   FaStarHalfStroke,
 } from "react-icons/fa6";
@@ -170,25 +168,23 @@ const advanceTasksData = [
   },
 ];
 
-const paymentSnapshotData = {
-  invoiceProgress: "+18%",
-  amounts: [
-    {
-      label: "Outstanding Amount",
-      value: "7,839",
-      percentage: "+3.98%",
-      color: "bg-orange-500",
-    },
-    {
-      label: "Overdue Amount",
-      value: "5,645",
-      percentage: "+1.78%",
-      color: "bg-gray-900",
-    },
-  ],
-};
-
-
+// const paymentSnapshotData = {
+//   invoiceProgress: "+18%",
+//   amounts: [
+//     {
+//       label: "Outstanding Amount",
+//       value: "7,839",
+//       percentage: "+3.98%",
+//       color: "bg-orange-500",
+//     },
+//     {
+//       label: "Overdue Amount",
+//       value: "5,645",
+//       percentage: "+1.78%",
+//       color: "bg-gray-900",
+//     },
+//   ],
+// };
 
 // const subscriptionData = {
 //   ALL: [
@@ -476,17 +472,63 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  const calculatePaymentSnapshotData = () => {
+    const safeIssues = Array.isArray(issues) ? issues : [];
+    const totalIssues = safeIssues.length;
+    const statusCounts = {
+      pending: safeIssues.filter((issue) => issue.status === "pending").length,
+      "in-progress": safeIssues.filter((issue) => issue.status === "in-progress").length,
+      resolved: safeIssues.filter((issue) => issue.status === "resolved").length,
+    };
+
+    const statusPercentages = {
+      pending: totalIssues > 0 ? ((statusCounts.pending / totalIssues) * 100).toFixed(2) : 0,
+      "in-progress": totalIssues > 0 ? ((statusCounts["in-progress"] / totalIssues) * 100).toFixed(2) : 0,
+      resolved: totalIssues > 0 ? ((statusCounts.resolved / totalIssues) * 100).toFixed(2) : 0,
+    };
+
+    return {
+      statuses: [
+        {
+          label: "Pending",
+          value: statusCounts.pending,
+          percentage: `+${statusPercentages.pending}%`,
+          color: "bg-orange-500",
+        },
+        {
+          label: "In Progress",
+          value: statusCounts["in-progress"],
+          percentage: `+${statusPercentages["in-progress"]}%`,
+          color: "bg-blue-500",
+        },
+        {
+          label: "Resolved",
+          value: statusCounts.resolved,
+          percentage: `+${statusPercentages.resolved}%`,
+          color: "bg-green-500",
+        },
+      ],
+      total: totalIssues,
+    };
+  };
+
+  console.log("Issues state:", issues);
+  const paymentSnapshotData = calculatePaymentSnapshotData();
+
+
+
+
+
+ 
+
   const combinedActivityLogData = assignedTasks.map((issue) => ({
-    email: issue.assignedTo?.email || "N/A",
-    activity: `Assigned Task: ${issue.userName || "N/A"}`,
-    module: issue.department?.departmentName || "N/A",
+    assignedTo: issue.assignedTo?.name || "N/A",
+    assignedBy: issue.userName || "N/A",
+    status: issue.status || "N/A",
     dateTime: issue.createdAt
       ? new Date(issue.createdAt).toLocaleString()
       : "N/A",
   }));
-
-
-  
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
@@ -1324,7 +1366,7 @@ const Dashboard = () => {
           </div>
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Payment Snapshot</h3>
+              <h3 className="text-lg font-semibold">Task Status Snapshot</h3>
             </div>
             <div className="p-6">
               <div className="flex items-center justify-center mb-4">
@@ -1336,48 +1378,57 @@ const Dashboard = () => {
                       stroke="#D1D5DB"
                       strokeWidth="3.5"
                     />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 11.28 27.05"
-                      fill="none"
-                      stroke="#F97316"
-                      strokeWidth="3.5"
-                      strokeDasharray="18, 100"
-                    />
+                    {paymentSnapshotData.statuses && (
+                      <>
+                        <path
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 11.28 4.5"
+                          fill="none"
+                          stroke="#F97316"
+                          strokeWidth="3.5"
+                          strokeDasharray={`${paymentSnapshotData.statuses[0]?.percentage?.replace('%', '') || 0}, 100`}
+                        />
+                        <path
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 11.28 4.5"
+                          fill="none"
+                          stroke="#3B82F6"
+                          strokeWidth="3.5"
+                          strokeDasharray={`${paymentSnapshotData.statuses[1]?.percentage?.replace('%', '') || 0}, 100`}
+                          transform="rotate(120, 18, 18)"
+                        />
+                        <path
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 11.28 4.5"
+                          fill="none"
+                          stroke="#10B981"
+                          strokeWidth="3.5"
+                          strokeDasharray={`${paymentSnapshotData.statuses[2]?.percentage?.replace('%', '') || 0}, 100`}
+                          transform="rotate(240, 18, 18)"
+                        />
+                      </>
+                    )}
                   </svg>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                    <p className="text-[10px] text-gray-400 font-medium">
-                      Invoices
-                    </p>
-                    <p className="text-xl font-bold text-gray-800">
-                      {paymentSnapshotData.invoiceProgress}
-                    </p>
+                    <p className="text-[10px] text-gray-400 font-medium">Tasks</p>
+                    <p className="text-xl font-bold text-gray-800">{paymentSnapshotData.total || 0}</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
-                {paymentSnapshotData.amounts.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`w-2 h-2 ${item.color} rounded-full`}
-                      ></span>
-                      <span className="text-xs text-gray-600">
-                        {item.label}
-                      </span>
+                {paymentSnapshotData.statuses ? (
+                  paymentSnapshotData.statuses.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className={`w-2 h-2 ${item.color} rounded-full`}></span>
+                        <span className="text-xs text-gray-600">{item.label}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-xs font-semibold text-gray-800">{item.value}</span>
+                        <span className="text-[10px] text-green-500">{item.percentage}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-xs font-semibold text-gray-800">
-                        {item.value}
-                      </span>
-                      <span className="text-[10px] text-green-500">
-                        {item.percentage}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-xs text-gray-600">No status data available</div>
+                )}
               </div>
             </div>
           </div>
@@ -1420,57 +1471,64 @@ const Dashboard = () => {
 
         {/* Bottom Section: Activity Log, Customers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow">
-            <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Assigned Tasks</h3>
-            </div>
-            <div className="p-6">
-              <table className="w-full text-xs table-fixed">
-                <thead>
-                  <tr className="text-left text-gray-400 border-b border-gray-200">
-                    <th className="pb-3 w-1/4">User Email</th>
-                    <th className="pb-3 w-1/4">Activity</th>
-                    <th className="pb-3 w-1/4">Module</th>
-                    <th className="pb-3 w-1/4">Date & Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {combinedActivityLogData.length > 0 ? (
-                    combinedActivityLogData.map((log, index) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="py-4">{log.email}</td>
-                        <td className="py-4 text-gray-600">{log.activity}</td>
-                        <td className="py-4 text-gray-600">{log.module}</td>
-                        <td className="py-4 text-gray-600">{log.dateTime}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="py-4 text-gray-600 text-center">
-                        No activities available
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Customers</h3>
-            </div>
-            <div className="p-6">
-              <div className="relative">
-                <span className="absolute right-0 top-0 bg-gray-900 text-white text-xs px-2 py-1 rounded">
-                  {customersData.revenueNote}
-                </span>
-                <div className="h-64">
-                  <canvas ref={customersChartRef} />
-                </div>
-              </div>
-            </div>
-          </div>
+  {/* Assigned Tasks */}
+  <div className="bg-white rounded-lg shadow h-[430px] flex flex-col">
+    <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
+      <h3 className="text-lg font-semibold">Assigned Tasks</h3>
+    </div>
+    {/* Scrollable Table Container */}
+    <div className="p-6 overflow-y-auto no-scrollbar flex-1">
+      <table className="w-full text-xs table-fixed">
+        <thead>
+          <tr className="text-left text-gray-400 border-b border-gray-200">
+          <th className="pb-3 w-1/4">Assigned By</th>
+            <th className="pb-3 w-1/4">Assigned To</th>
+            
+            <th className="pb-3 w-1/4">Status</th>
+            <th className="pb-3 w-1/4">Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {combinedActivityLogData.length > 0 ? (
+            combinedActivityLogData.map((log, index) => (
+              <tr key={index} className="border-b border-gray-100">
+                <td className="py-4 text-gray-600">{log.assignedBy}</td>
+                <td className="py-4">{log.assignedTo}</td>
+                
+                <td className="py-4 text-gray-600">{log.status}</td>
+                <td className="py-4 text-gray-600">{log.dateTime}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="py-4 text-gray-600 text-center">
+                No activities available
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {/* Customers */}
+  <div className="bg-white rounded-lg shadow h-[430px] flex flex-col">
+    <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
+      <h3 className="text-lg font-semibold">Customers</h3>
+    </div>
+    <div className="p-6 flex-1">
+      <div className="relative h-full">
+        <span className="absolute right-0 top-0 bg-gray-900 text-white text-xs px-2 py-1 rounded">
+          {customersData.revenueNote}
+        </span>
+        <div className="h-full">
+          <canvas ref={customersChartRef} className="w-full h-full" />
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* Subscription Section */}
         {/* <div className="bg-white rounded-lg shadow">

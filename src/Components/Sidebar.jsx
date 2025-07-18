@@ -15,6 +15,7 @@ import {
 import {
   MdDashboard,
   MdDeleteSweep,
+  MdDescription,
   MdFeedback,
   MdReviews,
 } from "react-icons/md";
@@ -112,12 +113,19 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/deleted-logs",
       allowedRoles: ["SuperAdmin"], // All roles can access
     },
+    // {
+    //   name: "Add Descriptions",
+    //   icon: <MdDescription />,
+    //   route: "/add-descriptions",
+    //   allowedRoles: ["SuperAdmin"], // All roles can access
+    // },
     {
       name: "Logout",
       icon: <FaSignOutAlt />,
       route: "/logout",
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
+    
   ];
 
   // Filter menu items based on user role
@@ -138,6 +146,11 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       navigate(route);
     }
   };
+
+  useEffect(() => {
+    setActiveRoute(location.pathname);
+  }, [location.pathname]);
+  
 
   return (
     <>

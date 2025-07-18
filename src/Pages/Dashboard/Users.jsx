@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
-import Loading from "../Components/Loading";
+import Loading from "../../Components/Loading";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
