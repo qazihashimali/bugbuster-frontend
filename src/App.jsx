@@ -13,6 +13,8 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
   };
 
   const isAuthPage = location.pathname === "/";
@@ -22,7 +24,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col sm:flex-row">
+    <div className="min-h-screen  w-full flex flex-col sm:flex-row">
       {!isAuthPage && (
         <Sidebar
           isOpen={isOpen}

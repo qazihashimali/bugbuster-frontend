@@ -22,7 +22,7 @@ import {
 import { LuBlocks, LuGitBranchPlus } from "react-icons/lu";
 import { SiGoogletasks } from "react-icons/si";
 import { useNavigate, useLocation } from "react-router-dom";
-import { RiBug2Fill } from "react-icons/ri";
+import { RiBug2Fill, RiBuilding2Fill } from "react-icons/ri";
 import { BsFillBugFill } from "react-icons/bs";
 import { TiThList } from "react-icons/ti";
 
@@ -63,6 +63,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Department",
       icon: <FaBuilding />,
       route: "/department",
+      allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
+    },
+    {
+      name: "Companies",
+      icon: <RiBuilding2Fill />,
+      route: "/companies",
       allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
     },
     // {
@@ -113,19 +119,18 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/deleted-logs",
       allowedRoles: ["SuperAdmin"], // All roles can access
     },
-    // {
-    //   name: "Add Descriptions",
-    //   icon: <MdDescription />,
-    //   route: "/add-descriptions",
-    //   allowedRoles: ["SuperAdmin"], // All roles can access
-    // },
+    {
+      name: "Descriptions",
+      icon: <MdDescription />,
+      route: "/add-descriptions",
+      allowedRoles: ["SuperAdmin", "Admin", "ServiceProvider"], // All roles can access
+    },
     {
       name: "Logout",
       icon: <FaSignOutAlt />,
       route: "/logout",
       allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
-    
   ];
 
   // Filter menu items based on user role
@@ -150,7 +155,6 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   useEffect(() => {
     setActiveRoute(location.pathname);
   }, [location.pathname]);
-  
 
   return (
     <>

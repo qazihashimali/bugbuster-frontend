@@ -1,7 +1,23 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+
+// Custom debounce hook
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -19,6 +35,7 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [branch, setBranch] = useState("");
   const [department, setDepartment] = useState("");
+  const [company, setCompany] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState("");
@@ -29,11 +46,19 @@ const Auth = () => {
     branches: [],
     departments: [],
     blocks: [],
+    companies: [],
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [companySearch, setCompanySearch] = useState("");
+  const [companyResults, setCompanyResults] = useState([]);
+  const [isCompanyNotFound, setIsCompanyNotFound] = useState(false);
+
+  const debouncedCompanySearch = useDebounce(companySearch, 500);
 
   const fetchDropdowns = async () => {
     setIsLoading(true);
@@ -50,11 +75,157 @@ const Auth = () => {
       }
 
       const data = await response.json();
-      setDropdowns(data);
+      setDropdowns({
+        branches: Array.isArray(data.branches) ? data.branches : [],
+        departments: Array.isArray(data.departments) ? data.departments : [],
+        blocks: Array.isArray(data.blocks) ? data.blocks : [],
+        companies: Array.isArray(data.companies) ? data.companies : [],
+      });
     } catch (err) {
       setError(err.message);
+      setDropdowns({
+        branches: [],
+        departments: [],
+        blocks: [],
+        companies: [],
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const upsertCompany = async (name, create) => {
+    const payload = { name };
+    if (create === "yes") {
+      payload.create = create;
+    }
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/company/metadata`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      throw new Error(error?.message || "Failed to update company");
+    }
+  };
+
+  const searchCompanies = useCallback(async (searchTerm) => {
+    if (!searchTerm) return;
+    try {
+      const data = await upsertCompany(searchTerm);
+      console.log("searchCompanies - upsertCompany response:", {
+        searchTerm,
+        data,
+      });
+      let results = [];
+      if (data.message === "Company found successfully" && data.company) {
+        results = [data.company].filter(Boolean);
+        setSuccessMessage("Company Found Successfully");
+        setIsCompanyNotFound(false);
+      } else {
+        results = [];
+        setSuccessMessage("");
+        setTimeout(() => setIsCompanyNotFound(true), 100); // Delay to stabilize UI
+      }
+      setCompanyResults(results);
+      setBranch("");
+      setDepartment("");
+      if (data.dropdowns) {
+        setDropdowns((prev) => {
+          const newState = {
+            ...prev,
+            branches: Array.isArray(data.dropdowns.branches)
+              ? data.dropdowns.branches
+              : [],
+            departments: Array.isArray(data.dropdowns.departments)
+              ? data.dropdowns.departments
+              : [],
+          };
+          console.log("searchCompanies - Updated dropdowns:", newState);
+          return newState;
+        });
+      }
+    } catch (err) {
+      setError(err.message);
+      setSuccessMessage("");
+      setCompanyResults([]);
+      setIsCompanyNotFound(true);
+      setBranch("");
+      setDepartment("");
+    }
+  }, []);
+
+  const handleCompanySelect = useCallback(async (companyName) => {
+    try {
+      setCompany(companyName);
+      setCompanySearch(companyName);
+      setIsCompanyModalOpen(false);
+      setCompanyResults([]);
+      setIsCompanyNotFound(false);
+      setSuccessMessage("");
+      setBranch("");
+      setDepartment("");
+
+      // Fetch branches and departments for the selected company
+      const data = await upsertCompany(companyName);
+      console.log("handleCompanySelect - upsertCompany response:", {
+        companyName,
+        data,
+      });
+      if (data.dropdowns) {
+        setDropdowns((prev) => {
+          const newState = {
+            ...prev,
+            branches: Array.isArray(data.dropdowns.branches)
+              ? data.dropdowns.branches
+              : [],
+            departments: Array.isArray(data.dropdowns.departments)
+              ? data.dropdowns.departments
+              : [],
+          };
+          console.log("handleCompanySelect - Updated dropdowns:", newState);
+          return newState;
+        });
+      }
+    } catch (err) {
+      setError(err.message);
+      setSuccessMessage("");
+    }
+  }, []);
+
+  const handleAddCompany = async () => {
+    try {
+      const newCompany = await upsertCompany(companySearch, "yes");
+      setDropdowns((prev) => ({
+        ...prev,
+        companies: [...prev.companies, newCompany],
+        branches: Array.isArray(newCompany.dropdowns?.branches)
+          ? newCompany.dropdowns.branches
+          : [],
+        departments: Array.isArray(newCompany.dropdowns?.departments)
+          ? newCompany.dropdowns.departments
+          : [],
+      }));
+      setCompany(newCompany._id);
+      setCompanySearch(newCompany.name);
+      setIsCompanyModalOpen(false);
+      setCompanyResults([]);
+      setIsCompanyNotFound(false);
+      setSuccessMessage("");
+      setBranch("");
+      setDepartment("");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -75,6 +246,10 @@ const Auth = () => {
     return () => clearInterval(interval);
   }, [isTimerActive, timer]);
 
+  useEffect(() => {
+    searchCompanies(debouncedCompanySearch);
+  }, [debouncedCompanySearch, searchCompanies]);
+
   const handleRoleChange = (role) => {
     setRoles((prev) => ({ ...prev, [role]: !prev[role] }));
   };
@@ -83,6 +258,7 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       if (isLogin) {
@@ -160,9 +336,11 @@ const Auth = () => {
           throw new Error("At least one role must be selected");
         }
 
-        if (!phone || !branch || !department) {
-          throw new Error("Phone, branch, and department are required");
-        }
+        // if (!phone || !branch || !department || !company) {
+        //   throw new Error(
+        //     "Phone, branch, department, and company are required"
+        //   );
+        // }
 
         const body = {
           name,
@@ -172,6 +350,7 @@ const Auth = () => {
           phone,
           branch,
           department,
+          company,
         };
 
         const response = await fetch(
@@ -214,6 +393,7 @@ const Auth = () => {
         setPhone("");
         setBranch("");
         setDepartment("");
+        setCompany("");
         setOtp("");
         setShowOtpInput(false);
         setVerifiedEmail("");
@@ -236,6 +416,7 @@ const Auth = () => {
 
     setIsLoading(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       const response = await fetch(
@@ -414,6 +595,27 @@ const Auth = () => {
                   />
                 </div>
                 <div style={{ marginBottom: "15px" }}>
+                  <input
+                    type="text"
+                    value={companySearch}
+                    onClick={() => setIsCompanyModalOpen(true)}
+                    placeholder="Select Company"
+                    readOnly
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      border: "1px solid #E0E0E0",
+                      borderRadius: "3px",
+                      fontSize: "14px",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      backgroundColor: "#f5f5f5",
+                      cursor: "pointer",
+                    }}
+                    required
+                  />
+                </div>
+                <div style={{ marginBottom: "15px" }}>
                   <label
                     style={{
                       display: "block",
@@ -499,6 +701,12 @@ const Auth = () => {
                         required
                       >
                         <option value="">Select Branch</option>
+                        {console.log(
+                          "Branch dropdown - company:",
+                          company,
+                          "branches:",
+                          dropdowns.branches
+                        )}
                         {dropdowns.branches.map((branch) => (
                           <option key={branch._id} value={branch._id}>
                             {branch.branchName} ({branch.branchCode})
@@ -522,6 +730,12 @@ const Auth = () => {
                         required
                       >
                         <option value="">Select Department</option>
+                        {console.log(
+                          "Department dropdown - company:",
+                          company,
+                          "departments:",
+                          dropdowns.departments
+                        )}
                         {dropdowns.departments.map((department) => (
                           <option key={department._id} value={department._id}>
                             {department.departmentName} (
@@ -533,6 +747,188 @@ const Auth = () => {
                   </>
                 )}
               </>
+            )}
+
+            {isCompanyModalOpen && (
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 1000,
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: "white",
+                    padding: "20px",
+                    borderRadius: "4px",
+                    width: "300px",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  {console.log("Company modal - state:", {
+                    isCompanyNotFound,
+                    companySearch,
+                    companyResults,
+                  })}
+                  <h3
+                    style={{
+                      fontSize: "16px",
+                      marginBottom: "15px",
+                      color: "#333",
+                    }}
+                  >
+                    Select or Add Company
+                  </h3>
+                  {successMessage && (
+                    <div
+                      style={{
+                        color: "green",
+                        marginBottom: "15px",
+                        fontSize: "14px",
+                        textAlign: "center",
+                        opacity: successMessage ? 1 : 0,
+                        transition: "opacity 0.3s ease-in-out",
+                      }}
+                    >
+                      {successMessage}
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    value={companySearch}
+                    onChange={(e) => {
+                      setCompanySearch(e.target.value);
+                      setSuccessMessage("");
+                      setIsCompanyNotFound(false);
+                    }}
+                    placeholder="Search company..."
+                    style={{
+                      width: "100%",
+                      padding: "10px 12px",
+                      border: "1px solid #E0E0E0",
+                      borderRadius: "3px",
+                      fontSize: "14px",
+                      marginBottom: "15px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  {Array.isArray(companyResults) &&
+                    companyResults.length > 0 && (
+                      <div
+                        style={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          marginBottom: "15px",
+                        }}
+                      >
+                        {companyResults.map((comp) => (
+                          <div
+                            key={comp._id}
+                            onClick={() => handleCompanySelect(comp.name)}
+                            style={{
+                              padding: "10px",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #E0E0E0",
+                              fontSize: "14px",
+                              color: "#333",
+                              transition: "background-color 0.2s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                "#f5f5f5")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.backgroundColor = "white")
+                            }
+                          >
+                            {comp.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  {isCompanyNotFound && companySearch && (
+                    <div
+                      style={{
+                        marginBottom: "15px",
+                        opacity: isCompanyNotFound ? 1 : 0,
+                        transition: "opacity 0.3s ease-in-out",
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: "red",
+                          fontSize: "14px",
+                          marginBottom: "10px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Company not found. Please add company.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddCompany}
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          color: "white",
+                          backgroundColor: "#34076b",
+                          border: "none",
+                          borderRadius: "4px",
+                          fontSize: "14px",
+                          cursor: "pointer",
+                          transition: "background-color 0.2s",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#2a0557")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#34076b")
+                        }
+                      >
+                        Add Company: {companySearch}
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      setIsCompanyModalOpen(false);
+                      setCompanySearch("");
+                      setCompanyResults([]);
+                      setIsCompanyNotFound(false);
+                      setSuccessMessage("");
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      color: "#333",
+                      backgroundColor: "#f5f5f5",
+                      border: "1px solid #E0E0E0",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      transition: "background-color 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#e0e0e0")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = "#f5f5f5")
+                    }
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             )}
 
             {showOtpInput && (
@@ -753,6 +1149,7 @@ const Auth = () => {
                         setIsForgotPassword(true);
                         setIsLogin(false);
                         setError("");
+                        setSuccessMessage("");
                         setEmail("");
                         setPassword("");
                         setNewPassword("");
@@ -780,6 +1177,7 @@ const Auth = () => {
                         setIsLogin(false);
                         setIsForgotPassword(false);
                         setError("");
+                        setSuccessMessage("");
                         setEmail("");
                         setPassword("");
                         setNewPassword("");
@@ -788,6 +1186,7 @@ const Auth = () => {
                         setPhone("");
                         setBranch("");
                         setDepartment("");
+                        setCompany("");
                         setOtp("");
                         setShowOtpInput(false);
                         setVerifiedEmail("");
@@ -813,6 +1212,7 @@ const Auth = () => {
                     setIsForgotPassword(false);
                     setIsResetPassword(false);
                     setError("");
+                    setSuccessMessage("");
                     setEmail("");
                     setPassword("");
                     setNewPassword("");
@@ -838,6 +1238,7 @@ const Auth = () => {
                     setIsLogin(true);
                     setIsForgotPassword(false);
                     setError("");
+                    setSuccessMessage("");
                     setName("");
                     setEmail("");
                     setPassword("");
@@ -846,6 +1247,7 @@ const Auth = () => {
                     setPhone("");
                     setBranch("");
                     setDepartment("");
+                    setCompany("");
                     setOtp("");
                     setShowOtpInput(false);
                     setVerifiedEmail("");

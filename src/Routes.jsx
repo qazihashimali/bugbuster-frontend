@@ -9,8 +9,9 @@ import Users from "./Pages/Dashboard/Users";
 import DeletedLogs from "./Pages/Dashboard/DeletedLogs";
 import Feedback from "./Pages/Dashboard/Feedback";
 import Reviews from "./Pages/Dashboard/Reviews";
-// import AddDescriptions from "./Pages/Dashboard/AddDescriptions";
+import AddDescriptions from "./Pages/Dashboard/AddDescriptions";
 import Auth from "./Pages/Login";
+import Company from "./Pages/Dashboard/Company";
 
 const appRoutes = [
   { path: "/", element: <Auth /> },
@@ -25,7 +26,9 @@ const appRoutes = [
   { path: "/deleted-logs", element: <DeletedLogs /> },
   { path: "/feedback", element: <Feedback /> },
   { path: "/reviews", element: <Reviews /> },
-  // { path: "/add-descriptions", element: <AddDescriptions /> },
+  { path: "/add-descriptions", element: <AddDescriptions /> },
+  { path: "/companies", element: <Company /> },
+
 ];
 
 export default appRoutes;

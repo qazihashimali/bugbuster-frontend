@@ -241,7 +241,7 @@ const MyTasks = () => {
                     </td>
                     <td className="p-3">{issue.status || "N/A"}</td>
                     <td className="p-3">{issue.priority || "N/A"}</td>
-                    <td className="p-3">{issue.description || "N/A"}</td>
+                    <td className="p-3">{issue.description?.title || "N/A"}</td>
 
                     <td className="p-3 flex justify-center space-x-2">
                       <button
@@ -449,7 +449,7 @@ const MyTasks = () => {
                 </p>
                 <p className="mb-2">
                   <strong>Description:</strong>{" "}
-                  {selectedIssue.description || "N/A"}
+                  {selectedIssue.description?.title || "N/A"}
                 </p>
                 <p className="mb-2">
                   <strong>Branch:</strong>{" "}

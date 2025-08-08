@@ -13,6 +13,7 @@ const Navbar = () => {
     email: "",
     roles: [],
     _id: "",
+    company: "",
   });
   const [averageRating, setAverageRating] = useState(null);
 
@@ -89,6 +90,7 @@ const Navbar = () => {
             email: user.email || "",
             roles: user.roles || [],
             _id: user._id || "",
+            company: user.company || "",
           });
         }
       } catch (err) {
@@ -123,7 +125,7 @@ const Navbar = () => {
           const data = await response.json();
           setAverageRating(data.averageRating || "N/A");
         } catch (err) {
-          console.error("Error fetching average rating:", err);
+          console.log("Error fetching average rating:", err);
           setAverageRating("N/A");
         }
       };
@@ -342,13 +344,16 @@ const Navbar = () => {
                     {userData.name}
                   </div>
                   <div className="text-xs text-white/80">
-                    {userData.roles.join(", ") || "No roles"}
+                   <span className="font-bold text-white">Company:</span> {userData.company}
+                  </div>
+                  <div className="text-xs text-white/80">
+                    <span className="font-bold text-white">Roles:</span> {userData.roles.join(", ") || "No roles"}
                   </div>
                   <div className="text-xs text-white/80 truncate">
-                    {userData.email}
+                    <span className="font-bold text-white">Email:</span> {userData.email}
                   </div>
                   <div className="text-xs text-white/80 flex items-center">
-                    <span className="mr-1">Rating:</span>
+                    <span className="font-bold text-white mr-1">Rating:</span>
                     <div className="flex items-center space-x-[2px]">
                       {[...Array(5)].map((_, i) => {
                         const rating =
