@@ -45,7 +45,7 @@ const Navbar = () => {
         );
       }
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       setNotifications(data.logs || []);
       setUnreadCount(data.unreadCount || 0);
       setError(null);

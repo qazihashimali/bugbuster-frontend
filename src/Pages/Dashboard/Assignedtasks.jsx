@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import Loading from "../../Components/Loading";
@@ -45,7 +44,7 @@ const Assignedtasks = () => {
           },
         }
       );
-
+     
       if (!response.ok) {
         const text = await response.text();
         console.error(
@@ -62,7 +61,7 @@ const Assignedtasks = () => {
       const data = await response.json();
       const filteredIssues = Array.isArray(data) ? data : data.issues || [];
       setIssues(filteredIssues);
-      
+
       if (Date.now() - start < 2000)
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
@@ -204,9 +203,15 @@ const Assignedtasks = () => {
 
   const truncateDescription = (description) => {
     if (!description) return "";
-    const words = description.trim().split(" ");
-    if (words.length <= 2) return description;
-    return `${words.slice(0, 2).join(" ")}...`;
+
+    // Support both string and object with title
+    const text =
+      typeof description === "string"
+        ? description.trim()
+        : description?.title?.trim() || "";
+
+    const words = text.split(" ");
+    return words.length <= 2 ? text : `${words.slice(0, 2).join(" ")}...`;
   };
 
   return (
@@ -279,7 +284,9 @@ const Assignedtasks = () => {
                       >
                         <td className="p-3 text-sm">{issue.userName}</td>
                         <td className="p-3 text-sm">
-                          {truncateDescription(issue.description)}
+                          {truncateDescription(issue.description?.title)}
+
+                          {/* {issue.description?.title || "N/A"} */}
                         </td>
                         <td className="p-3 text-sm">
                           {issue.branch?.branchName || "N/A"}
@@ -342,7 +349,8 @@ const Assignedtasks = () => {
                         {issue.userName}
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {truncateDescription(issue.description)}
+                        {truncateDescription(issue.description.title)}
+                        {/* {issue.description?.title || "N/A"} */}
                       </p>
                     </div>
                     <div className="flex space-x-2 ml-3">
@@ -464,7 +472,7 @@ const Assignedtasks = () => {
                     <textarea
                       id="description"
                       name="description"
-                      value={formData.description}
+                      value={formData.description.title}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                       rows="4"
@@ -508,7 +516,7 @@ const Assignedtasks = () => {
                       <option value="High">High</option>
                     </select>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4 border-t">
+                  <div className="flex flex-col gap-2 sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4">
                     <button
                       type="submit"
                       className="bg-primary text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
@@ -540,7 +548,7 @@ const Assignedtasks = () => {
                       Description:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.description || "N/A"}
+                      {selectedIssue.description?.title || "N/A"}
                     </span>
                   </div>
                   <div>

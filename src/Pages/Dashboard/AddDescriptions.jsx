@@ -77,6 +77,8 @@ export default function FeedbackForm() {
             );
           }
           const descriptionsData = await response.json();
+          // console.log("Descriptions data:", descriptionsData);
+          
           setDescriptions(
             Array.isArray(descriptionsData) ? descriptionsData : []
           );

@@ -73,7 +73,7 @@ const MyTasks = () => {
           },
         }
       );
-      console.log(response);
+      // console.log(response);
 
       if (!response.ok) {
         const text = await response.text();

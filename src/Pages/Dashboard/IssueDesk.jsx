@@ -87,8 +87,12 @@ export default function IssueDesk() {
   useEffect(() => {
     const loadInitialData = async () => {
       const userData = localStorage.getItem("user");
+      // console.log("User data from localStorage:", userData);
+      
       if (userData) {
         const parsedUser = JSON.parse(userData);
+        // console.log("User data:", parsedUser);
+        
         setUser(parsedUser);
         setUserRole(parsedUser.role || null);
         setFormData((prev) => ({ ...prev, userName: parsedUser.name }));
@@ -113,6 +117,9 @@ export default function IssueDesk() {
               },
             }
           );
+         
+         
+          
           if (!dropdownResponse.ok) {
             const text = await dropdownResponse.text();
             console.error(
@@ -126,6 +133,8 @@ export default function IssueDesk() {
             );
           }
           const dropdownData = await dropdownResponse.json();
+          //  console.log("Dropdown data:", dropdownData);
+          
 
           setDropdowns({
             branches: Array.isArray(dropdownData.branches)
@@ -143,6 +152,7 @@ export default function IssueDesk() {
               : [],
           });
 
+          
           if (userData) {
             const parsedUser = JSON.parse(userData);
             const issuesResponse = await fetch(
@@ -273,6 +283,8 @@ export default function IssueDesk() {
       console.log('====================================');
       console.log(Object.fromEntries(formDataToSend));
       console.log('====================================');
+
+      
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/issues`,

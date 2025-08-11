@@ -333,7 +333,7 @@ const Dashboard = () => {
       try {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
-        console.log("User from localStorage:", parsedUser);
+        // console.log("User from localStorage:", parsedUser);
       } catch (err) {
         console.error("Failed to parse user data:", err);
         showAlert("error", "Failed to load user data");
@@ -373,7 +373,7 @@ const Dashboard = () => {
       }
 
       let data = await response.json();
-      console.log("Fetched issues:", data);
+      // console.log("Fetched issues:", data);
 
       // Validate and filter out invalid issues
       data = data.filter((issue) => {
@@ -394,7 +394,7 @@ const Dashboard = () => {
           throw new Error("User _id not found in localStorage");
         }
       }
-      console.log("Filtered issues:", data);
+      // console.log("Filtered issues:", data);
 
       setIssues(data);
     } catch (err) {
@@ -440,7 +440,7 @@ const Dashboard = () => {
       }
 
       const data = await response.json();
-      console.log("Fetched assigned tasks:", data);
+      // console.log("Fetched assigned tasks:", data);
       const filteredIssues = Array.isArray(data) ? data : data.issues || [];
       setAssignedTasks(filteredIssues);
     } catch (err) {
@@ -516,7 +516,7 @@ const Dashboard = () => {
     };
   };
 
-  console.log("Issues state:", issues);
+  // console.log("Issues state:", issues);
   const paymentSnapshotData = calculatePaymentSnapshotData();
 
   const combinedActivityLogData = assignedTasks.map((issue) => ({

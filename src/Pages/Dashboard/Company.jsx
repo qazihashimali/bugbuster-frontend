@@ -7,7 +7,7 @@ const createCompany = async ({ name, createdBy }) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch("/api/company", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,13 +35,15 @@ const getAllCompanies = async () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch("/api/company", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
+
+   
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -66,7 +68,7 @@ const getCompanyById = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch(`/api/company/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +92,7 @@ const getCompanyById = async (id) => {
 
 const updateCompany = async ({ id, name, createdBy }) => {
   try {
-    const req = await fetch(`/api/company/${id}`, {
+    const req = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -124,9 +126,9 @@ const Company = () => {
     const start = Date.now();
     try {
       const companies = await getAllCompanies();
-      // Log companies for debugging
-      console.log("Fetched companies:", companies);
-      // Filter out companies with invalid IDs
+      
+      // console.log("Fetched companies:", companies);
+      
       const validCompanies = companies.filter(
         (company) => company._id && company._id !== "undefined"
       );

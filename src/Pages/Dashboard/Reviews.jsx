@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaTimes } from "react-icons/fa";
 import { FaStar, FaStarHalfStroke } from "react-icons/fa6";
@@ -220,7 +219,8 @@ const Reviews = () => {
     if (filters.branch && filters.department) {
       const filtered = dropdowns.users.filter(
         (user) =>
-          user.branch === filters.branch && user.department === filters.department
+          user.branch === filters.branch &&
+          user.department === filters.department
       );
       setDropdowns((prev) => ({ ...prev, filteredUsers: filtered }));
     } else {
@@ -382,34 +382,48 @@ const Reviews = () => {
               )}
             </div>
           )}
-
+          <div className="bg-primary text-white p-3">
+            <h2 className="text-lg font-semibold">Details</h2>
+          </div>
           <div className="bg-white shadow rounded-lg overflow-x-auto">
-            <div className="bg-primary text-white p-3">
-              <h2 className="text-lg font-semibold">Details</h2>
-            </div>
             <table className="w-full min-w-[640px]">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="p-3 text-left text-sm sm:text-base">User Name</th>
+                  <th className="p-3 text-left text-sm sm:text-base">
+                    User Name
+                  </th>
                   <th className="p-3 text-left text-sm sm:text-base">Branch</th>
-                  <th className="p-3 text-left text-sm sm:text-base">Department</th>
-                  <th className="p-3 text-left text-sm sm:text-base">Feedback To</th>
-                  <th className="p-3 text-left text-sm sm:text-base">Feedback</th>
+                  <th className="p-3 text-left text-sm sm:text-base">
+                    Department
+                  </th>
+                  <th className="p-3 text-left text-sm sm:text-base">
+                    Feedback To
+                  </th>
+                  <th className="p-3 text-left text-sm sm:text-base">
+                    Feedback
+                  </th>
                   <th className="p-3 text-left text-sm sm:text-base">Rating</th>
-                  <th className="p-3 text-center text-sm sm:text-base">Actions</th>
+                  <th className="p-3 text-center text-sm sm:text-base">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredIssues.length === 0 && !isLoading && (
                   <tr>
-                    <td colSpan="7" className="p-3 text-center text-sm sm:text-base">
+                    <td
+                      colSpan="7"
+                      className="p-3 text-center text-sm sm:text-base"
+                    >
                       No feedback found.
                     </td>
                   </tr>
                 )}
                 {filteredIssues.map((issue) => (
                   <tr key={issue._id}>
-                    <td className="p-3 text-sm sm:text-base">{issue.userName || "N/A"}</td>
+                    <td className="p-3 text-sm sm:text-base">
+                      {issue.userName || "N/A"}
+                    </td>
                     <td className="p-3 text-sm sm:text-base">
                       {issue.branch
                         ? `${issue.branch.branchName} (${issue.branch.branchCode})`
@@ -455,7 +469,9 @@ const Reviews = () => {
         >
           <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-[90%] sm:max-w-[32rem] max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold">View Feedback</h2>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                View Feedback
+              </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-600 hover:text-gray-800"

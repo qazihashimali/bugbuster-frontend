@@ -562,7 +562,7 @@ const Users = () => {
                       </div>
                     </>
                   )}
-                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4 border-t">
+                  <div className="flex flex-col gap-4 sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4">
                     <button
                       type="submit"
                       className="bg-primary text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
@@ -632,7 +632,7 @@ const Users = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-end mt-6 pt-4 border-t">
+                <div className="flex justify-end mt-6 pt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm"
