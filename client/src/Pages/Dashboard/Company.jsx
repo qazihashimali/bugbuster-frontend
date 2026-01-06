@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaPlusCircle, FaTimes } from "react-icons/fa";
 import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const createCompany = async ({ name, createdBy }) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ name, email: createdBy }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/company`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, email: createdBy }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -35,15 +39,16 @@ const getAllCompanies = async () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-   
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/company`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -68,13 +73,16 @@ const getCompanyById = async (id) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -92,14 +100,17 @@ const getCompanyById = async (id) => {
 
 const updateCompany = async ({ id, name, createdBy }) => {
   try {
-    const req = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      method: "PUT",
-      body: JSON.stringify({ name, createdBy }),
-    });
+    const req = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        method: "PUT",
+        body: JSON.stringify({ name, createdBy }),
+      }
+    );
     const res = await req.json();
 
     return res.company;
@@ -126,9 +137,9 @@ const Company = () => {
     const start = Date.now();
     try {
       const companies = await getAllCompanies();
-      
+
       // console.log("Fetched companies:", companies);
-      
+
       const validCompanies = companies.filter(
         (company) => company._id && company._id !== "undefined"
       );
@@ -139,7 +150,7 @@ const Company = () => {
         );
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(err.message || "Failed to fetch companies");
+      toast.error("Failed to fetch companies");
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +178,8 @@ const Company = () => {
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
     } catch (err) {
-      setError(err.message);
+      console.error("Create error:", err);
+      toast.error(err.message || "Failed to create company");
     } finally {
       setIsSubmitting(false);
     }
@@ -199,7 +211,7 @@ const Company = () => {
       setIsEditing(true);
       setIsModalOpen(true);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +240,8 @@ const Company = () => {
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
     } catch (err) {
-      setError(err.message);
+      console.error("Update error:", err);
+      toast.error(err.message || "Failed to update company");
     } finally {
       setIsSubmitting(false);
     }

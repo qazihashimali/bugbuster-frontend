@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { FaTimes, FaStar } from "react-icons/fa";
@@ -53,9 +52,7 @@ export default function Feedback() {
     return (
       <div className="p-4 rounded-lg text-center bg-primary text-white w-full max-w-xs h-[201px] flex flex-col justify-center mt-4">
         <h3 className="text-lg font-semibold pb-4">Rating</h3>
-        <div className="text-5xl font-bold mb-2">
-          {rating.toFixed(1)}/5
-        </div>
+        <div className="text-5xl font-bold mb-2">{rating.toFixed(1)}/5</div>
         <div className="flex justify-center space-x-1">
           {[0, 1, 2, 3, 4].map((index) => {
             const starValue = index + 1;
@@ -203,7 +200,10 @@ export default function Feedback() {
     setAlert({ type: "", message: "", show: false });
 
     if (!validateForm()) {
-      showAlert("error", "Please fill in all required fields, including a rating.");
+      showAlert(
+        "error",
+        "Please fill in all required fields, including a rating."
+      );
       return;
     }
 
@@ -374,7 +374,8 @@ export default function Feedback() {
                       <option value="">Select Department</option>
                       {dropdowns.departments.map((department) => (
                         <option key={department._id} value={department._id}>
-                          {department.departmentName} ({department.departmentCode})
+                          {department.departmentName} (
+                          {department.departmentCode})
                         </option>
                       ))}
                     </select>

@@ -6,6 +6,7 @@ import Footer from "./Components/Footer";
 import Auth from "./Pages/Login";
 import { Route, Routes, useLocation } from "react-router-dom";
 import appRoutes from "./Routes";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +15,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
   };
 
   const isAuthPage = location.pathname === "/";
@@ -25,6 +25,7 @@ function App() {
 
   return (
     <div className="min-h-screen  w-full flex flex-col sm:flex-row">
+      <Toaster />
       {!isAuthPage && (
         <Sidebar
           isOpen={isOpen}

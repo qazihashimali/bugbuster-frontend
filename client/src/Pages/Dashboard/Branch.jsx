@@ -1,13 +1,13 @@
-
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaEdit, FaTrash, FaPlusCircle, FaTimes } from 'react-icons/fa';
-import Loading from '../../Components/Loading';
+import React, { useState, useEffect } from "react";
+import { FaEye, FaEdit, FaTrash, FaPlusCircle, FaTimes } from "react-icons/fa";
+import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const Branch = () => {
   const [branches, setBranches] = useState([]);
-  const [branchCode, setBranchCode] = useState('');
-  const [branchName, setBranchName] = useState('');
-  const [error, setError] = useState('');
+  const [branchCode, setBranchCode] = useState("");
+  const [branchName, setBranchName] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,28 +18,38 @@ const Branch = () => {
     setIsLoading(true);
     const start = Date.now();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const token = localStorage.getItem("token");
+      if (!token) toast.error("No authentication token found. Please log in.");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/branches`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
-        console.error('Response status:', response.status, 'Response text:', text);
-        throw new Error(`Failed to fetch branches: ${response.status} ${response.statusText}`);
+        console.error(
+          "Response status:",
+          response.status,
+          "Response text:",
+          text
+        );
+        toast.error("Failed to fetch branches");
       }
 
       const data = await response.json();
       setBranches(data);
-      if (Date.now() - start < 2000) await new Promise(resolve => setTimeout(resolve, 2000 - (Date.now() - start)));
+      if (Date.now() - start < 2000)
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.message);
+      console.error("Fetch error:", err);
+      toast.error("Failed to fetch branches");
     } finally {
       setIsLoading(false);
     }
@@ -51,29 +61,34 @@ const Branch = () => {
 
   const handleAddBranch = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
     const start = Date.now();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ branchCode, branchName }),
-      });
+      const token = localStorage.getItem("token");
+      if (!token) toast.error("No authentication token found. Please log in.");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/branches`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ branchCode, branchName }),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to add branch');
+      if (!response.ok) toast.error(data.message || "Failed to add branch");
 
       setBranches([...branches, data.branch]);
-      setBranchCode('');
-      setBranchName('');
-      if (Date.now() - start < 2000) await new Promise(resolve => setTimeout(resolve, 2000 - (Date.now() - start)));
+      setBranchCode("");
+      setBranchName("");
+      if (Date.now() - start < 2000)
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -97,30 +112,40 @@ const Branch = () => {
 
   const handleUpdateBranch = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
     const start = Date.now();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
+      const token = localStorage.getItem("token");
+      if (!token) toast.error("No authentication token found. Please log in.");
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches/${selectedBranch._id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ branchCode, branchName }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/branches/${
+          selectedBranch._id
+        }`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ branchCode, branchName }),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to update branch');
+      if (!response.ok) toast.error(data.message || "Failed to update branch");
 
-      setBranches(branches.map(b => b._id === selectedBranch._id ? data.branch : b));
+      setBranches(
+        branches.map((b) => (b._id === selectedBranch._id ? data.branch : b))
+      );
       setIsModalOpen(false);
-      setBranchCode('');
-      setBranchName('');
-      if (Date.now() - start < 2000) await new Promise(resolve => setTimeout(resolve, 2000 - (Date.now() - start)));
+      setBranchCode("");
+      setBranchName("");
+      if (Date.now() - start < 2000)
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -129,28 +154,33 @@ const Branch = () => {
   };
 
   const handleDeleteBranch = async (branch) => {
-    if (!window.confirm('Are you sure you want to delete this branch?')) return;
+    if (!window.confirm("Are you sure you want to delete this branch?")) return;
 
-    setError('');
+    setError("");
     setIsSubmitting(true);
     const start = Date.now();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/branches/${branch._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const token = localStorage.getItem("token");
+      if (!token) toast.error("No authentication token found");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/branches/${branch._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to delete branch');
+      if (!response.ok) toast.error(data.message || "Failed to delete branch");
 
-      setBranches(branches.filter(b => b._id !== branch._id));
-      if (Date.now() - start < 2000) await new Promise(resolve => setTimeout(resolve, 2000 - (Date.now() - start)));
+      setBranches(branches.filter((b) => b._id !== branch._id));
+      if (Date.now() - start < 2000)
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -160,7 +190,11 @@ const Branch = () => {
 
   return (
     <div className="relative container mx-auto p-6 bg-gray-100 min-h-screen">
-      <div className={`bg-white shadow-md rounded-lg ${isLoading || isSubmitting ? 'blur-sm' : ''}`}>
+      <div
+        className={`bg-white shadow-md rounded-lg ${
+          isLoading || isSubmitting ? "blur-sm" : ""
+        }`}
+      >
         <div className="bg-primary text-white p-4 rounded-t-lg">
           <h1 className="text-2xl font-bold">Branch</h1>
         </div>
@@ -282,8 +316,8 @@ const Branch = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setBranchCode('');
-                  setBranchName('');
+                  setBranchCode("");
+                  setBranchName("");
                 }}
                 className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
               >
@@ -301,20 +335,29 @@ const Branch = () => {
       )}
 
       {isModalOpen && selectedBranch && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"  style={{backgroundColor: 'rgba(0, 0, 0, 0.9)'}}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
+        >
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
-                {isEditing ? 'Edit Branch' : 'View Branch'}
+                {isEditing ? "Edit Branch" : "View Branch"}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-600 hover:text-gray-800">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-600 hover:text-gray-800"
+              >
                 <FaTimes />
               </button>
             </div>
             {isEditing ? (
               <form onSubmit={handleUpdateBranch}>
                 <div className="mb-4">
-                  <label htmlFor="modalBranchCode" className="block text-sm font-medium mb-1">
+                  <label
+                    htmlFor="modalBranchCode"
+                    className="block text-sm font-medium mb-1"
+                  >
                     Branch Code
                   </label>
                   <input
@@ -327,7 +370,10 @@ const Branch = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label htmlFor="modalBranchName" className="block text-sm font-medium mb-1">
+                  <label
+                    htmlFor="modalBranchName"
+                    className="block text-sm font-medium mb-1"
+                  >
                     Branch Name
                   </label>
                   <input
@@ -358,8 +404,12 @@ const Branch = () => {
               </form>
             ) : (
               <div>
-                <p><strong>Branch Code:</strong> {selectedBranch.branchCode}</p>
-                <p><strong>Branch Name:</strong> {selectedBranch.branchName}</p>
+                <p>
+                  <strong>Branch Code:</strong> {selectedBranch.branchCode}
+                </p>
+                <p>
+                  <strong>Branch Name:</strong> {selectedBranch.branchName}
+                </p>
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}

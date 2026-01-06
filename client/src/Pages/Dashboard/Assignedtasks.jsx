@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const Assignedtasks = () => {
   const [issues, setIssues] = useState([]);
@@ -44,7 +45,7 @@ const Assignedtasks = () => {
           },
         }
       );
-     
+
       if (!response.ok) {
         const text = await response.text();
         console.error(
@@ -54,7 +55,9 @@ const Assignedtasks = () => {
           text
         );
         throw new Error(
-          `Failed to fetch issues: ${response.status} ${response.statusText}`
+          toast.error(
+            `Failed to fetch issues: ${response.status} ${response.statusText}`
+          )
         );
       }
 
@@ -104,13 +107,14 @@ const Assignedtasks = () => {
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found. Please log in.");
 
       if (
         user._id !== selectedIssue.createdBy._id.toString() &&
         user.email !== "Admin@gmail.com"
       ) {
-        throw new Error("Unauthorized to update this issue");
+        toast.error("You do not have permission to update this issue.");
+        return;
       }
 
       const response = await fetch(
@@ -126,10 +130,9 @@ const Assignedtasks = () => {
       );
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to update issue");
+      if (!response.ok) toast.error(`Failed to update issue: ${data.message}`);
 
-      if (!data.issue) throw new Error("Invalid response: issue data missing");
+      if (!data.issue) toast.error("Failed to update issue. Please try again.");
       setIssues(
         issues.map((i) => (i._id === selectedIssue._id ? data.issue : i))
       );
@@ -160,13 +163,14 @@ const Assignedtasks = () => {
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found. Please log in.");
 
       if (
         user._id !== issue.createdBy._id.toString() &&
         user.email !== "Admin@gmail.com"
       ) {
-        throw new Error("Unauthorized to delete this issue");
+        toast.error("You do not have permission to delete this issue.");
+        return;
       }
 
       const response = await fetch(
@@ -181,8 +185,7 @@ const Assignedtasks = () => {
       );
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to delete issue");
+      if (!response.ok) toast.error(`Failed to delete issue: ${data.message}`);
 
       setIssues(issues.filter((i) => i._id !== issue._id));
       if (Date.now() - start < 2000)

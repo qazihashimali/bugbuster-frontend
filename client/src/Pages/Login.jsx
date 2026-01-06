@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 // Custom debounce hook
 const useDebounce = (value, delay) => {
@@ -82,7 +83,7 @@ const Auth = () => {
         companies: Array.isArray(data.companies) ? data.companies : [],
       });
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
       setDropdowns({
         branches: [],
         departments: [],
@@ -115,7 +116,7 @@ const Auth = () => {
       const data = await res.json();
       return data;
     } catch (error) {
-      throw new Error(error?.message || "Failed to update company");
+      toast.error("Failed to fetch dropdown data", error);
     }
   };
 
@@ -156,7 +157,7 @@ const Auth = () => {
         });
       }
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
       setSuccessMessage("");
       setCompanyResults([]);
       setIsCompanyNotFound(true);
@@ -198,7 +199,7 @@ const Auth = () => {
         });
       }
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
       setSuccessMessage("");
     }
   }, []);
@@ -225,7 +226,7 @@ const Auth = () => {
       setBranch("");
       setDepartment("");
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -272,15 +273,13 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Something went wrong");
-
+        if (!response.ok) toast.error(data.message || "Something went wrong");
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/dashboard", { replace: true });
       } else if (isForgotPassword && !showOtpInput) {
         if (!email) {
-          throw new Error("Email is required");
+          toast.error("Email is required");
         }
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/auth/forgot-password`,
@@ -292,8 +291,7 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Something went wrong");
+        if (!response.ok) toast.error(data.message || "Something went wrong");
 
         setVerifiedEmail(email);
         setResendAttempts(data.resendAttempts || 0);
@@ -303,7 +301,7 @@ const Auth = () => {
         setIsTimerActive(true);
       } else if (isResetPassword && showOtpInput) {
         if (!newPassword) {
-          throw new Error("New password is required");
+          toast.error("New password is required");
         }
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/auth/reset-password`,
@@ -315,8 +313,7 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Something went wrong");
+        if (!response.ok) toast.error(data.message || "Something went wrong");
 
         setIsLogin(true);
         setIsForgotPassword(false);
@@ -333,7 +330,7 @@ const Auth = () => {
       } else if (!showOtpInput) {
         const selectedRoles = Object.keys(roles).filter((role) => roles[role]);
         if (selectedRoles.length === 0) {
-          throw new Error("At least one role must be selected");
+          toast.error("At least one role must be selected");
         }
 
         // if (!phone || !branch || !department || !company) {
@@ -363,8 +360,7 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Something went wrong");
+        if (!response.ok) toast.error(data.message || "Something went wrong");
 
         setVerifiedEmail(email);
         setResendAttempts(data.resendAttempts || 0);
@@ -382,8 +378,7 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.message || "Something went wrong");
+        if (!response.ok) toast.error(data.message || "Something went wrong");
 
         setIsLogin(true);
         setName("");
@@ -402,7 +397,7 @@ const Auth = () => {
         setIsTimerActive(false);
       }
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -410,7 +405,7 @@ const Auth = () => {
 
   const handleResendOTP = async () => {
     if (resendAttempts >= 4) {
-      setError("Maximum OTP resend attempts reached. Please restart.");
+      toast.error("Maximum OTP resend attempts reached. Please restart.");
       return;
     }
 
@@ -429,14 +424,14 @@ const Auth = () => {
       );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      if (!response.ok) toast.error(data.message || "Something went wrong");
 
       setResendAttempts(data.resendAttempts);
       setTimer(40);
       setIsTimerActive(true);
       setOtp("");
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }

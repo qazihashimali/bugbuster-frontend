@@ -27,6 +27,7 @@ import { Link } from "react-router-dom";
 import { BsFillBugFill } from "react-icons/bs";
 import { SiGoogletasks } from "react-icons/si";
 import { TiThList } from "react-icons/ti";
+import toast from "react-hot-toast";
 
 // Register Chart.js components
 ChartJS.register(
@@ -322,10 +323,10 @@ const Dashboard = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [assignedTasks, setAssignedTasks] = useState([]);
 
-  const showAlert = (type, message) => {
-    setAlert({ type, message, show: true });
-    setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
-  };
+  // const showAlert = (type, message) => {
+  //   setAlert({ type, message, show: true });
+  //   setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
+  // };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -336,7 +337,7 @@ const Dashboard = () => {
         // console.log("User from localStorage:", parsedUser);
       } catch (err) {
         console.error("Failed to parse user data:", err);
-        showAlert("error", "Failed to load user data");
+        toast.error("Failed to parse user data");
       }
     }
   }, []);
@@ -346,7 +347,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No authentication token found");
+        toast.error("No authentication token found");
       }
 
       const response = await fetch(
@@ -367,9 +368,7 @@ const Dashboard = () => {
           "Response text:",
           text
         );
-        throw new Error(
-          `Failed to fetch tasks: ${response.status} ${response.statusText}`
-        );
+        toast.error(`Failed to fetch issues: ${response.statusText}`);
       }
 
       let data = await response.json();
@@ -396,7 +395,7 @@ const Dashboard = () => {
       if (user) {
         const userId = user._id;
         if (!userId) {
-          throw new Error("User _id not found in localStorage");
+          toast.error("User ID not found in local storage");
         }
       }
       // console.log("Filtered issues:", data);
@@ -404,7 +403,7 @@ const Dashboard = () => {
       setIssues(data);
     } catch (err) {
       console.error("Fetch issues error:", err);
-      showAlert("error", err.message || "Failed to fetch tasks");
+      toast.error(`Failed to fetch issues: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -416,9 +415,7 @@ const Dashboard = () => {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
       if (!token || !user?._id) {
-        throw new Error(
-          "No authentication token or user ID found. Please log in again."
-        );
+        toast.error("No authentication token or user ID found");
       }
 
       const response = await fetch(
@@ -439,9 +436,7 @@ const Dashboard = () => {
           "Response text:",
           text
         );
-        throw new Error(
-          `Failed to fetch assigned tasks: ${response.status} ${response.statusText}`
-        );
+        toast.error(`Failed to fetch assigned tasks: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -450,7 +445,7 @@ const Dashboard = () => {
       setAssignedTasks(filteredIssues);
     } catch (err) {
       console.error("Fetch assigned tasks error:", err);
-      showAlert("error", err.message || "Failed to fetch assigned tasks");
+      toast.error(err.message || "Failed to fetch assigned tasks");
     } finally {
       setIsLoading(false);
     }
@@ -564,18 +559,18 @@ const Dashboard = () => {
   const handleUpdateIssue = async (e) => {
     if (e.preventDefault) e.preventDefault();
     if (!user) {
-      showAlert("error", "You must be logged in to perform this action");
+      toast.error("You must be logged in to update an issue");
       return;
     }
 
     const validStatuses = ["pending", "in-progress", "resolved"];
     if (formData.status && !validStatuses.includes(formData.status)) {
-      showAlert("error", "Invalid status selected");
+      toast.error("Invalid rating selected");
       return;
     }
 
     if (formData.rating < 0 || formData.rating > 5) {
-      showAlert("error", "Invalid rating value");
+      toast.error("Invalid rating selected");
       return;
     }
 
@@ -606,12 +601,12 @@ const Dashboard = () => {
       }
 
       if (Object.keys(payload).length === 0) {
-        showAlert("error", "No changes to update");
+        toast.error("No changes detected.");
         setIsModalOpen(false);
         return;
       }
 
-      console.log("Payload being sent to API:", payload);
+      // console.log("Payload being sent to API:", payload);
 
       // Perform the update
       const response = await fetch(
@@ -661,11 +656,11 @@ const Dashboard = () => {
         setIsModalOpen(false);
         setFormData({ status: "", rating: 0, feedback: "", comment: "" });
         setSelectedIssue(null);
-        showAlert("success", "Task updated successfully!");
+        toast.success("Task updated successfully!");
       }
     } catch (err) {
       console.error("Update issue error:", err);
-      showAlert("error", err.message || "Failed to update task");
+      toast.error(err.message || "Failed to update task");
     } finally {
       setIsLoading(false);
     }
@@ -698,16 +693,18 @@ const Dashboard = () => {
         if (!response.ok) {
           console.error("Server response:", data);
           throw new Error(
-            data.message || `Failed to reopen task: ${response.statusText}`
+            toast.error(
+              data.message || `Failed to reopen task: ${response.statusText}`
+            )
           );
         }
 
         handleUpdateIssue("reopen");
 
-        showAlert("success", "Task reopened successfully!");
+        toast.success("Task reopened successfully!");
       } catch (err) {
         console.error("Reopen issue error:", err);
-        showAlert("error", err.message || "Failed to reopen task");
+        toast.error(err.message || "Failed to reopen task");
       } finally {
         setIsLoading(false);
       }

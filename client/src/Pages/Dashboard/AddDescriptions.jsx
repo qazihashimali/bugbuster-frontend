@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import { FaTimes, FaEye, FaPlusCircle, FaEdit, FaTrash } from "react-icons/fa";
 import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const Alert = ({ type, message, onClose }) => {
   const alertStyles = {
@@ -123,7 +124,11 @@ export default function FeedbackForm() {
     setAlert({ type: "", message: "", show: false });
 
     if (!validateForm()) {
-      showAlert("error", "Please fill in all required fields with valid data.");
+      toast.error(
+        "error",
+        "Please fill in all required fields with valid data."
+      );
+
       return;
     }
 
@@ -132,7 +137,8 @@ export default function FeedbackForm() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        showAlert("error", "You must be logged in to submit a description.");
+        toast.error("No authentication token found. Please log in.");
+
         setIsSubmitting(false);
         return;
       }
@@ -160,16 +166,13 @@ export default function FeedbackForm() {
           timeUnit: "",
         });
         setIsModalOpen(false);
-        showAlert(
-          "success",
-          data.message || "Description submitted successfully!"
-        );
+        toast.success(data.message || "Description submitted successfully.");
       } else {
         showAlert("error", data.message || "Failed to submit description.");
       }
     } catch (error) {
       console.error("Error submitting description:", error);
-      showAlert("error", "An error occurred while submitting the description.");
+      toast.error("Failed to submit description. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -205,7 +208,8 @@ export default function FeedbackForm() {
 
     if (!validateForm()) {
       console.log("Please fill in all required fields with valid data.");
-      showAlert("error", "Please fill in all required fields with valid data.");
+      toast.error("Please fill in all required fields with valid data.");
+
       return;
     }
 
@@ -214,7 +218,7 @@ export default function FeedbackForm() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        showAlert("error", "You must be logged in to update a description.");
+        toast.error("No authentication token found. Please log in.");
         setIsSubmitting(false);
         return;
       }
@@ -258,16 +262,13 @@ export default function FeedbackForm() {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditDescriptionId(null);
-        showAlert(
-          "success",
-          data.message || "Description updated successfully!"
-        );
+        toast.success(data.message || "Description updated successfully.");
       } else {
-        showAlert("error", data.message || "Failed to update description.");
+        toast.error(data.message || "Failed to update description.");
       }
     } catch (error) {
       console.error("Error updating description:", error);
-      showAlert("error", "An error occurred while updating the description.");
+      toast.error("Failed to update description. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -283,7 +284,7 @@ export default function FeedbackForm() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        showAlert("error", "You must be logged in to delete a description.");
+        toast.error("No authentication token found. Please log in.");
         setIsSubmitting(false);
         return;
       }
@@ -314,16 +315,13 @@ export default function FeedbackForm() {
         setDescriptions(
           descriptions.filter((desc) => desc._id !== description._id)
         );
-        showAlert(
-          "success",
-          data.message || "Description deleted successfully!"
-        );
+        toast.success(data.message || "Description deleted successfully.");
       } else {
-        showAlert("error", data.message || "Failed to delete description.");
+        toast.error(data.message || "Failed to delete description.");
       }
     } catch (error) {
       console.error("Error deleting description:", error);
-      showAlert("error", "An error occurred while deleting the description.");
+      toast.error("Failed to delete description. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

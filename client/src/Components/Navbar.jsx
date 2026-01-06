@@ -344,13 +344,16 @@ const Navbar = () => {
                     {userData.name}
                   </div>
                   <div className="text-xs text-white/80">
-                   <span className="font-bold text-white">Company:</span> {userData.company}
+                    <span className="font-bold text-white">Company:</span>{" "}
+                    {userData.company}
                   </div>
                   <div className="text-xs text-white/80">
-                    <span className="font-bold text-white">Roles:</span> {userData.roles.join(", ") || "No roles"}
+                    <span className="font-bold text-white">Roles:</span>{" "}
+                    {userData.roles.join(", ") || "No roles"}
                   </div>
                   <div className="text-xs text-white/80 truncate">
-                    <span className="font-bold text-white">Email:</span> {userData.email}
+                    <span className="font-bold text-white">Email:</span>{" "}
+                    {userData.email}
                   </div>
                   <div className="text-xs text-white/80 flex items-center">
                     <span className="font-bold text-white mr-1">Rating:</span>
