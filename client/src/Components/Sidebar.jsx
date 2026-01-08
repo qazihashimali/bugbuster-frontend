@@ -31,6 +31,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   const location = useLocation();
   const [activeRoute, setActiveRoute] = useState(location.pathname);
   const [userRole, setUserRole] = useState(null);
+  const [user, setUser] = useState(null);
 
   // Load user data from localStorage on component mount
   useEffect(() => {
@@ -39,6 +40,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       if (userData) {
         const user = JSON.parse(userData);
         setUserRole(user.roles); // ["Admin", "EndUser"] or ["SuperAdmin"]
+        setUser(user);
       }
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -139,7 +141,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
     (item) =>
       (!userRole || // If user role not loaded yet, show all items temporarily
         item.allowedRoles.some((role) => userRole.includes(role))) &&
-      !item.allowedCompany
+      (!item.allowedCompany || item.allowedCompany === user?.company)
   );
 
   const handleNavigation = (route) => {

@@ -273,10 +273,13 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok) toast.error(data.message || "Something went wrong");
+        if (!response.ok) {
+          toast.error(data.message || "Something went wrong");
+        }
         if (data.token && data.user) {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
+          toast.success("Login successful");
           navigate("/dashboard", { replace: true });
         }
       } else if (isForgotPassword && !showOtpInput) {
