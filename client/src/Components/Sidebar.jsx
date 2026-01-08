@@ -70,6 +70,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       icon: <RiBuilding2Fill />,
       route: "/companies",
       allowedRoles: ["Admin", "SuperAdmin"], // Only Admin can access
+      allowedCompany: import.meta.env.VITE_ALLOWED_COMPANIES,
     },
     // {
     //   name: "Block",
@@ -136,8 +137,9 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   // Filter menu items based on user role
   const menuItems = allMenuItems.filter(
     (item) =>
-      !userRole || // If user role not loaded yet, show all items temporarily
-      item.allowedRoles.some((role) => userRole.includes(role))
+      (!userRole || // If user role not loaded yet, show all items temporarily
+        item.allowedRoles.some((role) => userRole.includes(role))) &&
+      !item.allowedCompany
   );
 
   const handleNavigation = (route) => {

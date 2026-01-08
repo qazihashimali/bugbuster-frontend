@@ -274,9 +274,11 @@ const Auth = () => {
 
         const data = await response.json();
         if (!response.ok) toast.error(data.message || "Something went wrong");
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/dashboard", { replace: true });
+        if (data.token && data.user) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          navigate("/dashboard", { replace: true });
+        }
       } else if (isForgotPassword && !showOtpInput) {
         if (!email) {
           toast.error("Email is required");

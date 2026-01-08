@@ -359,31 +359,31 @@ export default function FeedbackForm() {
         <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
           <h1 className="text-2xl font-bold">Description Desk</h1>
 
-          {JSON.parse(localStorage.getItem("user")).roles.includes("Admin") ||
+          {(JSON.parse(localStorage.getItem("user")).roles.includes("Admin") ||
             JSON.parse(localStorage.getItem("user")).roles.includes(
               "SuperAdmin"
             ) ||
-            (!JSON.parse(localStorage.getItem("user")).roles.includes(
+            !JSON.parse(localStorage.getItem("user")).roles.includes(
               "ServiceProvider"
-            ) && (
-              <button
-                onClick={() => {
-                  setSelectedDescription(null);
-                  setIsEditing(false);
-                  setFormData({
-                    title: "",
-                    description: "",
-                    timeline: "",
-                    timeUnit: "",
-                  });
-                  setIsModalOpen(true);
-                }}
-                className="bg-white text-primary px-4 py-1 rounded-md hover:bg-gray-100 flex items-center"
-              >
-                <FaPlusCircle className="mr-2" />
-                Add Description
-              </button>
-            ))}
+            )) && (
+            <button
+              onClick={() => {
+                setSelectedDescription(null);
+                setIsEditing(false);
+                setFormData({
+                  title: "",
+                  description: "",
+                  timeline: "",
+                  timeUnit: "",
+                });
+                setIsModalOpen(true);
+              }}
+              className="bg-white text-primary px-4 py-1 rounded-md hover:bg-gray-100 flex items-center"
+            >
+              <FaPlusCircle className="mr-2" />
+              Add Description
+            </button>
+          )}
         </div>
 
         <div className="p-6">
@@ -396,6 +396,7 @@ export default function FeedbackForm() {
                 <tr>
                   <th className="p-3 text-left">Title</th>
                   <th className="p-3 text-left">Description</th>
+                  <th className="p-3 text-left">Type</th>
                   <th className="p-3 text-left">Timeline</th>
                   <th className="p-3 text-left">Created By</th>
                   <th className="p-3 text-center">Actions</th>
@@ -412,6 +413,7 @@ export default function FeedbackForm() {
                           ? `${desc.description.substring(0, 50)}...`
                           : desc.description}
                       </td>
+                      <td className="p-3">{desc.type}</td>
                       <td className="p-3">
                         {desc?.timeline
                           ? `${desc?.timeline} ${desc?.timeUnit}`

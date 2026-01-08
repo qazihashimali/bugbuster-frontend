@@ -888,7 +888,7 @@ const Dashboard = () => {
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-xs min-w-[1200px]">
-                  <thead className="bg-gray-100">
+                  <thead className="bg-gray-100 truncate">
                     <tr className="text-left text-gray-400">
                       <th className="p-3">Assigned By</th>
                       <th className="p-3">Branch</th>
