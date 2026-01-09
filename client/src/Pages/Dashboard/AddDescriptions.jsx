@@ -31,7 +31,7 @@ export default function FeedbackForm() {
   });
   const [descriptions, setDescriptions] = useState([]);
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDescription, setSelectedDescription] = useState(null);
@@ -132,14 +132,14 @@ export default function FeedbackForm() {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("No authentication token found. Please log in.");
 
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -174,7 +174,7 @@ export default function FeedbackForm() {
       console.error("Error submitting description:", error);
       toast.error("Failed to submit description. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -213,13 +213,13 @@ export default function FeedbackForm() {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("No authentication token found. Please log in.");
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -270,7 +270,7 @@ export default function FeedbackForm() {
       console.error("Error updating description:", error);
       toast.error("Failed to update description. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -279,13 +279,13 @@ export default function FeedbackForm() {
       return;
 
     setAlert({ type: "", message: "", show: false });
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         toast.error("No authentication token found. Please log in.");
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -323,7 +323,7 @@ export default function FeedbackForm() {
       console.error("Error deleting description:", error);
       toast.error("Failed to delete description. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -353,7 +353,7 @@ export default function FeedbackForm() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <div
         className={`bg-white shadow-md rounded-lg ${
-          isLoading || isSubmitting ? "blur-sm" : ""
+          isLoading ? "blur-sm" : ""
         }`}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
@@ -594,7 +594,7 @@ export default function FeedbackForm() {
                 <button
                   type="submit"
                   className="bg-primary text-white px-4 py-2 rounded-md flex items-center"
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                 >
                   <FaPlusCircle className="mr-2" />{" "}
                   {isEditing ? "Update" : "Add"}
@@ -677,7 +677,11 @@ export default function FeedbackForm() {
         </div>
       )}
 
-      {isSubmitting && <Loading fullscreen />}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <Loading />
+        </div>
+      )}
     </div>
   );
 }

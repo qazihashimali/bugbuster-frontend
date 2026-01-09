@@ -460,7 +460,7 @@ const Reviews = () => {
         </div>
       </div>
 
-      {isLoading && <Loading fullscreen />}
+      {isLoading && <Loading />}
 
       {isModalOpen && selectedIssue && (
         <div

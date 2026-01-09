@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTimes } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
@@ -269,7 +268,7 @@ const MyTasks = () => {
         </div>
       </div>
 
-      {(isLoading || isSubmitting) && <Loading fullscreen />}
+      {(isLoading || isSubmitting) && <Loading />}
 
       {isModalOpen && selectedIssue && (
         <div

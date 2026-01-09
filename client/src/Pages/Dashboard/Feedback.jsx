@@ -40,7 +40,7 @@ export default function Feedback() {
   });
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   const hasFetched = useRef(false);
 
   const showAlert = (type, message) => {
@@ -207,7 +207,7 @@ export default function Feedback() {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -259,7 +259,7 @@ export default function Feedback() {
     } catch (err) {
       showAlert("error", err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -267,7 +267,7 @@ export default function Feedback() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <div
         className={`bg-white shadow-md rounded-lg ${
-          isLoading || isSubmitting ? "blur-sm" : ""
+          isLoading ? "blur-sm" : ""
         }`}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg">
@@ -468,7 +468,7 @@ export default function Feedback() {
                 <button
                   type="submit"
                   className="bg-primary text-white px-4 py-2 rounded-md"
-                  disabled={isLoading || isSubmitting}
+                  disabled={isLoading}
                 >
                   Add
                 </button>
@@ -504,7 +504,11 @@ export default function Feedback() {
         )}
       </div>
 
-      {(isLoading || isSubmitting) && <Loading fullscreen />}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <Loading />
+        </div>
+      )}
     </div>
   );
 }
