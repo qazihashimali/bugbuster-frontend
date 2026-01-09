@@ -324,10 +324,10 @@ const Navbar = () => {
 
         <div className="relative">
           <div
-            className="cursor-pointer hover:text-blue-300 transition-colors duration-200"
+            className="cursor-pointer bg-white text-primary text-2xl w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200"
             onClick={toggleProfileModal}
           >
-            <FaUserCircle className="text-2xl" />
+            {userData?.name?.charAt(0)?.toUpperCase()}
           </div>
 
           {showProfileModal && (
