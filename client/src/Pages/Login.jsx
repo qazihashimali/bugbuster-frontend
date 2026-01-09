@@ -1100,31 +1100,50 @@ const Auth = () => {
                 borderRadius: "4px",
                 fontSize: "18px",
                 fontWeight: "400",
-                cursor: "pointer",
+                cursor: isLoading ? "not-allowed" : "pointer",
                 marginBottom: "15px",
                 backgroundColor: "#34076b",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
               }}
               disabled={isLoading}
             >
-              {isLoading
-                ? isLogin
-                  ? "Signing in..."
+              {isLoading && (
+                <span
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    border: "2px solid white",
+                    borderTop: "2px solid transparent",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+              )}
+
+              <span>
+                {isLoading
+                  ? isLogin
+                    ? "Signing in..."
+                    : isForgotPassword
+                    ? showOtpInput
+                      ? "Resetting Password..."
+                      : "Sending OTP..."
+                    : showOtpInput
+                    ? "Verifying OTP..."
+                    : "Creating account..."
+                  : isLogin
+                  ? "Continue"
                   : isForgotPassword
                   ? showOtpInput
-                    ? "Resetting Password..."
-                    : "Sending OTP..."
+                    ? "Reset Password"
+                    : "Send OTP"
                   : showOtpInput
-                  ? "Verifying OTP..."
-                  : "Creating account..."
-                : isLogin
-                ? "Continue"
-                : isForgotPassword
-                ? showOtpInput
-                  ? "Reset Password"
-                  : "Send OTP"
-                : showOtpInput
-                ? "Verify OTP"
-                : "Continue"}
+                  ? "Verify OTP"
+                  : "Continue"}
+              </span>
             </button>
 
             <div
