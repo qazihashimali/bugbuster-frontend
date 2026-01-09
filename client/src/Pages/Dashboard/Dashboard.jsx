@@ -1272,11 +1272,19 @@ const Dashboard = () => {
                           <div className="flex justify-end space-x-4">
                             <button
                               type="submit"
-                              className="bg-primary text-white px-4 py-2 rounded-md"
                               disabled={isLoading}
+                              className={`bg-primary text-white px-4 py-2 rounded-md flex items-center justify-center gap-2
+    ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-primary/90"}
+  `}
                             >
-                              Update Task
+                              {isLoading && (
+                                <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                              )}
+                              <span>
+                                {isLoading ? "Updating..." : "Update Task"}
+                              </span>
                             </button>
+
                             <button
                               type="button"
                               onClick={() => setIsModalOpen(false)}
