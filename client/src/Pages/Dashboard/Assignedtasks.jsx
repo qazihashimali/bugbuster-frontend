@@ -14,6 +14,7 @@ const Assignedtasks = () => {
   const [formData, setFormData] = useState({
     userName: "",
     description: "",
+    descriptionId: "",
     status: "pending",
     priority: "Medium",
   });
@@ -91,7 +92,8 @@ const Assignedtasks = () => {
     setSelectedIssue(issue);
     setFormData({
       userName: issue.userName,
-      description: issue.description,
+      description: issue.description?.description || "",
+      descriptionId: issue.description?._id,
       status: issue.status,
       priority: issue.priority,
     });
@@ -104,10 +106,15 @@ const Assignedtasks = () => {
     setError("");
     setIsSubmitting(true);
     const start = Date.now();
+
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!token) toast.error("No authentication token found. Please log in.");
+
+      if (!token) {
+        toast.error("No authentication token found. Please log in.");
+        return;
+      }
 
       if (
         user._id !== selectedIssue.createdBy._id.toString() &&
@@ -125,30 +132,47 @@ const Assignedtasks = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            descriptionId: formData.descriptionId,
+          }),
         }
       );
 
       const data = await response.json();
-      if (!response.ok) toast.error(`Failed to update issue: ${data.message}`);
 
-      if (!data.issue) toast.error("Failed to update issue. Please try again.");
+      if (!response.ok) {
+        toast.error(`Failed to update issue: ${data.message}`);
+        return;
+      }
+
+      if (!data.issue) {
+        toast.error("Failed to update issue. Please try again.");
+        return;
+      }
+
       setIssues(
         issues.map((i) => (i._id === selectedIssue._id ? data.issue : i))
       );
+
+      toast.success("Issue updated successfully!");
       setIsModalOpen(false);
+      setIsEditing(false);
       setFormData({
         userName: "",
         description: "",
         status: "pending",
         priority: "Medium",
       });
-      if (Date.now() - start < 2000)
+
+      if (Date.now() - start < 2000) {
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
+      }
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -285,9 +309,9 @@ const Assignedtasks = () => {
                         key={issue._id}
                         className="border-b border-gray-200 hover:bg-gray-50"
                       >
-                        <td className="p-3 text-sm">{issue.userName}</td>
+                        <td className="p-3 text-sm">{issue?.userName}</td>
                         <td className="p-3 text-sm">
-                          {truncateDescription(issue.description?.title)}
+                          {truncateDescription(issue.description?.description)}
 
                           {/* {issue.description?.title || "N/A"} */}
                         </td>
@@ -298,7 +322,7 @@ const Assignedtasks = () => {
                           {issue.department?.departmentName || "N/A"}
                         </td>
                         <td className="p-3 text-sm">
-                          {statusDisplay[issue.status] || issue.status}
+                          {statusDisplay[issue?.status] || issue?.status}
                         </td>
                         <td className="p-3 text-sm">{issue.priority}</td>
                         <td className="p-3 text-sm">
@@ -352,7 +376,7 @@ const Assignedtasks = () => {
                         {issue.userName}
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {truncateDescription(issue.description.title)}
+                        {truncateDescription(issue?.description?.title)}
                         {/* {issue.description?.title || "N/A"} */}
                       </p>
                     </div>
@@ -475,7 +499,7 @@ const Assignedtasks = () => {
                     <textarea
                       id="description"
                       name="description"
-                      value={formData.description.title}
+                      value={formData?.description || ""}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                       rows="4"
