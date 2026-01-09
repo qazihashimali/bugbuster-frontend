@@ -28,6 +28,7 @@ import { BsFillBugFill } from "react-icons/bs";
 import { SiGoogletasks } from "react-icons/si";
 import { TiThList } from "react-icons/ti";
 import toast from "react-hot-toast";
+import Loading from "../../Components/Loading";
 
 // Register Chart.js components
 ChartJS.register(
@@ -1043,7 +1044,9 @@ const Dashboard = () => {
                 </table>
               </div>
               {isLoading && (
-                <div className="p-4 text-gray-600 text-center">Loading...</div>
+                <div className="p-4 text-gray-600 text-center">
+                  <Loading />
+                </div>
               )}
               {!isLoading && filteredIssues.length === 0 && (
                 <div className="p-4 text-gray-600 text-center">
@@ -1517,10 +1520,11 @@ const Dashboard = () => {
         {/* Bottom Section: Activity Log, Customers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Assigned Tasks */}
-          <div className="bg-white rounded-lg shadow h-[430px] flex flex-col">
+          <div className="relative bg-white rounded-lg shadow h-[430px] flex flex-col">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
               <h3 className="text-lg font-semibold">Assigned Tasks</h3>
             </div>
+
             {/* Scrollable Table Container */}
             <div className="p-6 overflow-y-auto no-scrollbar flex-1">
               <table className="w-full text-xs table-fixed">
@@ -1528,7 +1532,6 @@ const Dashboard = () => {
                   <tr className="text-left text-gray-400 border-b border-gray-200">
                     <th className="pb-3 w-1/4">Assigned By</th>
                     <th className="pb-3 w-1/4">Assigned To</th>
-
                     <th className="pb-3 w-1/4">Status</th>
                     <th className="pb-3 w-1/4">Date & Time</th>
                   </tr>
@@ -1539,7 +1542,6 @@ const Dashboard = () => {
                       <tr key={index} className="border-b border-gray-100">
                         <td className="py-4 text-gray-600">{log.assignedBy}</td>
                         <td className="py-4">{log.assignedTo}</td>
-
                         <td className="py-4 text-gray-600">{log.status}</td>
                         <td className="py-4 text-gray-600">{log.dateTime}</td>
                       </tr>
@@ -1557,6 +1559,13 @@ const Dashboard = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Loader Overlay */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
+                <Loading />
+              </div>
+            )}
           </div>
 
           {/* Customers */}
