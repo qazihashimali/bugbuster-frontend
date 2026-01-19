@@ -15,7 +15,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    toast.success("Logged out successfully.");
+    toast.success("We hope to see you again soon!");
   };
 
   const isAuthPage = location.pathname === "/";

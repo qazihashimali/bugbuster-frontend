@@ -185,7 +185,7 @@ export default function FeedbackForm() {
   };
 
   const handleEditDescription = (description) => {
-    console.log("Editing description:", description);
+    // console.log("Editing description:", description);
     setFormData({
       title: description.title,
       description: description.description,

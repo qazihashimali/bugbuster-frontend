@@ -968,7 +968,7 @@ const Dashboard = () => {
                             {truncateDescription(issue.description) || "N/A"}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3 truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"

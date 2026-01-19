@@ -3,24 +3,7 @@ import { IoChevronDown } from "react-icons/io5";
 import { FaEdit, FaTrash, FaPlusCircle, FaTimes, FaStar } from "react-icons/fa";
 import Loading from "../../Components/Loading";
 import { FaEye, FaStarHalfStroke } from "react-icons/fa6";
-
-const Alert = ({ type, message, onClose }) => {
-  const alertStyles = {
-    success: "bg-green-100 border-green-500 text-green-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-  };
-
-  return (
-    <div
-      className={`border-l-4 p-4 mb-4 flex justify-between items-center ${alertStyles[type]}`}
-    >
-      <p>{message}</p>
-      <button onClick={onClose} className="text-gray-700 hover:text-gray-900">
-        <FaTimes />
-      </button>
-    </div>
-  );
-};
+import toast from "react-hot-toast";
 
 export default function IssueDesk() {
   const [user, setUser] = useState(null);
@@ -46,20 +29,15 @@ export default function IssueDesk() {
   });
 
   const [issues, setIssues] = useState([]);
-  const [alert, setAlert] = useState({ type: "", message: "", show: false });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const hasFetched = useRef(false);
-
-  const showAlert = (type, message) => {
-    setAlert({ type, message, show: true });
-    setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
-  };
 
   const renderStars = (rating) => {
     if (!rating || rating === 0) return "N/A";
@@ -131,7 +109,7 @@ export default function IssueDesk() {
             );
           }
           const dropdownData = await dropdownResponse.json();
-          //  console.log("Dropdown data:", dropdownData);
+          console.log("Dropdown data:", dropdownData);
 
           setDropdowns({
             branches: Array.isArray(dropdownData.branches)
@@ -190,10 +168,8 @@ export default function IssueDesk() {
             );
           }
         } catch (err) {
-          showAlert(
-            "error",
-            err.message || "Failed to load initial data. Please try again."
-          );
+          console.error(err);
+          toast.error(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -256,9 +232,9 @@ export default function IssueDesk() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlert({ type: "", message: "", show: false });
+    setIsLoading(true);
+
     setIsFormOpen(false);
-    setIsSubmitting(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -276,9 +252,9 @@ export default function IssueDesk() {
         formDataToSend.append("attachment", formData.attachment);
       }
 
-      console.log("====================================");
-      console.log(Object.fromEntries(formDataToSend));
-      console.log("====================================");
+      // console.log("====================================");
+      // console.log(Object.fromEntries(formDataToSend));
+      // console.log("====================================");
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/issues`,
@@ -317,12 +293,12 @@ export default function IssueDesk() {
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
-      showAlert("success", "Issue submitted successfully!");
+      toast.success("Issue submitted successfully!");
     } catch (err) {
       console.error(err);
-      showAlert("error", err.message);
+      toast.error(err.message || "Failed to submit issue. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -350,8 +326,7 @@ export default function IssueDesk() {
 
   const handleUpdateIssue = async (e) => {
     e.preventDefault();
-    setAlert({ type: "", message: "", show: false });
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -410,19 +385,19 @@ export default function IssueDesk() {
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
-      showAlert("success", "Issue updated successfully!");
+      toast.success("Issue updated successfully!");
     } catch (err) {
-      showAlert("error", err.message);
+      console.error(err);
+      toast.error(err.message || "Failed to update issue. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleDeleteIssue = async (issue) => {
     if (!window.confirm("Are you sure you want to delete this issue?")) return;
 
-    setAlert({ type: "", message: "", show: false });
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -448,11 +423,12 @@ export default function IssueDesk() {
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
-      showAlert("success", "Issue deleted successfully!");
+      toast.success("Issue deleted successfully!");
     } catch (err) {
-      showAlert("error", err.message);
+      console.error(err);
+      toast.error(err.message || "Failed to delete issue. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -478,7 +454,7 @@ export default function IssueDesk() {
     <div className="p-6 bg-gray-100 min-h-screen mx-auto">
       <div
         className={`bg-white shadow-md rounded-lg 
-          ${isLoading || isSubmitting ? "blur-sm" : ""}
+          ${isLoading ? "blur-sm" : ""}
         `}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
@@ -944,7 +920,6 @@ export default function IssueDesk() {
                     className="bg-primary text-white px-4 py-2 rounded-md flex items-center"
                     disabled={
                       isLoading ||
-                      isSubmitting ||
                       (!formData.description &&
                         !selectedDescription.title?.includes("custom"))
                     }
@@ -980,16 +955,6 @@ export default function IssueDesk() {
                 </div>
               </form>
             </div>
-          </div>
-        )}
-
-        {alert.show && (
-          <div className="p-6">
-            <Alert
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert({ type: "", message: "", show: false })}
-            />
           </div>
         )}
       </div>
@@ -1213,9 +1178,9 @@ export default function IssueDesk() {
                   <button
                     type="submit"
                     className="bg-primary text-white px-4 py-2 rounded-md"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isLoading}
                   >
-                    Update
+                    {isLoading ? "Updating..." : "Update"}
                   </button>
                   <button
                     type="button"

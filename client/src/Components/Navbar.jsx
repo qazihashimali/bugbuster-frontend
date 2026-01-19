@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -77,6 +78,7 @@ const Navbar = () => {
     });
     setShowProfileModal(false);
     navigate("/");
+    toast.success("We hope to see you again soon!");
   };
 
   useEffect(() => {
@@ -324,7 +326,7 @@ const Navbar = () => {
 
         <div className="relative">
           <div
-            className="cursor-pointer bg-white text-primary text-2xl w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200"
+            className="cursor-pointer bg-white text-primary font-bold text-2xl w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200"
             onClick={toggleProfileModal}
           >
             {userData?.name?.charAt(0)?.toUpperCase()}

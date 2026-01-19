@@ -204,31 +204,31 @@ const Auth = () => {
     }
   }, []);
 
-  const handleAddCompany = async () => {
-    try {
-      const newCompany = await upsertCompany(companySearch, "yes");
-      setDropdowns((prev) => ({
-        ...prev,
-        companies: [...prev.companies, newCompany],
-        branches: Array.isArray(newCompany.dropdowns?.branches)
-          ? newCompany.dropdowns.branches
-          : [],
-        departments: Array.isArray(newCompany.dropdowns?.departments)
-          ? newCompany.dropdowns.departments
-          : [],
-      }));
-      setCompany(newCompany._id);
-      setCompanySearch(newCompany.name);
-      setIsCompanyModalOpen(false);
-      setCompanyResults([]);
-      setIsCompanyNotFound(false);
-      setSuccessMessage("");
-      setBranch("");
-      setDepartment("");
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+  // const handleAddCompany = async () => {
+  //   try {
+  //     const newCompany = await upsertCompany(companySearch, "yes");
+  //     setDropdowns((prev) => ({
+  //       ...prev,
+  //       companies: [...prev.companies, newCompany],
+  //       branches: Array.isArray(newCompany.dropdowns?.branches)
+  //         ? newCompany.dropdowns.branches
+  //         : [],
+  //       departments: Array.isArray(newCompany.dropdowns?.departments)
+  //         ? newCompany.dropdowns.departments
+  //         : [],
+  //     }));
+  //     setCompany(newCompany._id);
+  //     setCompanySearch(newCompany.name);
+  //     setIsCompanyModalOpen(false);
+  //     setCompanyResults([]);
+  //     setIsCompanyNotFound(false);
+  //     setSuccessMessage("");
+  //     setBranch("");
+  //     setDepartment("");
+  //   } catch (err) {
+  //     toast.error(err.message);
+  //   }
+  // };
 
   useEffect(() => {
     fetchDropdowns();
@@ -279,7 +279,7 @@ const Auth = () => {
         if (data.token && data.user) {
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
-          toast.success("Login successful");
+          toast.success(`Welcome back, ${data?.user?.name}!`);
           navigate("/dashboard", { replace: true });
         }
       } else if (isForgotPassword && !showOtpInput) {
@@ -856,7 +856,12 @@ const Auth = () => {
                         ))}
                       </div>
                     )}
-                  {isCompanyNotFound && companySearch && (
+                  {isCompanyNotFound && (
+                    <p className="text-red-500 text-xs mb-4">
+                      Company not found.Contact Bugbuster Admin!
+                    </p>
+                  )}
+                  {/* {isCompanyNotFound && companySearch && (
                     <div
                       style={{
                         marginBottom: "15px",
@@ -898,7 +903,7 @@ const Auth = () => {
                         Add Company: {companySearch}
                       </button>
                     </div>
-                  )}
+                  )} */}
                   <button
                     onClick={() => {
                       setIsCompanyModalOpen(false);
