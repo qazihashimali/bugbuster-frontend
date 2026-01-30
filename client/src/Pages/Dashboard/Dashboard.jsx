@@ -238,8 +238,22 @@ const Dashboard = () => {
         toast.error("No authentication token found");
       }
 
+      const searchParams = new URLSearchParams();
+
+      if (searchParams) {
+        if (
+          !user.roles.includes("SuperAdmin") &&
+          !user.roles.includes("Admin")
+        ) {
+          searchParams.append("assignedTo", user._id);
+          searchParams.append("createdBy", user._id);
+        }
+      }
+
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/issues`,
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/issues?${searchParams.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -260,25 +274,25 @@ const Dashboard = () => {
       }
 
       let data = await response.json();
-      // console.log("Fetched issues:", data);
+      console.log("Fetched issues:", data);
 
       // Validate and filter out invalid issues
-      data = data.filter((issue) => {
-        if (!issue && !issue._id) {
-          console.warn("Invalid issue detected:", issue);
-          return false;
-        }
+      // data = data.filter((issue) => {
+      //   if (!issue && !issue._id) {
+      //     console.warn("Invalid issue detected:", issue);
+      //     return false;
+      //   }
 
-        if (
-          issue.assignedTo?._id !== user._id &&
-          issue.createdBy?._id !== user._id &&
-          !user.roles.includes("Admin") &&
-          !user.roles.includes("SuperAdmin")
-        ) {
-          return false;
-        }
-        return true;
-      });
+      //   if (
+      //     issue.assignedTo?._id !== user._id &&
+      //     issue.createdBy?._id !== user._id &&
+      //     !user.roles.includes("Admin") &&
+      //     !user.roles.includes("SuperAdmin")
+      //   ) {
+      //     return false;
+      //   }
+      //   return true;
+      // });
 
       if (user) {
         const userId = user._id;
@@ -330,6 +344,7 @@ const Dashboard = () => {
       const data = await response.json();
       // console.log("Fetched assigned tasks:", data);
       const filteredIssues = Array.isArray(data) ? data : data.issues || [];
+
       setAssignedTasks(filteredIssues);
     } catch (err) {
       console.error("Fetch assigned tasks error:", err);
