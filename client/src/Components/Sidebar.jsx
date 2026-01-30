@@ -164,7 +164,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
         >
           {isOpen && (
             <img
-              src="/src/assets/logo2.png"
+              src="/logo2.png"
               className="w-20 h-10 align-center ml-10"
               alt="logo"
             />

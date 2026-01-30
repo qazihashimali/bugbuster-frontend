@@ -416,14 +416,14 @@ const Auth = () => {
       <div className="w-[30%] flex flex-col items-center pt-[10px] bg-[#34076b]">
         <div className="text-white text-[28px] font-bold flex items-center bg-[#34076b]">
           <img
-            src="/src/assets/logo2.png"
+            src="/logo2.png"
             alt="Logo"
             className="w-[100px] h-[40px] mr-[60px] mt-[10px]"
           />
         </div>
       </div>
 
-      <div className="flex-1 flex items-center bg-[url('/src/assets/login_img.jpg')] justify-start relative bg-[#F2F7F7] bg-no-repeat bg-cover">
+      <div className="flex-1 flex items-center bg-[url('/login_img.jpg')] justify-start relative bg-[#F2F7F7] bg-no-repeat bg-cover">
         <div
           className={`
           bg-white 
