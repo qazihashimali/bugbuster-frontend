@@ -1,26 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
-import { FaTimes, FaEye, FaPlusCircle, FaEdit, FaTrash } from "react-icons/fa";
+import { FaEye, FaPlusCircle, FaEdit, FaTrash } from "react-icons/fa";
 import Loading from "../../Components/Loading";
 import toast from "react-hot-toast";
-
-const Alert = ({ type, message, onClose }) => {
-  const alertStyles = {
-    success: "bg-blue-100 border-blue-500 text-blue-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-  };
-
-  return (
-    <div
-      className={`border-l-4 p-4 mb-4 flex justify-between items-center ${alertStyles[type]}`}
-    >
-      <p>{message}</p>
-      <button onClick={onClose} className="text-gray-700 hover:text-gray-900">
-        <FaTimes />
-      </button>
-    </div>
-  );
-};
 
 export default function FeedbackForm() {
   const [formData, setFormData] = useState({
@@ -30,8 +12,6 @@ export default function FeedbackForm() {
     timeUnit: "",
   });
   const [descriptions, setDescriptions] = useState([]);
-  const [alert, setAlert] = useState({ type: "", message: "", show: false });
-
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDescription, setSelectedDescription] = useState(null);
@@ -40,21 +20,16 @@ export default function FeedbackForm() {
   const hasFetched = useRef(false);
   const timeUnits = ["Select Unit", "Hours", "Days", "Minutes"];
 
-  const showAlert = (type, message) => {
-    setAlert({ type, message, show: true });
-    setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
-  };
-
   useEffect(() => {
     const loadInitialData = async () => {
       if (!hasFetched.current) {
         hasFetched.current = true;
         setIsLoading(true);
-        const start = Date.now();
+
         try {
           const token = localStorage.getItem("token");
           if (!token)
-            throw new Error("No authentication token found. Please log in.");
+            toast.error("No authentication token found. Please log in.");
 
           const response = await fetch(
             `${import.meta.env.VITE_BACKEND_URL}/api/descriptions`,
@@ -73,7 +48,7 @@ export default function FeedbackForm() {
               "Response text:",
               text
             );
-            throw new Error(
+            toast.error(
               `Failed to fetch descriptions: ${response.status} ${response.statusText}`
             );
           }
@@ -83,17 +58,8 @@ export default function FeedbackForm() {
           setDescriptions(
             Array.isArray(descriptionsData) ? descriptionsData : []
           );
-
-          if (Date.now() - start < 2000) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, 2000 - (Date.now() - start))
-            );
-          }
         } catch (err) {
-          showAlert(
-            "error",
-            err.message || "Failed to load descriptions. Please try again."
-          );
+          toast.error(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -106,7 +72,7 @@ export default function FeedbackForm() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log(`Input changed: ${name} = ${value}`);
+    // console.log(`Input changed: ${name} = ${value}`);
   };
 
   const validateForm = () => {
@@ -121,7 +87,6 @@ export default function FeedbackForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlert({ type: "", message: "", show: false });
 
     if (!validateForm()) {
       toast.error(
@@ -168,7 +133,7 @@ export default function FeedbackForm() {
         setIsModalOpen(false);
         toast.success(data.message || "Description submitted successfully.");
       } else {
-        showAlert("error", data.message || "Failed to submit description.");
+        toast.error(data.message || "Failed to submit description.");
       }
     } catch (error) {
       console.error("Error submitting description:", error);
@@ -179,7 +144,7 @@ export default function FeedbackForm() {
   };
 
   const handleViewDescription = (description) => {
-    console.log("Viewing description:", description);
+    // console.log("Viewing description:", description);
     setSelectedDescription(description);
     setIsModalOpen(true);
   };
@@ -204,7 +169,6 @@ export default function FeedbackForm() {
 
   const handleUpdateDescription = async (e) => {
     e.preventDefault();
-    setAlert({ type: "", message: "", show: false });
 
     if (!validateForm()) {
       console.log("Please fill in all required fields with valid data.");
@@ -237,13 +201,13 @@ export default function FeedbackForm() {
         }
       );
 
-      console.log(
-        "PUT response status:",
-        response.status,
-        "Response:",
-        await response.clone().json(),
-        formData
-      );
+      // console.log(
+      //   "PUT response status:",
+      //   response.status,
+      //   "Response:",
+      //   await response.clone().json(),
+      //   formData
+      // );
 
       const data = await response.json();
 
@@ -278,7 +242,6 @@ export default function FeedbackForm() {
     if (!window.confirm("Are you sure you want to delete this description?"))
       return;
 
-    setAlert({ type: "", message: "", show: false });
     setIsLoading(true);
 
     try {
@@ -338,17 +301,23 @@ export default function FeedbackForm() {
     const isAdmin = roles.includes("Admin") || roles.includes("SuperAdmin");
     const isServiceProvider = roles.includes("ServiceProvider");
 
-    if (isAdmin && isCreator) {
+    // ✅ Admin / SuperAdmin — full access
+    if (isAdmin) {
       return { canEdit: true, canDelete: true };
     }
 
+    // ✅ ServiceProvider — edit only
     if (isServiceProvider) {
       return { canEdit: true, canDelete: false };
     }
 
+    // ✅ Creator — edit own
+    if (isCreator) {
+      return { canEdit: true, canDelete: true };
+    }
+
     return { canEdit: false, canDelete: false };
   };
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div
@@ -378,7 +347,7 @@ export default function FeedbackForm() {
                 });
                 setIsModalOpen(true);
               }}
-              className="bg-white text-primary px-4 py-1 rounded-md hover:bg-gray-100 flex items-center"
+              className="bg-white cursor-pointer text-primary px-4 py-1 rounded-md hover:bg-gray-100 flex items-center"
             >
               <FaPlusCircle className="mr-2" />
               Add Description
@@ -387,19 +356,27 @@ export default function FeedbackForm() {
         </div>
 
         <div className="p-6">
-          <div className="bg-primary text-white p-3">
+          <div className="bg-primary rounded-t-lg text-white p-3">
             <h2 className="text-lg font-semibold">Details</h2>
           </div>
-          <div className="bg-white shadow rounded-lg overflow-auto no-scrollbar">
-            <table className="w-full">
-              <thead className="bg-gray-100">
+          <div className="bg-white shadow rounded-lg overflow-x-auto no-scrollbar">
+            <table className="min-w-[900px] w-full">
+              <thead className="bg-gray-100 truncate">
                 <tr>
-                  <th className="p-3 text-left">Title</th>
-                  <th className="p-3 text-left">Description</th>
-                  <th className="p-3 text-left">Type</th>
-                  <th className="p-3 text-left">Timeline</th>
-                  <th className="p-3 text-left">Created By</th>
-                  <th className="p-3 text-center">Actions</th>
+                  <th className="p-3 text-left text-sm font-medium">Title</th>
+                  <th className="p-3 text-left text-sm font-medium">
+                    Description
+                  </th>
+                  <th className="p-3 text-left text-sm font-medium">Type</th>
+                  <th className="p-3 text-left text-sm font-medium">
+                    Timeline
+                  </th>
+                  <th className="p-3 text-left text-sm font-medium">
+                    Created By
+                  </th>
+                  <th className="p-3 text-center text-sm font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -407,27 +384,27 @@ export default function FeedbackForm() {
                   const { canEdit, canDelete } = getUserPermissions(desc);
                   return (
                     <tr key={desc._id}>
-                      <td className="p-3">{desc.title}</td>
-                      <td className="p-3">
+                      <td className="p-3  text-sm truncate">{desc.title}</td>
+                      <td className="p-3  text-sm truncate">
                         {desc.description.length > 50
                           ? `${desc.description.substring(0, 50)}...`
                           : desc.description}
                       </td>
-                      <td className="p-3">{desc.type}</td>
-                      <td className="p-3">
+                      <td className="p-3  text-sm">{desc.type}</td>
+                      <td className="p-3  text-sm">
                         {desc?.timeline
                           ? `${desc?.timeline} ${desc?.timeUnit}`
                           : "N/A"}
                       </td>
-                      <td className="p-3">
+                      <td className="p-3  text-sm">
                         {desc.createdBy
                           ? `${desc.createdBy.name} (${desc.createdBy.email})`
                           : "N/A"}
                       </td>
-                      <td className="p-3 text-center">
+                      <td className="p-3 flex flex-col sm:flex-row justify-center gap-2">
                         <button
                           onClick={() => handleViewDescription(desc)}
-                          className="text-orange-600 hover:text-orange-800 mr-2"
+                          className="text-orange-600 cursor-pointer hover:text-orange-800 mr-2"
                           title="View"
                         >
                           <FaEye />
@@ -437,7 +414,7 @@ export default function FeedbackForm() {
                             {canEdit && (
                               <button
                                 onClick={() => handleEditDescription(desc)}
-                                className="text-orange-600 hover:text-orange-800 mr-2"
+                                className="text-orange-600 cursor-pointer hover:text-orange-800 mr-2"
                                 title="Edit"
                               >
                                 <FaEdit />
@@ -446,7 +423,7 @@ export default function FeedbackForm() {
                             {canDelete && (
                               <button
                                 onClick={() => handleDeleteDescription(desc)}
-                                className="text-orange-600 hover:text-orange-800"
+                                className="text-orange-600  cursor-pointer hover:text-orange-800"
                                 title="Delete"
                               >
                                 <FaTrash />
@@ -462,44 +439,15 @@ export default function FeedbackForm() {
             </table>
           </div>
         </div>
-
-        {alert.show && (
-          <div className="p-6">
-            <Alert
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert({ type: "", message: "", show: false })}
-            />
-          </div>
-        )}
       </div>
 
       {isModalOpen && (isEditing || !selectedDescription) && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90  flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[40rem]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
                 {isEditing ? "Edit Description" : "Add New Description"}
               </h2>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setIsEditing(false);
-                  setEditDescriptionId(null);
-                  setFormData({
-                    title: "",
-                    description: "",
-                    timeline: "",
-                    timeUnit: "",
-                  });
-                }}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <FaTimes />
-              </button>
             </div>
             <form onSubmit={isEditing ? handleUpdateDescription : handleSubmit}>
               <div className="grid grid-cols-1 gap-4">
@@ -514,7 +462,7 @@ export default function FeedbackForm() {
                     type="text"
                     id="title"
                     name="title"
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     value={formData.title}
                     onChange={handleInputChange}
                     placeholder="Enter description title"
@@ -531,7 +479,7 @@ export default function FeedbackForm() {
                   <textarea
                     id="description"
                     name="description"
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     rows="5"
                     value={formData.description}
                     onChange={handleInputChange}
@@ -552,7 +500,7 @@ export default function FeedbackForm() {
                       type="number"
                       id="timeline"
                       name="timeline"
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       value={formData.timeline}
                       onChange={handleInputChange}
                       placeholder="Enter timeline"
@@ -572,7 +520,7 @@ export default function FeedbackForm() {
                       <select
                         id="timeUnit"
                         name="timeUnit"
-                        className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary"
                         value={formData.timeUnit}
                         onChange={handleInputChange}
                         required
@@ -592,14 +540,6 @@ export default function FeedbackForm() {
               </div>
               <div className="mt-6 flex justify-end space-x-4">
                 <button
-                  type="submit"
-                  className="bg-primary text-white px-4 py-2 rounded-md flex items-center"
-                  disabled={isLoading}
-                >
-                  <FaPlusCircle className="mr-2" />{" "}
-                  {isEditing ? "Update" : "Add"}
-                </button>
-                <button
                   type="button"
                   onClick={() => {
                     setFormData({
@@ -612,9 +552,17 @@ export default function FeedbackForm() {
                     setIsEditing(false);
                     setEditDescriptionId(null);
                   }}
-                  className="bg-gray-800 text-white px-4 py-2 rounded-md"
+                  className="bg-black cursor-pointer text-white px-4 py-2 rounded-md"
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md flex items-center"
+                  disabled={isLoading}
+                >
+                  <FaPlusCircle className="mr-2" />{" "}
+                  {isEditing ? "Update" : "Add"}
                 </button>
               </div>
             </form>
@@ -623,22 +571,10 @@ export default function FeedbackForm() {
       )}
 
       {isModalOpen && selectedDescription && !isEditing && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[32rem]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">View Description</h2>
-              <button
-                onClick={() => {
-                  setSelectedDescription(null);
-                  setIsModalOpen(false);
-                }}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <FaTimes />
-              </button>
             </div>
             <div>
               <p className="mb-2">
@@ -668,7 +604,7 @@ export default function FeedbackForm() {
                   setSelectedDescription(null);
                   setIsModalOpen(false);
                 }}
-                className="bg-gray-800 text-white px-4 py-2 rounded-md"
+                className="bg-black cursor-pointer text-white px-4 py-2 rounded-md"
               >
                 Close
               </button>

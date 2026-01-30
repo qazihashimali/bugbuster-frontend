@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { FaCog, FaBell, FaUserCircle } from "react-icons/fa";
+import { FaCog, FaBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [error, setError] = useState(null);
+
   const [unreadCount, setUnreadCount] = useState(0);
   const [userData, setUserData] = useState({
     name: "User",
@@ -27,7 +27,7 @@ const Navbar = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token || !userData._id) {
-        setError("Missing token or user ID");
+        toast.error("Missing token or user ID");
         return;
       }
       const response = await fetch(
@@ -41,7 +41,7 @@ const Navbar = () => {
       );
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
+        toast.error(
           `HTTP error! Status: ${response.status}, Response: ${errorText}`
         );
       }
@@ -49,10 +49,9 @@ const Navbar = () => {
       // console.log(data);
       setNotifications(data.logs || []);
       setUnreadCount(data.unreadCount || 0);
-      setError(null);
     } catch (error) {
       console.error("Error fetching API logs:", error);
-      setError(error.message);
+      toast.error(error.message);
       setNotifications([]);
     }
   };
@@ -97,6 +96,7 @@ const Navbar = () => {
         }
       } catch (err) {
         console.error("Failed to parse user data:", err);
+        toast.error("Failed to parse user data", err);
       }
     }
   }, []);
@@ -119,10 +119,10 @@ const Navbar = () => {
           if (!contentType || !contentType.includes("application/json")) {
             const text = await response.text();
             console.error("Non-JSON response received:", text);
-            throw new Error("Response is not JSON");
+            toast.error("Non-JSON response received:", text);
           }
           if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            toast.error(`HTTP error! Status: ${response.status}`);
           }
           const data = await response.json();
           setAverageRating(data.averageRating || "N/A");
@@ -149,7 +149,7 @@ const Navbar = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token || !userData._id) {
-        setError("Missing token or user ID");
+        toast.error("Missing token or user ID");
         return;
       }
       const response = await fetch(
@@ -164,14 +164,14 @@ const Navbar = () => {
       );
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
+        toast.error(
           `HTTP error! Status: ${response.status}, Response: ${errorText}`
         );
       }
       fetchApiLogs();
     } catch (error) {
       console.error("Error marking notifications as read:", error);
-      setError(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -215,16 +215,12 @@ const Navbar = () => {
     <div className="text-white p-4 flex justify-between items-center shadow-lg w-full bg-primary">
       <div className="flex items-center space-x-3">
         <h1 className="text-lg font-semibold">
-          Welcome, {userData.name} to BUGBUSTER
+          Welcome, {userData?.name} to BUGBUSTER
         </h1>
       </div>
 
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-6">
-          <div className="cursor-pointer hover:text-blue-300 transition-colors duration-200">
-            <FaCog className="text-xl" />
-          </div>
-
           <div className="relative">
             <div
               className="cursor-pointer hover:text-blue-300 transition-colors duration-200"
@@ -243,7 +239,7 @@ const Navbar = () => {
                 ref={notificationRef}
                 className="absolute right-0 mt-3 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20"
               >
-                <div className="px-4 py-3 text-gray-800 flex justify-between border-b border-gray-200">
+                <div className="px-4 py-3 text-gray-600 flex justify-between border-b border-gray-200">
                   <h3 className="font-semibold">Activity Feed</h3>
                   <button
                     onClick={markAllAsRead}
@@ -255,7 +251,7 @@ const Navbar = () => {
 
                 <div className="py-2">
                   <div className="flex border-b border-gray-200">
-                    <button className="flex-1 px-2 py-2 text-gray-800 border-b-2 border-blue-500">
+                    <button className="flex-1 px-2 py-2 text-gray-800 border-b-2 border-primary">
                       Activities
                       {unreadCount > 0 && (
                         <span className="bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
@@ -265,14 +261,8 @@ const Navbar = () => {
                     </button>
                   </div>
 
-                  <div className="max-h-96 overflow-y-auto">
-                    {error && (
-                      <div className="px-4 py-2 text-red-600 text-sm">
-                        Error: {error}
-                      </div>
-                    )}
-
-                    {notifications.length === 0 && !error ? (
+                  <div className="max-h-96 overflow-y-auto no-scrollbar">
+                    {notifications?.length === 0 ? (
                       <div className="px-4 py-8 text-center text-gray-500">
                         No notifications available
                       </div>
@@ -287,26 +277,27 @@ const Navbar = () => {
                           }`}
                         >
                           <div className="relative mr-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
-                              {notification.performedBy?.name?.charAt(0) || "U"}
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">
+                              {notification?.performedBy?.name?.charAt(0) ||
+                                "U"}
                             </div>
                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center mb-1">
                               <span className="font-medium text-gray-800 text-sm">
-                                {notification.performedBy?.name ||
+                                {notification?.performedBy?.name ||
                                   "Unknown User"}
                               </span>
                               <span className="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {notification.action}
+                                {notification?.action}
                               </span>
                             </div>
                             <p className="text-sm text-gray-600 mb-1">
-                              {notification.message}
+                              {notification?.message}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {formatTime(notification.performedAt)}
+                              {formatTime(notification?.performedAt)}
                             </p>
                           </div>
                           {!notification?.read?.includes(userData._id) && (
@@ -339,23 +330,23 @@ const Navbar = () => {
             >
               <div className="p-3 flex items-center bg-primary">
                 <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md">
-                  {userData.name.charAt(0)}
+                  {userData?.name.charAt(0)}
                 </div>
                 <div className="ml-2">
                   <div className="font-semibold text-base text-white">
-                    {userData.name}
+                    {userData?.name}
                   </div>
                   <div className="text-xs text-white/80">
                     <span className="font-bold text-white">Company:</span>{" "}
-                    {userData.company}
+                    {userData?.company}
                   </div>
                   <div className="text-xs text-white/80">
                     <span className="font-bold text-white">Roles:</span>{" "}
-                    {userData.roles.join(", ") || "No roles"}
+                    {userData?.roles.join(", ") || "No roles"}
                   </div>
                   <div className="text-xs text-white/80 truncate">
                     <span className="font-bold text-white">Email:</span>{" "}
-                    {userData.email}
+                    {userData?.email}
                   </div>
                   <div className="text-xs text-white/80 flex items-center">
                     <span className="font-bold text-white mr-1">Rating:</span>

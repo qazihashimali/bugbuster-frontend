@@ -1,28 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {
-  FaTachometerAlt,
   FaBuilding,
-  FaProjectDiagram,
-  FaQuestionCircle,
-  FaSignOutAlt,
   FaRegArrowAltCircleLeft,
   FaRegArrowAltCircleRight,
-  FaTasks,
   FaUsers,
   FaCommentMedical,
   FaCommentDots,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdDeleteSweep,
-  MdDescription,
-  MdFeedback,
-  MdReviews,
-} from "react-icons/md";
-import { LuBlocks, LuGitBranchPlus } from "react-icons/lu";
+import { MdDashboard, MdDeleteSweep, MdDescription } from "react-icons/md";
+import { LuGitBranchPlus } from "react-icons/lu";
 import { SiGoogletasks } from "react-icons/si";
 import { useNavigate, useLocation } from "react-router-dom";
-import { RiBug2Fill, RiBuilding2Fill } from "react-icons/ri";
+import { RiBuilding2Fill } from "react-icons/ri";
 import { BsFillBugFill } from "react-icons/bs";
 import { TiThList } from "react-icons/ti";
 
@@ -128,12 +117,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/add-descriptions",
       allowedRoles: ["SuperAdmin", "Admin", "ServiceProvider"], // All roles can access
     },
-    {
-      name: "Logout",
-      icon: <FaSignOutAlt />,
-      route: "/logout",
-      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
-    },
+    // {
+    //   name: "Logout",
+    //   icon: <FaSignOutAlt />,
+    //   route: "/logout",
+    //   allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
+    // },
   ];
 
   // Filter menu items based on user role
@@ -175,7 +164,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
         >
           {isOpen && (
             <img
-              src="logo (2).png"
+              src="/src/assets/logo2.png"
               className="w-20 h-10 align-center ml-10"
               alt="logo"
             />

@@ -3,30 +3,12 @@ import { FaEye, FaTimes } from "react-icons/fa";
 import { FaStar, FaStarHalfStroke } from "react-icons/fa6";
 import { IoChevronDown } from "react-icons/io5";
 import Loading from "../../Components/Loading";
-
-const Alert = ({ type, message, onClose }) => {
-  const alertStyles = {
-    success: "bg-blue-100 border-blue-500 text-blue-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-  };
-
-  return (
-    <div
-      className={`border-l-4 p-4 mb-4 flex justify-between items-center ${alertStyles[type]} max-w-full sm:max-w-md md:max-w-lg mx-auto`}
-    >
-      <p>{message}</p>
-      <button onClick={onClose} className="text-gray-700 hover:text-gray-900">
-        <FaTimes />
-      </button>
-    </div>
-  );
-};
+import toast from "react-hot-toast";
 
 const Reviews = () => {
   const [issues, setIssues] = useState([]);
   const [filteredIssues, setFilteredIssues] = useState([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -42,20 +24,6 @@ const Reviews = () => {
     user: "",
   });
   const hasFetched = useRef(false);
-
-  const showAlert = (type, message) => {
-    if (type === "success") {
-      setSuccess(message);
-      setError("");
-    } else {
-      setError(message);
-      setSuccess("");
-    }
-    setTimeout(() => {
-      setSuccess("");
-      setError("");
-    }, 5000);
-  };
 
   const renderStars = (rating) => {
     if (rating === null || rating === undefined || rating === 0) {
@@ -95,7 +63,7 @@ const Reviews = () => {
   const fetchDropdowns = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/feedback/dropdowns`,
@@ -109,7 +77,7 @@ const Reviews = () => {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`Failed to fetch dropdown data: ${text}`);
+        toast.error(text);
       }
 
       const dropdownData = await response.json();
@@ -126,21 +94,20 @@ const Reviews = () => {
           : [],
       });
     } catch (err) {
-      showAlert("error", err.message);
+      toast.error(err.message);
     }
   };
 
   const fetchIssues = async () => {
     setIsLoading(true);
-    setError("");
-    setSuccess("");
+
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const userData = localStorage.getItem("user");
-      if (!userData) throw new Error("No user data found");
+      if (!userData) toast.error("No user data found");
 
       const user = JSON.parse(userData);
       const isAdmin =
@@ -159,7 +126,7 @@ const Reviews = () => {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`Failed to fetch feedback: ${text}`);
+        toast.error(text);
       }
 
       const data = await response.json();
@@ -173,7 +140,7 @@ const Reviews = () => {
         );
       }
     } catch (err) {
-      showAlert("error", err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -254,17 +221,7 @@ const Reviews = () => {
             <div>
               <label
                 htmlFor="branch"
-                className="block text-sm font-medium mb-1"
-                style={{
-                  backgroundColor: "white",
-                  width: "fit-content",
-                  position: "relative",
-                  top: "13px",
-                  marginLeft: "14px",
-                  paddingLeft: "4px",
-                  paddingRight: "4px",
-                  zIndex: "20",
-                }}
+                className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
               >
                 Select Branch
               </label>
@@ -272,7 +229,7 @@ const Reviews = () => {
                 <select
                   id="branch"
                   name="branch"
-                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base"
+                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
                   value={filters.branch}
                   onChange={handleFilterChange}
                 >
@@ -291,17 +248,7 @@ const Reviews = () => {
             <div>
               <label
                 htmlFor="department"
-                className="block text-sm font-medium mb-1"
-                style={{
-                  backgroundColor: "white",
-                  width: "fit-content",
-                  position: "relative",
-                  top: "13px",
-                  marginLeft: "14px",
-                  paddingLeft: "4px",
-                  paddingRight: "4px",
-                  zIndex: "20",
-                }}
+                className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
               >
                 Select Department
               </label>
@@ -309,7 +256,7 @@ const Reviews = () => {
                 <select
                   id="department"
                   name="department"
-                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base"
+                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
                   value={filters.department}
                   onChange={handleFilterChange}
                 >
@@ -328,17 +275,7 @@ const Reviews = () => {
             <div>
               <label
                 htmlFor="user"
-                className="block text-sm font-medium mb-1"
-                style={{
-                  backgroundColor: "white",
-                  width: "fit-content",
-                  position: "relative",
-                  top: "13px",
-                  marginLeft: "14px",
-                  paddingLeft: "4px",
-                  paddingRight: "4px",
-                  zIndex: "20",
-                }}
+                className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
               >
                 Select User
               </label>
@@ -346,7 +283,7 @@ const Reviews = () => {
                 <select
                   id="user"
                   name="user"
-                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm sm:text-base"
+                  className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
                   value={filters.user}
                   onChange={handleFilterChange}
                 >
@@ -364,46 +301,28 @@ const Reviews = () => {
             </div>
           </div>
 
-          {(error || success) && (
-            <div className="mb-6">
-              {error && (
-                <Alert
-                  type="error"
-                  message={error}
-                  onClose={() => setError("")}
-                />
-              )}
-              {success && (
-                <Alert
-                  type="success"
-                  message={success}
-                  onClose={() => setSuccess("")}
-                />
-              )}
-            </div>
-          )}
-          <div className="bg-primary text-white p-3">
+          <div className="bg-primary rounded-t-lg text-white p-3">
             <h2 className="text-lg font-semibold">Details</h2>
           </div>
-          <div className="bg-white shadow rounded-lg overflow-x-auto">
+          <div className="bg-white shadow rounded-lg overflow-x-auto no-scrollbar">
             <table className="w-full min-w-[640px]">
-              <thead className="bg-gray-100">
+              <thead className="bg-gray-100 truncate">
                 <tr>
-                  <th className="p-3 text-left text-sm sm:text-base">
+                  <th className="p-3 text-left text-sm font-medium">
                     User Name
                   </th>
-                  <th className="p-3 text-left text-sm sm:text-base">Branch</th>
-                  <th className="p-3 text-left text-sm sm:text-base">
+                  <th className="p-3 text-left text-sm font-medium">Branch</th>
+                  <th className="p-3 text-left text-sm font-medium">
                     Department
                   </th>
-                  <th className="p-3 text-left text-sm sm:text-base">
+                  <th className="p-3 text-left text-sm font-medium">
                     Feedback To
                   </th>
-                  <th className="p-3 text-left text-sm sm:text-base">
+                  <th className="p-3 text-left text-sm font-medium">
                     Feedback
                   </th>
-                  <th className="p-3 text-left text-sm sm:text-base">Rating</th>
-                  <th className="p-3 text-center text-sm sm:text-base">
+                  <th className="p-3 text-left text-sm font-medium">Rating</th>
+                  <th className="p-3 text-center text-sm font-medium">
                     Actions
                   </th>
                 </tr>
@@ -421,36 +340,36 @@ const Reviews = () => {
                 )}
                 {filteredIssues.map((issue) => (
                   <tr key={issue._id}>
-                    <td className="p-3 text-sm sm:text-base">
+                    <td className="p-3 text-sm truncate">
                       {issue.userName || "N/A"}
                     </td>
-                    <td className="p-3 text-sm sm:text-base">
-                      {issue.branch
-                        ? `${issue.branch.branchName} (${issue.branch.branchCode})`
-                        : "N/A"}
+                    <td className="p-3 text-sm truncate">
+                      {issue.branch ? `${issue.branch.branchName} ` : "N/A"}
                     </td>
-                    <td className="p-3 text-sm sm:text-base">
+                    <td className="p-3 text-sm truncate">
                       {issue.department
-                        ? `${issue.department.departmentName} (${issue.department.departmentCode})`
+                        ? `${issue.department.departmentName} `
                         : "N/A"}
                     </td>
-                    <td className="p-3 text-sm sm:text-base">
+                    <td className="p-3 text-sm ">
                       {issue.feedbackTo
                         ? `${issue.feedbackTo.name} (${issue.feedbackTo.email})`
                         : "N/A"}
                     </td>
-                    <td className="p-3 max-w-[150px] sm:max-w-xs truncate text-sm sm:text-base">
+                    <td className="p-3 max-w-[150px] sm:max-w-xs truncate text-sm ">
                       {issue.feedback || "N/A"}
                     </td>
                     <td className="p-3">{renderStars(issue.rating)}</td>
-                    <td className="p-3 flex justify-center">
-                      <button
-                        onClick={() => handleViewIssue(issue)}
-                        className="text-orange-600 hover:text-orange-800"
-                        title="View"
-                      >
-                        <FaEye />
-                      </button>
+                    <td className="p-3">
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => handleViewIssue(issue)}
+                          className="text-orange-600 cursor-pointer hover:text-orange-800"
+                          title="View"
+                        >
+                          <FaEye />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -463,21 +382,12 @@ const Reviews = () => {
       {isLoading && <Loading />}
 
       {isModalOpen && selectedIssue && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90  flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-[90%] sm:max-w-[32rem] max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg sm:text-xl font-semibold">
                 View Feedback
               </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <FaTimes />
-              </button>
             </div>
             <div>
               <p className="mb-2 text-sm sm:text-base">
@@ -510,7 +420,7 @@ const Reviews = () => {
               <div className="flex justify-end mt-4">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm sm:text-base"
+                  className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm sm:text-base"
                 >
                   Close
                 </button>

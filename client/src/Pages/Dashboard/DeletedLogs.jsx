@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaTimes, FaUndo } from "react-icons/fa";
 import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const DeletedLogs = () => {
   const [logs, setLogs] = useState([]);
-  const [error, setError] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
@@ -14,7 +15,7 @@ const DeletedLogs = () => {
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/logs/deleted`,
@@ -34,7 +35,7 @@ const DeletedLogs = () => {
           "Response text:",
           text
         );
-        throw new Error(
+        toast.error(
           `Failed to fetch deleted logs: ${response.status} ${response.statusText}`
         );
       }
@@ -47,7 +48,7 @@ const DeletedLogs = () => {
         );
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(err.message || "Failed to fetch deleted logs");
+      toast.error(err.message || "Failed to fetch deleted logs");
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +66,7 @@ const DeletedLogs = () => {
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/logs/restore/${log._id}`,
@@ -79,8 +80,7 @@ const DeletedLogs = () => {
       );
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Failed to restore item");
+      if (!response.ok) toast.error(data.message);
 
       setLogs(logs.filter((l) => l._id !== log._id));
       if (Date.now() - start < 2000)
@@ -89,7 +89,7 @@ const DeletedLogs = () => {
         );
     } catch (err) {
       console.error("Restore error:", err);
-      setError(err.message || "Failed to restore item");
+      toast.error(err.message || "Failed to restore log");
     } finally {
       setIsLoading(false);
     }
@@ -159,8 +159,6 @@ const DeletedLogs = () => {
           <h1 className="text-xl sm:text-2xl font-bold">Deleted Logs</h1>
         </div>
 
-        {error && <div className="p-4 text-red-600">{error}</div>}
-
         <div className="p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="bg-primary text-white p-3">
@@ -168,24 +166,24 @@ const DeletedLogs = () => {
                 Deleted Items
               </h2>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className="min-w-[900px] w-full">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-100 truncate">
                   <tr>
-                    <th className="p-3 text-left text-sm sm:text-base">
+                    <th className="p-3 text-left text-sm font-medium">
                       Details
                     </th>
 
-                    <th className="p-3 text-left text-sm sm:text-base">
+                    <th className="p-3 text-left text-sm font-medium">
                       Deleted From
                     </th>
-                    <th className="p-3 text-left text-sm sm:text-base">
+                    <th className="p-3 text-left text-sm font-medium">
                       Deleted By
                     </th>
-                    <th className="p-3 text-left text-sm sm:text-base">
+                    <th className="p-3 text-left text-sm font-medium">
                       Deleted At
                     </th>
-                    <th className="p-3 text-center text-sm sm:text-base">
+                    <th className="p-3 text-center text-sm font-medium">
                       Actions
                     </th>
                   </tr>
@@ -193,23 +191,25 @@ const DeletedLogs = () => {
                 <tbody>
                   {logs.map((log) => (
                     <tr key={log._id} className="">
-                      <td className="p-3">{getDetails(log)}</td>
-                      <td className="p-3">{getDeletedFrom(log.entityType)}</td>
-                      <td className="p-3">
-                        {log.deletedBy.name} ({log.deletedBy.email})
+                      <td className="p-3 text-sm">{getDetails(log)}</td>
+                      <td className="p-3  text-sm">
+                        {getDeletedFrom(log.entityType)}
                       </td>
-                      <td className="p-3">{formatTimestamp(log.deletedAt)}</td>
+                      <td className="p-3  text-sm">{log.deletedBy.email}</td>
+                      <td className="p-3  text-sm">
+                        {formatTimestamp(log.deletedAt)}
+                      </td>
                       <td className="p-3 flex flex-col sm:flex-row justify-center gap-2">
                         <button
                           onClick={() => handleViewLog(log)}
-                          className="text-orange-600 hover:text-orange-800"
+                          className="text-orange-600 cursor-pointer hover:text-orange-800"
                           title="View"
                         >
                           <FaEye />
                         </button>
                         <button
                           onClick={() => handleRestoreLog(log)}
-                          className="text-green-600 hover:text-green-800"
+                          className="text-green-600 cursor-pointer hover:text-green-800"
                           title="Restore"
                         >
                           <FaUndo />
@@ -231,19 +231,10 @@ const DeletedLogs = () => {
       )}
 
       {isModalOpen && selectedLog && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-[95%] sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-[95%] sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">View Deleted Log</h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <FaTimes />
-              </button>
             </div>
             <div>
               <p className="mb-2">
@@ -427,7 +418,7 @@ const DeletedLogs = () => {
               <div className="flex justify-end mt-4">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                  className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
                 >
                   Close
                 </button>

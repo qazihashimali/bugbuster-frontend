@@ -7,9 +7,9 @@ const Block = () => {
   const [blocks, setBlocks] = useState([]);
   const [blockCode, setBlockCode] = useState("");
   const [blockName, setBlockName] = useState("");
-  const [error, setError] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -62,8 +62,7 @@ const Block = () => {
 
   const handleAddBlock = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -95,7 +94,7 @@ const Block = () => {
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -115,8 +114,7 @@ const Block = () => {
 
   const handleUpdateBlock = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -151,15 +149,14 @@ const Block = () => {
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleDeleteBlock = async (block) => {
     if (!window.confirm("Are you sure you want to delete this block?")) return;
 
-    setError("");
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
@@ -187,7 +184,7 @@ const Block = () => {
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -195,14 +192,12 @@ const Block = () => {
     <div className="relative container mx-auto p-6 bg-gray-100 min-h-screen">
       <div
         className={`bg-white shadow-md rounded-lg ${
-          isLoading || isSubmitting ? "blur-sm" : ""
+          isLoading ? "blur-sm" : ""
         }`}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg">
           <h1 className="text-2xl font-bold">Blocks</h1>
         </div>
-
-        {error && <div className="p-4 text-red-600">{error}</div>}
 
         <div className="p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -258,17 +253,7 @@ const Block = () => {
               <div>
                 <label
                   htmlFor="blockCode"
-                  className="block text-sm font-medium mb-1"
-                  style={{
-                    backgroundColor: "white",
-                    width: "fit-content",
-                    position: "relative",
-                    top: "13px",
-                    marginLeft: "14px",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    zIndex: "20",
-                  }}
+                  className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                 >
                   Block Code
                 </label>
@@ -277,7 +262,7 @@ const Block = () => {
                   id="blockCode"
                   value={blockCode}
                   onChange={(e) => setBlockCode(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Enter Block Code"
                   required
                 />
@@ -285,17 +270,7 @@ const Block = () => {
               <div>
                 <label
                   htmlFor="blockName"
-                  className="block text-sm font-medium mb-1"
-                  style={{
-                    backgroundColor: "white",
-                    width: "fit-content",
-                    position: "relative",
-                    top: "13px",
-                    marginLeft: "14px",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    zIndex: "20",
-                  }}
+                  className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                 >
                   Block Name
                 </label>
@@ -304,7 +279,7 @@ const Block = () => {
                   id="blockName"
                   value={blockName}
                   onChange={(e) => setBlockName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Enter Block Name"
                   required
                 />
@@ -315,7 +290,7 @@ const Block = () => {
               <button
                 type="submit"
                 className="bg-primary text-white px-4 py-2 rounded-md flex items-center"
-                disabled={isLoading || isSubmitting}
+                disabled={isLoading}
               >
                 <FaPlusCircle className="mr-2" /> Add
               </button>
@@ -334,17 +309,14 @@ const Block = () => {
         </div>
       </div>
 
-      {(isLoading || isSubmitting) && (
+      {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <Loading />
         </div>
       )}
 
       {isModalOpen && selectedBlock && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
@@ -371,7 +343,7 @@ const Block = () => {
                     id="modalBlockCode"
                     value={blockCode}
                     onChange={(e) => setBlockCode(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                   />
                 </div>
@@ -387,7 +359,7 @@ const Block = () => {
                     id="modalBlockName"
                     value={blockName}
                     onChange={(e) => setBlockName(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                   />
                 </div>
@@ -395,7 +367,7 @@ const Block = () => {
                   <button
                     type="submit"
                     className="bg-primary text-white px-4 py-2 rounded-md"
-                    disabled={isLoading || isSubmitting}
+                    disabled={isLoading}
                   >
                     Update
                   </button>

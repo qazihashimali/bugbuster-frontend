@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const createCompany = async ({ name, createdBy }) => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) throw new Error("No authentication token found");
+    if (!token) toast.error("No authentication token found");
 
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/company`,
@@ -23,21 +23,20 @@ const createCompany = async ({ name, createdBy }) => {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Backend error:", errorData);
-      throw new Error(
-        errorData.message || `HTTP error! Status: ${response.status}`
-      );
+      toast.error(errorData.message);
     }
 
     return response.json();
   } catch (error) {
-    throw new Error(error.message || "Failed to create company");
+    console.error("Create error:", error);
+    toast.error(error.message || "Failed to create company");
   }
 };
 
 const getAllCompanies = async () => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) throw new Error("No authentication token found");
+    if (!token) toast.error("No authentication token found");
 
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/company`,
@@ -52,7 +51,7 @@ const getAllCompanies = async () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(
+      toast.error(
         errorData.message || `HTTP error! Status: ${response.status}`
       );
     }
@@ -60,18 +59,18 @@ const getAllCompanies = async () => {
     const data = await response.json();
     return data.companies;
   } catch (error) {
-    throw new Error(error.message || "Failed to fetch companies");
+    toast.error(error.message || "Failed to fetch companies");
   }
 };
 
 const getCompanyById = async (id) => {
   if (!id || id === "undefined") {
-    throw new Error("Invalid company ID");
+    toast.error("Invalid company ID");
   }
 
   try {
     const token = localStorage.getItem("token");
-    if (!token) throw new Error("No authentication token found");
+    if (!token) toast.error("No authentication token found");
 
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/company/${id}`,
@@ -86,15 +85,13 @@ const getCompanyById = async (id) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP error! Status: ${response.status}`
-      );
+      toast.error(errorData.message);
     }
 
     const data = await response.json();
     return data.company;
   } catch (error) {
-    throw new Error(error.message || "Failed to fetch company");
+    toast.error(error.message || "Failed to fetch company details");
   }
 };
 
@@ -115,7 +112,7 @@ const updateCompany = async ({ id, name, createdBy }) => {
 
     return res.company;
   } catch (error) {
-    throw new Error(error?.message || "Failed to update company");
+    toast.error(error.message || "Failed to update company");
   }
 };
 
@@ -125,9 +122,9 @@ const Company = () => {
   const [companyEmail, setCompanyEmail] = useState(
     JSON.parse(localStorage.getItem("user"))?.email
   );
-  const [error, setError] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -162,8 +159,7 @@ const Company = () => {
 
   const handleAddCompany = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const response = await createCompany({
@@ -181,12 +177,11 @@ const Company = () => {
       console.error("Create error:", err);
       toast.error(err.message || "Failed to create company");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleViewCompany = async (companyId) => {
-    setError("");
     setIsLoading(true);
     try {
       const company = await getCompanyById(companyId);
@@ -194,14 +189,13 @@ const Company = () => {
       setIsEditing(false);
       setIsModalOpen(true);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleEditCompany = async (companyId) => {
-    setError("");
     setIsLoading(true);
     try {
       const company = await getCompanyById(companyId);
@@ -219,13 +213,13 @@ const Company = () => {
 
   const handleUpdateCompany = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+
+    setIsLoading(true);
     const start = Date.now();
     try {
       const response = await updateCompany({
         id: selectedCompany._id,
-        createdBy: companyEmail || undefined,
+        createdBy: companyEmail,
         name: companyName,
       });
 
@@ -243,7 +237,7 @@ const Company = () => {
       console.error("Update error:", err);
       toast.error(err.message || "Failed to update company");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -251,14 +245,12 @@ const Company = () => {
     <div className="relative container mx-auto p-6 bg-gray-100 min-h-screen">
       <div
         className={`bg-white shadow-md rounded-lg ${
-          isLoading || isSubmitting ? "blur-sm" : ""
+          isLoading ? "blur-sm" : ""
         }`}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg">
           <h1 className="text-2xl font-bold">Company</h1>
         </div>
-
-        {error && <div className="p-4 text-red-600">{error}</div>}
 
         <div className="p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -266,28 +258,34 @@ const Company = () => {
               <h2 className="text-lg font-semibold">Details</h2>
             </div>
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-gray-100 truncate">
                 <tr>
-                  <th className="p-3 text-left">Company Name</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-center">Actions</th>
+                  <th className="p-3 text-left text-sm font-medium">
+                    Company Name
+                  </th>
+                  <th className="p-3 text-left text-sm font-medium">Email</th>
+                  <th className="p-3 text-center text-sm font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {companies.map((company) => (
                   <tr key={company?._id} className="">
-                    <td className="p-3">{company?.name}</td>
-                    <td className="p-3">{company?.createdBy || "N/A"}</td>
+                    <td className="p-3 text-sm">{company?.name}</td>
+                    <td className="p-3 text-sm">
+                      {company?.createdBy ?? "manager@nitsel.com"}
+                    </td>
                     <td className="p-3 flex justify-center space-x-2">
                       <button
                         onClick={() => handleViewCompany(company._id)}
-                        className="text-orange-600 hover:text-orange-800"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800"
                       >
                         <FaEye />
                       </button>
                       <button
                         onClick={() => handleEditCompany(company._id)}
-                        className="text-orange-600 hover:text-orange-800"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800"
                       >
                         <FaEdit />
                       </button>
@@ -305,17 +303,7 @@ const Company = () => {
               <div>
                 <label
                   htmlFor="companyName"
-                  className="block text-sm font-medium mb-1"
-                  style={{
-                    backgroundColor: "white",
-                    width: "fit-content",
-                    position: "relative",
-                    top: "13px",
-                    marginLeft: "14px",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    zIndex: "20",
-                  }}
+                  className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                 >
                   Company Name
                 </label>
@@ -324,7 +312,7 @@ const Company = () => {
                   id="companyName"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Enter Company Name"
                   required
                 />
@@ -332,17 +320,7 @@ const Company = () => {
               <div>
                 <label
                   htmlFor="companyEmail"
-                  className="block text-sm font-medium mb-1"
-                  style={{
-                    backgroundColor: "white",
-                    width: "fit-content",
-                    position: "relative",
-                    top: "13px",
-                    marginLeft: "14px",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    zIndex: "20",
-                  }}
+                  className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                 >
                   Email (Optional)
                 </label>
@@ -352,57 +330,48 @@ const Company = () => {
                   value={companyEmail}
                   disabled
                   onChange={(e) => setCompanyEmail(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Enter Company Email"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Company Email"
                 />
               </div>
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
               <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-md flex items-center"
-                disabled={isLoading || isSubmitting}
-              >
-                <FaPlusCircle className="mr-2" /> Add
-              </button>
-              <button
                 type="button"
                 onClick={() => {
                   setCompanyName("");
                   setCompanyEmail("");
                 }}
-                className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                className="bg-black text-white px-4 py-2 rounded-md  cursor-pointer"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-primary text-white px-4 py-2 rounded-md flex cursor-pointer items-center"
+                disabled={isLoading}
+              >
+                <FaPlusCircle className="mr-2" /> Add
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      {(isLoading || isSubmitting) && (
+      {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <Loading />
         </div>
       )}
 
       {isModalOpen && selectedCompany && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">
                 {isEditing ? "Edit Company" : "View Company"}
               </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <FaTimes />
-              </button>
             </div>
             {isEditing ? (
               <form onSubmit={handleUpdateCompany}>
@@ -418,7 +387,7 @@ const Company = () => {
                     id="modalCompanyName"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     required
                   />
                 </div>
@@ -433,40 +402,41 @@ const Company = () => {
                     type="email"
                     disabled
                     id="modalCompanyEmail"
-                    value={companyEmail}
+                    value={companyEmail || "manager@nitsel.com"}
                     onChange={(e) => setCompanyEmail(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex justify-end space-x-4">
                   <button
-                    type="submit"
-                    className="bg-primary text-white px-4 py-2 rounded-md"
-                    disabled={isLoading || isSubmitting}
-                  >
-                    Update
-                  </button>
-                  <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                    className="bg-black cursor-pointer text-white px-4 py-2 rounded-md "
                   >
                     Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-primary text-white px-4 py-2 rounded-md"
+                    disabled={isLoading}
+                  >
+                    Update
                   </button>
                 </div>
               </form>
             ) : (
               <div>
                 <p>
-                  <strong>Company Name:</strong> {selectedCompany.name}
+                  <strong>Company Name:</strong> {selectedCompany?.name}
                 </p>
                 <p>
-                  <strong>Email:</strong> {selectedCompany.createdBy || "N/A"}
+                  <strong>Email:</strong>{" "}
+                  {selectedCompany?.createdBy || "manager@nitsel.com"}
                 </p>
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                    className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
                   >
                     Close
                   </button>

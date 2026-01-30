@@ -1,24 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEyeSlash, FaEye } from "react-icons/fa";
 import toast from "react-hot-toast";
-
-// Custom debounce hook
-const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
+import useDebounce from "../hooks/Debounce";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -52,8 +36,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [companySearch, setCompanySearch] = useState("");
   const [companyResults, setCompanyResults] = useState([]);
@@ -72,7 +55,7 @@ const Auth = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch dropdown data");
+        toast.error("Failed to fetch dropdown data");
       }
 
       const data = await response.json();
@@ -131,11 +114,11 @@ const Auth = () => {
       let results = [];
       if (data.message === "Company found successfully" && data.company) {
         results = [data.company].filter(Boolean);
-        setSuccessMessage("Company Found Successfully");
+        toast.success("Company found successfully");
         setIsCompanyNotFound(false);
       } else {
         results = [];
-        setSuccessMessage("");
+
         setTimeout(() => setIsCompanyNotFound(true), 100); // Delay to stabilize UI
       }
       setCompanyResults(results);
@@ -158,7 +141,7 @@ const Auth = () => {
       }
     } catch (err) {
       toast.error(err.message);
-      setSuccessMessage("");
+
       setCompanyResults([]);
       setIsCompanyNotFound(true);
       setBranch("");
@@ -173,16 +156,13 @@ const Auth = () => {
       setIsCompanyModalOpen(false);
       setCompanyResults([]);
       setIsCompanyNotFound(false);
-      setSuccessMessage("");
+
       setBranch("");
       setDepartment("");
 
       // Fetch branches and departments for the selected company
       const data = await upsertCompany(companyName);
-      console.log("handleCompanySelect - upsertCompany response:", {
-        companyName,
-        data,
-      });
+
       if (data.dropdowns) {
         setDropdowns((prev) => {
           const newState = {
@@ -200,7 +180,6 @@ const Auth = () => {
       }
     } catch (err) {
       toast.error(err.message);
-      setSuccessMessage("");
     }
   }, []);
 
@@ -258,8 +237,6 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-    setSuccessMessage("");
 
     try {
       if (isLogin) {
@@ -338,12 +315,6 @@ const Auth = () => {
           toast.error("At least one role must be selected");
         }
 
-        // if (!phone || !branch || !department || !company) {
-        //   throw new Error(
-        //     "Phone, branch, department, and company are required"
-        //   );
-        // }
-
         const body = {
           name,
           email,
@@ -415,8 +386,6 @@ const Auth = () => {
     }
 
     setIsLoading(true);
-    setError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(
@@ -443,96 +412,33 @@ const Auth = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        width: "100%",
-        fontFamily: "Arial, sans-serif",
-        margin: 0,
-        padding: 0,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          width: "30%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: "10px",
-          backgroundColor: "#34076b",
-        }}
-      >
-        <div
-          style={{
-            color: "white",
-            fontSize: "28px",
-            fontWeight: "bold",
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#34076b",
-          }}
-        >
+    <div className="flex h-screen w-full font-sans m-0 p-0 overflow-hidden">
+      <div className="w-[30%] flex flex-col items-center pt-[10px] bg-[#34076b]">
+        <div className="text-white text-[28px] font-bold flex items-center bg-[#34076b]">
           <img
-            src="logo (2).png"
+            src="/src/assets/logo2.png"
             alt="Logo"
-            style={{
-              width: "100px",
-              height: "40px",
-              marginRight: "60px",
-              marginTop: "10px",
-            }}
+            className="w-[100px] h-[40px] mr-[60px] mt-[10px]"
           />
         </div>
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "#F2F7F7",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          position: "relative",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundImage: `url(https://images.pexels.com/photos/840996/pexels-photo-840996.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)`,
-        }}
-      >
+      <div className="flex-1 flex items-center bg-[url('/src/assets/login_img.jpg')] justify-start relative bg-[#F2F7F7] bg-no-repeat bg-cover">
         <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "4px",
-            boxShadow: "0 1px 8px rgba(0, 0, 0, 0.08)",
-            padding: "30px",
-            width: "320px",
-            position: "absolute",
-            left: "-180px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            maxHeight: !isLogin ? "500px" : "auto",
-            overflowY: !isLogin ? "auto" : "visible",
-            scrollbarWidth: !isLogin ? "none" : "auto",
-            msOverflowStyle: !isLogin ? "none" : "auto",
-          }}
+          className={`
+          bg-white 
+          rounded 
+          shadow-[0_1px_8px_rgba(0,0,0,0.08)] 
+          p-[30px] 
+          w-[320px] 
+          absolute 
+          -left-[180px] 
+          top-1/2 
+          -translate-y-1/2
+          ${!isLogin ? "max-h-[500px] overflow-y-auto no-scrollbar" : ""}
+        `}
         >
-          <style>
-            {`
-              div[style*="overflow-y: auto"]::-webkit-scrollbar {
-                display: none;
-              }
-            `}
-          </style>
-          <h2
-            style={{
-              fontSize: "17px",
-              fontWeight: "400",
-              color: "#333",
-              marginTop: "5px",
-              marginBottom: "25px",
-            }}
-          >
+          <h2 className="text-[17px] font-normal text-[#333] mt-[5px] mb-[25px]">
             {isLogin
               ? "Login to your account"
               : isForgotPassword
@@ -544,31 +450,15 @@ const Auth = () => {
               : "Create your account"}
           </h2>
 
-          {error && (
-            <div
-              style={{ color: "red", marginBottom: "15px", fontSize: "14px" }}
-            >
-              {error}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit}>
             {isForgotPassword && !showOtpInput && (
-              <div style={{ marginBottom: "15px" }}>
+              <div className="mb-[15px]">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  style={{
-                    width: "100%",
-                    padding: "10px 12px",
-                    border: "1px solid #E0E0E0",
-                    borderRadius: "3px",
-                    fontSize: "14px",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                  className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                   required
                 />
               </div>
@@ -576,90 +466,47 @@ const Auth = () => {
 
             {!isLogin && !isForgotPassword && !showOtpInput && (
               <>
-                <div style={{ marginBottom: "15px" }}>
+                <div className="mb-[15px]">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Full Name"
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                     required
                   />
                 </div>
-                <div style={{ marginBottom: "15px" }}>
+                <div className="mb-[15px]">
                   <input
                     type="text"
                     value={companySearch}
                     onClick={() => setIsCompanyModalOpen(true)}
                     placeholder="Select Company"
                     readOnly
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      outline: "none",
-                      boxSizing: "border-box",
-                      backgroundColor: "#f5f5f5",
-                      cursor: "pointer",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border bg-[#f5f5f5] cursor-pointer"
                     required
                   />
                 </div>
-                <div style={{ marginBottom: "15px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "5px",
-                      fontSize: "14px",
-                      color: "#333",
-                    }}
-                  >
+                <div className="mb-[15px]">
+                  <label className="block mb-[5px] text-[14px] text-[#333]">
                     Select Role(s):
                   </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "14px",
-                      }}
-                    >
+                  <div className="flex flex-col gap-[10px]">
+                    <label className="flex items-center text-[14px]">
                       <input
                         type="checkbox"
                         checked={roles.EndUser}
                         onChange={() => handleRoleChange("EndUser")}
-                        style={{ marginRight: "8px" }}
+                        className="mr-2"
                       />
                       End User
                     </label>
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "14px",
-                      }}
-                    >
+                    <label className="flex items-center text-[14px]">
                       <input
                         type="checkbox"
                         checked={roles.ServiceProvider}
                         onChange={() => handleRoleChange("ServiceProvider")}
-                        style={{ marginRight: "8px" }}
+                        className="mr-2"
                       />
                       Service Provider
                     </label>
@@ -667,46 +514,25 @@ const Auth = () => {
                 </div>
                 {(roles.EndUser || roles.ServiceProvider) && (
                   <>
-                    <div style={{ marginBottom: "15px" }}>
+                    <div className="mb-[15px]">
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="Phone Number"
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "1px solid #E0E0E0",
-                          borderRadius: "3px",
-                          fontSize: "14px",
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
+                        className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                         required
                       />
                     </div>
-                    <div style={{ marginBottom: "15px" }}>
+                    <div className="mb-[15px]">
                       <select
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "1px solid #E0E0E0",
-                          borderRadius: "3px",
-                          fontSize: "14px",
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
+                        className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                         required
                       >
                         <option value="">Select Branch</option>
-                        {console.log(
-                          "Branch dropdown - company:",
-                          company,
-                          "branches:",
-                          dropdowns.branches
-                        )}
+
                         {dropdowns.branches.map((branch) => (
                           <option key={branch._id} value={branch._id}>
                             {branch.branchName} ({branch.branchCode})
@@ -714,28 +540,15 @@ const Auth = () => {
                         ))}
                       </select>
                     </div>
-                    <div style={{ marginBottom: "15px" }}>
+                    <div className="mb-[15px]">
                       <select
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "1px solid #E0E0E0",
-                          borderRadius: "3px",
-                          fontSize: "14px",
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
+                        className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                         required
                       >
                         <option value="">Select Department</option>
-                        {console.log(
-                          "Department dropdown - company:",
-                          company,
-                          "departments:",
-                          dropdowns.departments
-                        )}
+
                         {dropdowns.departments.map((department) => (
                           <option key={department._id} value={department._id}>
                             {department.departmentName} (
@@ -750,106 +563,36 @@ const Auth = () => {
             )}
 
             {isCompanyModalOpen && (
-              <div
-                style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 1000,
-                }}
-              >
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    padding: "20px",
-                    borderRadius: "4px",
-                    width: "300px",
-                    maxHeight: "400px",
-                    overflowY: "auto",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
+                <div className="bg-white p-[20px] rounded-[4px] w-[300px] max-h-[400px] overflow-y-auto">
                   {console.log("Company modal - state:", {
                     isCompanyNotFound,
                     companySearch,
                     companyResults,
                   })}
-                  <h3
-                    style={{
-                      fontSize: "16px",
-                      marginBottom: "15px",
-                      color: "#333",
-                    }}
-                  >
+                  <h3 className="text-[16px] font-semibold mb-[15px] text-[#333]">
                     Select or Add Company
                   </h3>
-                  {successMessage && (
-                    <div
-                      style={{
-                        color: "green",
-                        marginBottom: "15px",
-                        fontSize: "14px",
-                        textAlign: "center",
-                        opacity: successMessage ? 1 : 0,
-                        transition: "opacity 0.3s ease-in-out",
-                      }}
-                    >
-                      {successMessage}
-                    </div>
-                  )}
+
                   <input
                     type="text"
                     value={companySearch}
                     onChange={(e) => {
                       setCompanySearch(e.target.value);
-                      setSuccessMessage("");
+
                       setIsCompanyNotFound(false);
                     }}
                     placeholder="Search company..."
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      marginBottom: "15px",
-                      boxSizing: "border-box",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                   />
                   {Array.isArray(companyResults) &&
                     companyResults.length > 0 && (
-                      <div
-                        style={{
-                          maxHeight: "200px",
-                          overflowY: "auto",
-                          marginBottom: "15px",
-                        }}
-                      >
+                      <div className="max-h-[200px] overflow-y-auto mb-[15px]">
                         {companyResults.map((comp) => (
                           <div
                             key={comp._id}
                             onClick={() => handleCompanySelect(comp.name)}
-                            style={{
-                              padding: "10px",
-                              cursor: "pointer",
-                              borderBottom: "1px solid #E0E0E0",
-                              fontSize: "14px",
-                              color: "#333",
-                              transition: "background-color 0.2s",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.backgroundColor =
-                                "#f5f5f5")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.backgroundColor = "white")
-                            }
+                            className="p-[10px] cursor-pointer border-b border-[#E0E0E0] text-[14px] text-[#333] transition-colors duration-200 hover:bg-[#f5f5f5]"
                           >
                             {comp.name}
                           </div>
@@ -910,27 +653,14 @@ const Auth = () => {
                       setCompanySearch("");
                       setCompanyResults([]);
                       setIsCompanyNotFound(false);
-                      setSuccessMessage("");
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      color: "#333",
-                      backgroundColor: "#f5f5f5",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "4px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      transition: "background-color 0.2s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#e0e0e0")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#f5f5f5")
-                    }
+                    className="w-full p-[10px] text-[#333] bg-[#f5f5f5] border border-[#E0E0E0] rounded-md text-[14px] cursor-pointer transition-colors duration-200 hover:bg-[#e0e0e0]"
                   >
-                    Cancel
+                    {companySearch &&
+                    companyResults.length === 0 &&
+                    !isCompanyNotFound
+                      ? "Searching..."
+                      : "Cancel"}
                   </button>
                 </div>
               </div>
@@ -938,7 +668,7 @@ const Auth = () => {
 
             {showOtpInput && (
               <>
-                <div style={{ marginBottom: "15px" }}>
+                <div className="mb-[15px]">
                   <input
                     type="text"
                     value={otp}
@@ -948,53 +678,27 @@ const Auth = () => {
                     }}
                     placeholder="Enter 6-digit OTP"
                     maxLength="6"
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                     required
                   />
                 </div>
-                <div
-                  style={{
-                    marginBottom: "15px",
-                    textAlign: "center",
-                    fontSize: "14px",
-                    color: "#555",
-                  }}
-                >
+                <div className="mb-[15px] text-center text-[14px] text-[#555]">
                   {isTimerActive ? (
                     `Resend OTP available in ${timer} seconds`
                   ) : resendAttempts < 4 ? (
                     <>
                       Didn't receive OTP?{" "}
-                      <a
-                        href="#"
+                      <Link
+                        to={"#"}
                         onClick={(e) => {
                           e.preventDefault();
                           handleResendOTP();
                         }}
-                        style={{
-                          color: "#34076b",
-                          textDecoration: "none",
-                          fontWeight: "500",
-                          cursor: isLoading ? "default" : "pointer",
-                        }}
+                        className="text-[#34076b] cursor-pointer"
                       >
                         {isLoading ? "Sending..." : "Resend"}
-                      </a>
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          marginTop: "5px",
-                          color: "#777",
-                        }}
-                      >
+                      </Link>
+                      <div className="text-[13px] mt-[5px] text-[#777] ">
                         Attempts remaining: {4 - resendAttempts}
                       </div>
                     </>
@@ -1007,52 +711,28 @@ const Auth = () => {
 
             {(isLogin || (!isLogin && !isForgotPassword && !showOtpInput)) && (
               <>
-                <div style={{ marginBottom: "15px" }}>
+                <div className="mb-[15px]">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                     required
                   />
                 </div>
-                <div style={{ marginBottom: "15px", position: "relative" }}>
+                <div className="mb-[15px] relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    style={{
-                      width: "100%",
-                      padding: "10px 30px 10px 12px",
-                      border: "1px solid #E0E0E0",
-                      borderRadius: "3px",
-                      fontSize: "14px",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
+                    className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                     required
                   />
                   <span
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: "absolute",
-                      right: "10px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                      color: "#666",
-                    }}
+                    className="absolute right-[10px] top-[50%] transform -translate-y-1/2 cursor-pointer text-[16px] text-[#666]"
                   >
                     {!showPassword ? <FaEyeSlash /> : <FaEye />}
                   </span>
@@ -1061,34 +741,18 @@ const Auth = () => {
             )}
 
             {isForgotPassword && isResetPassword && showOtpInput && (
-              <div style={{ marginBottom: "15px", position: "relative" }}>
+              <div className="mb-[15px] relative">
                 <input
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  style={{
-                    width: "100%",
-                    padding: "10px 30px 10px 12px",
-                    border: "1px solid #E0E0E0",
-                    borderRadius: "3px",
-                    fontSize: "14px",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                  className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
                   required
                 />
                 <span
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    color: "#666",
-                  }}
+                  className="absolute right-[10px] top-[50%] transform -translate-y-1/2 cursor-pointer text-[16px] text-[#666]"
                 >
                   {!showNewPassword ? <FaEyeSlash /> : <FaEye />}
                 </span>
@@ -1097,35 +761,11 @@ const Auth = () => {
 
             <button
               type="submit"
-              style={{
-                width: "100%",
-                padding: "10px",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "18px",
-                fontWeight: "400",
-                cursor: isLoading ? "not-allowed" : "pointer",
-                marginBottom: "15px",
-                backgroundColor: "#34076b",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
+              className="w-full p-[10px] text-white rounded-md cursor-pointer bg-[#34076b] text-[18px]  mb-[15px] flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading && (
-                <span
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    border: "2px solid white",
-                    borderTop: "2px solid transparent",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               )}
 
               <span>
@@ -1151,29 +791,18 @@ const Auth = () => {
               </span>
             </button>
 
-            <div
-              style={{
-                textAlign: "center",
-                fontSize: "14px",
-                color: "#555",
-                marginBottom: "16px",
-              }}
-            >
+            <div className="text-center text-[14px] text-[#555] mb-[15px]">
               {isLogin ? (
                 <>
                   <div>
-                    <a
-                      href="#"
-                      style={{
-                        color: "#333",
-                        textDecoration: "none",
-                      }}
+                    <Link
+                      to={"#"}
+                      className="text-[#333] no-underline"
                       onClick={(e) => {
                         e.preventDefault();
                         setIsForgotPassword(true);
                         setIsLogin(false);
-                        setError("");
-                        setSuccessMessage("");
+
                         setEmail("");
                         setPassword("");
                         setNewPassword("");
@@ -1186,22 +815,18 @@ const Auth = () => {
                       }}
                     >
                       Forgot Password?
-                    </a>
+                    </Link>
                   </div>
-                  <div style={{ marginTop: "10px" }}>
+                  <div className="mt-[10px]">
                     Don't have an account?{" "}
-                    <a
-                      href="#"
-                      style={{
-                        color: "#333",
-                        textDecoration: "none",
-                      }}
+                    <Link
+                      to={"#"}
+                      className="text-[#333] no-underline"
                       onClick={(e) => {
                         e.preventDefault();
                         setIsLogin(false);
                         setIsForgotPassword(false);
-                        setError("");
-                        setSuccessMessage("");
+
                         setEmail("");
                         setPassword("");
                         setNewPassword("");
@@ -1220,23 +845,19 @@ const Auth = () => {
                       }}
                     >
                       Register
-                    </a>
+                    </Link>
                   </div>
                 </>
               ) : isForgotPassword ? (
-                <a
-                  href="#"
-                  style={{
-                    color: "#333",
-                    textDecoration: "none",
-                  }}
+                <Link
+                  to={"#"}
+                  className="text-[#333] no-underline"
                   onClick={(e) => {
                     e.preventDefault();
                     setIsLogin(true);
                     setIsForgotPassword(false);
                     setIsResetPassword(false);
-                    setError("");
-                    setSuccessMessage("");
+
                     setEmail("");
                     setPassword("");
                     setNewPassword("");
@@ -1249,20 +870,16 @@ const Auth = () => {
                   }}
                 >
                   Back to Login
-                </a>
+                </Link>
               ) : !showOtpInput ? (
-                <a
-                  href="#"
-                  style={{
-                    color: "#333",
-                    textDecoration: "none",
-                  }}
+                <Link
+                  to={"#"}
+                  className="text-[#333] no-underline"
                   onClick={(e) => {
                     e.preventDefault();
                     setIsLogin(true);
                     setIsForgotPassword(false);
-                    setError("");
-                    setSuccessMessage("");
+
                     setName("");
                     setEmail("");
                     setPassword("");
@@ -1281,18 +898,11 @@ const Auth = () => {
                   }}
                 >
                   Login
-                </a>
+                </Link>
               ) : null}
             </div>
 
-            <div
-              style={{
-                textAlign: "center",
-                fontSize: "12px",
-                color: "#888",
-                marginTop: "20px",
-              }}
-            >
+            <div className="text-center text-[12px] text-[#888] mt-[20px]">
               By{" "}
               {isLogin
                 ? "logging in"

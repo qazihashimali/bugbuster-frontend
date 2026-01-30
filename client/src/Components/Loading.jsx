@@ -1,4 +1,3 @@
-// src/Components/Loading.jsx
 const Loading = ({ message = "Loading...", fullscreen = false }) => {
   const spinnerClass =
     "w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full animate-spin";

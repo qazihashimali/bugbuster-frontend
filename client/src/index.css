@@ -35,5 +35,6 @@ body,
 }
 
 @theme {
-  --color-primary: #34076b;
+  /* --color-primary: #34076b; */
+  --color-primary: #400983;
 }

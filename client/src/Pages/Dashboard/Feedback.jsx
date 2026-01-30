@@ -1,26 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
-import { FaTimes, FaStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import Loading from "../../Components/Loading";
-
-const Alert = ({ type, message, onClose }) => {
-  const alertStyles = {
-    success: "bg-blue-100 border-blue-500 text-blue-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-  };
-
-  return (
-    <div
-      className={`border-l-4 p-4 mb-4 flex justify-between items-center ${alertStyles[type]}`}
-    >
-      <p>{message}</p>
-      <button onClick={onClose} className="text-gray-700 hover:text-gray-900">
-        <FaTimes />
-      </button>
-    </div>
-  );
-};
+import toast from "react-hot-toast";
 
 export default function Feedback() {
   const [user, setUser] = useState(null);
@@ -38,15 +21,10 @@ export default function Feedback() {
     users: [],
     filteredUsers: [],
   });
-  const [alert, setAlert] = useState({ type: "", message: "", show: false });
-  const [isLoading, setIsLoading] = useState(false);
-  // const [isSubmitting, setIsSubmitting] = useState(false);
-  const hasFetched = useRef(false);
 
-  const showAlert = (type, message) => {
-    setAlert({ type, message, show: true });
-    setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
-  };
+  const [isLoading, setIsLoading] = useState(false);
+
+  const hasFetched = useRef(false);
 
   const renderEditableStars = (rating, onStarClick) => {
     return (
@@ -109,10 +87,10 @@ export default function Feedback() {
       if (!hasFetched.current) {
         hasFetched.current = true;
         setIsLoading(true);
-        const start = Date.now();
+
         try {
           const token = localStorage.getItem("token");
-          if (!token) throw new Error("No authentication token found");
+          if (!token) toast.error("No authentication token found");
 
           const dropdownResponse = await fetch(
             `${import.meta.env.VITE_BACKEND_URL}/api/feedback/dropdowns`,
@@ -131,7 +109,7 @@ export default function Feedback() {
               "Response text:",
               text
             );
-            throw new Error(
+            toast.error(
               `Failed to fetch dropdown data: ${dropdownResponse.status} ${dropdownResponse.statusText}`
             );
           }
@@ -148,14 +126,8 @@ export default function Feedback() {
               ? dropdownData.users
               : [],
           });
-
-          if (Date.now() - start < 2000) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, 2000 - (Date.now() - start))
-            );
-          }
         } catch (err) {
-          showAlert("error", err.message);
+          toast.error(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -197,13 +169,9 @@ export default function Feedback() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlert({ type: "", message: "", show: false });
 
     if (!validateForm()) {
-      showAlert(
-        "error",
-        "Please fill in all required fields, including a rating."
-      );
+      toast.error("Please fill in all required fields correctly.");
       return;
     }
 
@@ -211,7 +179,7 @@ export default function Feedback() {
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const payload = {
         userName: formData.userName,
@@ -236,13 +204,11 @@ export default function Feedback() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to submit feedback. Please try again."
-        );
+        toast.error(data.message);
       }
 
-      if (!data.feedback)
-        throw new Error("Invalid response: feedback data missing");
+      if (!data.feedback) toast.error("Failed to submit feedback");
+
       setFormData({
         userName: user?.name || "",
         branch: "",
@@ -255,9 +221,9 @@ export default function Feedback() {
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
         );
-      showAlert("success", "Feedback submitted successfully!");
+      toast.success("Feedback submitted successfully!");
     } catch (err) {
-      showAlert("error", err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -281,17 +247,7 @@ export default function Feedback() {
                 <div>
                   <label
                     htmlFor="userName"
-                    className="block text-sm font-medium mb-1"
-                    style={{
-                      backgroundColor: "white",
-                      width: "fit-content",
-                      position: "relative",
-                      top: "13px",
-                      marginLeft: "14px",
-                      paddingLeft: "4px",
-                      paddingRight: "4px",
-                      zIndex: "20",
-                    }}
+                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                   >
                     User Name
                   </label>
@@ -299,7 +255,7 @@ export default function Feedback() {
                     type="text"
                     id="userName"
                     name="userName"
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     value={formData.userName}
                     onChange={handleInputChange}
                     placeholder="Enter user name"
@@ -310,25 +266,16 @@ export default function Feedback() {
                 <div>
                   <label
                     htmlFor="branch"
-                    className="block text-sm font-medium mb-1"
-                    style={{
-                      backgroundColor: "white",
-                      width: "fit-content",
-                      position: "relative",
-                      top: "13px",
-                      marginLeft: "14px",
-                      paddingLeft: "4px",
-                      paddingRight: "4px",
-                      zIndex: "20",
-                    }}
+                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                   >
                     Branch
                   </label>
+
                   <div className="relative">
                     <select
                       id="branch"
                       name="branch"
-                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary"
                       value={formData.branch}
                       onChange={handleInputChange}
                       required
@@ -348,17 +295,7 @@ export default function Feedback() {
                 <div>
                   <label
                     htmlFor="department"
-                    className="block text-sm font-medium mb-1"
-                    style={{
-                      backgroundColor: "white",
-                      width: "fit-content",
-                      position: "relative",
-                      top: "13px",
-                      marginLeft: "14px",
-                      paddingLeft: "4px",
-                      paddingRight: "4px",
-                      zIndex: "20",
-                    }}
+                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                   >
                     Department
                   </label>
@@ -366,7 +303,7 @@ export default function Feedback() {
                     <select
                       id="department"
                       name="department"
-                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary"
                       value={formData.department}
                       onChange={handleInputChange}
                       required
@@ -387,17 +324,7 @@ export default function Feedback() {
                 <div>
                   <label
                     htmlFor="feedbackTo"
-                    className="block text-sm font-medium mb-1"
-                    style={{
-                      backgroundColor: "white",
-                      width: "fit-content",
-                      position: "relative",
-                      top: "13px",
-                      marginLeft: "14px",
-                      paddingLeft: "4px",
-                      paddingRight: "4px",
-                      zIndex: "20",
-                    }}
+                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                   >
                     Feedback To
                   </label>
@@ -405,7 +332,7 @@ export default function Feedback() {
                     <select
                       id="feedbackTo"
                       name="feedbackTo"
-                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary"
                       value={formData.feedbackTo}
                       onChange={handleInputChange}
                       required
@@ -435,25 +362,14 @@ export default function Feedback() {
                 <div className="flex-1">
                   <label
                     htmlFor="feedback"
-                    className="block text-sm font-medium mb-1"
-                    style={{
-                      backgroundColor: "white",
-                      width: "fit-content",
-                      position: "relative",
-                      top: "13px",
-                      marginLeft: "14px",
-                      paddingLeft: "4px",
-                      paddingRight: "4px",
-                      zIndex: "16",
-                      marginBottom: "2px",
-                    }}
+                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
                   >
                     Feedback
                   </label>
                   <textarea
                     id="feedback"
                     name="feedback"
-                    className="w-full  px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full  px-3 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     rows="7"
                     value={formData.feedback}
                     onChange={handleInputChange}
@@ -466,13 +382,6 @@ export default function Feedback() {
 
               <div className="mt-6 flex justify-end space-x-4">
                 <button
-                  type="submit"
-                  className="bg-primary text-white px-4 py-2 rounded-md"
-                  disabled={isLoading}
-                >
-                  Add
-                </button>
-                <button
                   type="button"
                   onClick={() => {
                     setFormData({
@@ -484,24 +393,21 @@ export default function Feedback() {
                       rating: 0,
                     });
                   }}
-                  className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+                  className="bg-black cursor-pointer text-white px-4 py-2 rounded-md "
                 >
                   Clear
+                </button>
+                <button
+                  type="submit"
+                  className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md"
+                  disabled={isLoading}
+                >
+                  Add
                 </button>
               </div>
             </form>
           </div>
         </div>
-
-        {alert.show && (
-          <div className="p-6">
-            <Alert
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert({ type: "", message: "", show: false })}
-            />
-          </div>
-        )}
       </div>
 
       {isLoading && (

@@ -47,7 +47,7 @@ function App() {
         <div className="flex-1 flex flex-col w-full sm:w-[75%] mx-auto">
           {!isAuthPage && <Navbar />}
 
-          <main className="flex-1 overflow-y-auto bg-gray-100">
+          <main className="flex-1 overflow-y-auto no-scrollbar bg-gray-100">
             <Routes>
               {appRoutes.map((route, index) => (
                 <Route key={index} path={route.path} element={route.element} />

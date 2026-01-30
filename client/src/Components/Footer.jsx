@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -7,16 +8,16 @@ const Footer = () => {
         <option>English</option>
       </select> */}
       <div className="flex space-x-4">
-        <span>BUG BUSTER © 2025</span>
-        <a href="#" className="text-white">
+        <span>BUG BUSTER © {new Date().getFullYear()}</span>
+        <Link to="#" className="text-white">
           Privacy Policy
-        </a>
-        <a href="#" className="text-white">
+        </Link>
+        <Link to="#" className="text-white">
           Terms of Service
-        </a>
-        <a href="#" className="text-white">
+        </Link>
+        <Link to="#" className="text-white">
           FAQ's
-        </a>
+        </Link>
       </div>
     </footer>
   );

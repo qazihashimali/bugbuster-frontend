@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { FaEye, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import Loading from "../../Components/Loading";
+import toast from "react-hot-toast";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const [error, setError] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReportsToOpen, setIsReportsToOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -26,6 +27,7 @@ const Users = () => {
     block: "",
     branch: "",
     department: "",
+    reportHim: [],
   });
 
   const roleOptions = ["EndUser", "ServiceProvider", "Admin", "SuperAdmin"];
@@ -39,28 +41,39 @@ const Users = () => {
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found. Please log in.");
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      if (!token) toast.error("No authentication token found.");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
-        console.error("Response status:", response.status, "Response text:", text);
-        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+        console.error(
+          "Response status:",
+          response.status,
+          "Response text:",
+          text
+        );
+        toast.error(
+          `Failed to fetch users: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : data.users || []);
       if (Date.now() - start < 2000)
-        await new Promise((resolve) => setTimeout(resolve, 2000 - (Date.now() - start)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -69,19 +82,29 @@ const Users = () => {
   const fetchDropdowns = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found.");
+      if (!token) toast.error("No authentication token found.");
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/dropdowns`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/dropdowns`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
-        console.error("Dropdowns response status:", response.status, "Response text:", text);
-        throw new Error(`Failed to fetch dropdowns: ${response.status} ${response.statusText}`);
+        console.error(
+          "Dropdowns response status:",
+          response.status,
+          "Response text:",
+          text
+        );
+        toast.error(
+          `Failed to fetch dropdowns: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -92,7 +115,7 @@ const Users = () => {
       });
     } catch (err) {
       console.error("Fetch dropdowns error:", err);
-      setError(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -118,6 +141,7 @@ const Users = () => {
       // block: user.block?._id || "",
       branch: user.branch?._id || "",
       department: user.department?._id || "",
+      reportHim: user.reportHim || [],
     });
     setIsEditing(true);
     setIsModalOpen(true);
@@ -125,113 +149,185 @@ const Users = () => {
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found.");
 
-      // if (formData.roles.includes("EndUser") && (!formData.houseNo || !formData.block)) {
-      //   throw new Error("House number and block are required for EndUser");
-      // }
-      if ((formData.roles.includes("EndUser") || formData.roles.includes("ServiceProvider")) && !formData.phone) {
-        throw new Error("Phone is required for EndUser or ServiceProvider");
+      if (
+        (formData.roles.includes("EndUser") ||
+          formData.roles.includes("ServiceProvider")) &&
+        !formData.phone
+      ) {
+        toast.error("Phone number is required for selected roles");
       }
-      if (formData.roles.includes("ServiceProvider") && (!formData.branch || !formData.department)) {
-        throw new Error("Branch and department are required for ServiceProvider");
+      if (
+        formData.roles.includes("ServiceProvider") &&
+        (!formData.branch || !formData.department)
+      ) {
+        toast.error("Branch and department are required for selected role");
       }
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/users/${selectedUser._id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/users/${
+          selectedUser._id
+        }`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to update user");
+      if (!response.ok) toast.error(data.message || "Failed to update user");
 
-      if (!data.user) throw new Error("Invalid response: user data missing");
+      if (!data.user) toast.error("No user data returned from server");
       setUsers(users.map((u) => (u._id === selectedUser._id ? data.user : u)));
       setIsModalOpen(false);
       // setFormData({ name: "", email: "", roles: [], phone: "", houseNo: "", block: "", branch: "", department: "" });
-      setFormData({ name: "", email: "", roles: [], phone: "",  branch: "", department: "" });
+      setFormData({
+        name: "",
+        email: "",
+        roles: [],
+        phone: "",
+        branch: "",
+        department: "",
+        reportHim: [],
+      });
 
       if (Date.now() - start < 2000)
-        await new Promise((resolve) => setTimeout(resolve, 2000 - (Date.now() - start)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleDeleteUser = async (user) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
-    setError("");
-    setIsSubmitting(true);
+    setIsLoading(true);
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
-
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/users/${user._id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      if (!token) toast.error("No authentication token found.");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/users/${user._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to delete user");
+      if (!response.ok) toast.error(data.message || "Failed to delete user");
 
       setUsers(users.filter((u) => u._id !== user._id));
       if (Date.now() - start < 2000)
-        await new Promise((resolve) => setTimeout(resolve, 2000 - (Date.now() - start)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000 - (Date.now() - start))
+        );
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
+  // const handleInputChange = (e) => {
+  //   const { name, value, type, checked } = e.target;
+  //   if (type === "checkbox") {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       roles: checked
+  //         ? [...prev.roles, value]
+  //         : prev.roles.filter((role) => role !== value),
+  //     }));
+  //   } else {
+  //     setFormData((prev) => ({ ...prev, [name]: value }));
+  //   }
+  // };
+
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
+    const { name, value, type, checked, selectedOptions } = e.target;
+
+    // Roles checkbox
+    if (type === "checkbox" && name === "roles") {
       setFormData((prev) => ({
         ...prev,
         roles: checked
           ? [...prev.roles, value]
-          : prev.roles.filter((role) => role !== value),
+          : prev.roles.filter((r) => r !== value),
       }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      return;
     }
+
+    // Reports To (multi-select)
+    if (name === "reportHim") {
+      const values = Array.from(selectedOptions, (o) => o.value);
+      setFormData((prev) => ({ ...prev, reportHim: values }));
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  const handleReportsToToggle = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      reportHim: Array.isArray(prev.reportHim)
+        ? prev.reportHim.includes(id)
+          ? prev.reportHim.filter((item) => item !== id)
+          : [...prev.reportHim, id]
+        : [id],
+    }));
+  };
   const filteredUsers =
     filterRole === "All"
       ? users
       : users.filter((user) => user.roles.includes(filterRole));
 
-  return (
-    <div className="relative container mx-auto p-3 sm:p-4 lg:p-6 bg-gray-100 min-h-screen" aria-busy={isLoading || isSubmitting}>
-      <div className={`bg-white shadow-md rounded-lg ${isLoading || isSubmitting ? "blur-sm" : ""}`}>
-        <div className="bg-primary text-white p-3 sm:p-4 rounded-t-lg">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">User Management</h1>
-        </div>
+  const reportToOptions = users.filter(
+    (u) => u._id !== selectedUser?._id && u.roles.includes("ServiceProvider")
+  );
 
-        {error && <div className="p-3 sm:p-4 text-red-600 text-sm sm:text-base">{error}</div>}
+  return (
+    <div
+      className="relative container mx-auto p-3 sm:p-4 lg:p-6 bg-gray-100 min-h-screen"
+      aria-busy={isLoading}
+    >
+      <div
+        className={`bg-white shadow-md rounded-lg ${
+          isLoading ? "blur-sm" : ""
+        }`}
+      >
+        <div className="bg-primary text-white p-3 sm:p-4 rounded-t-lg">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">
+            User Management
+          </h1>
+        </div>
 
         <div className="p-3 sm:p-4 lg:p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="bg-primary text-white p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-              <h2 className="text-base sm:text-lg font-semibold">Users Details</h2>
+              <h2 className="text-base sm:text-lg font-semibold">
+                Users Details
+              </h2>
               <div className="relative w-full sm:w-auto">
                 <select
                   value={filterRole}
@@ -252,29 +348,48 @@ const Users = () => {
             </div>
 
             {/* Desktop Table View with Scrollbar */}
-            <div className="hidden lg:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto no-scrollbar">
               <div className="min-w-[1000px]">
                 <table className="w-full table-auto">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="p-3 text-left text-sm font-medium">Name</th>
-                      <th className="p-3 text-left text-sm font-medium">Email</th>
-                      <th className="p-3 text-left text-sm font-medium">Roles</th>
-                      <th className="p-3 text-left text-sm font-medium">Phone</th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Name
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Email
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Roles
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Phone
+                      </th>
                       {/* <th className="p-3 text-left text-sm font-medium">House No</th>
                       <th className="p-3 text-left text-sm font-medium">Block</th> */}
-                      <th className="p-3 text-left text-sm font-medium">Branch</th>
-                      <th className="p-3 text-left text-sm font-medium">Department</th>
-                      <th className="p-3 text-center text-sm font-medium">Actions</th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Branch
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Department
+                      </th>
+                      <th className="p-3 text-center text-sm font-medium">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredUsers.map((user) => (
-                      <tr key={user._id} className="border-b border-gray-200 hover:bg-gray-50">
+                      <tr
+                        key={user._id}
+                        className="border-b border-gray-200 hover:bg-gray-50"
+                      >
                         <td className="p-3 text-sm">{user.name || "N/A"}</td>
                         <td className="p-3 text-sm">{user.email || "N/A"}</td>
                         <td className="p-3 text-sm">
-                          {user.roles?.length > 0 ? user.roles.join(", ") : "N/A"}
+                          {user.roles?.length > 0
+                            ? user.roles.join(", ")
+                            : "N/A"}
                         </td>
                         <td className="p-3 text-sm">{user.phone || "N/A"}</td>
                         {/* <td className="p-3 text-sm">{user.houseNo || "N/A"}</td>
@@ -282,7 +397,9 @@ const Users = () => {
                           {user.block ? `(${user.block.blockCode}) ${user.block.blockName}` : "N/A"}
                         </td> */}
                         <td className="p-3 text-sm">
-                          {user.branch ? `(${user.branch.branchCode}) ${user.branch.branchName}` : "N/A"}
+                          {user.branch
+                            ? `(${user.branch.branchCode}) ${user.branch.branchName}`
+                            : "N/A"}
                         </td>
                         <td className="p-3 text-sm">
                           {user.department
@@ -292,19 +409,19 @@ const Users = () => {
                         <td className="p-3 flex justify-center space-x-2">
                           <button
                             onClick={() => handleViewUser(user)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaEye size={16} />
                           </button>
                           <button
                             onClick={() => handleEditUser(user)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaEdit size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaTrash size={16} />
                           </button>
@@ -319,28 +436,35 @@ const Users = () => {
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden">
               {filteredUsers.map((user) => (
-                <div key={user._id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                <div
+                  key={user._id}
+                  className="border-b border-gray-200 p-4 hover:bg-gray-50"
+                >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-base text-gray-900">{user.name || "N/A"}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{user.email || "N/A"}</p>
+                      <h3 className="font-semibold text-base text-gray-900">
+                        {user?.name || "N/A"}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {user?.email || "N/A"}
+                      </p>
                     </div>
                     <div className="flex space-x-2 ml-3">
                       <button
                         onClick={() => handleViewUser(user)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaEye size={16} />
                       </button>
                       <button
                         onClick={() => handleEditUser(user)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaEdit size={16} />
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaTrash size={16} />
                       </button>
@@ -350,26 +474,34 @@ const Users = () => {
                     <div>
                       <span className="font-medium text-gray-700">Roles:</span>
                       <span className="ml-2 text-gray-600">
-                        {user.roles?.length > 0 ? user.roles.join(", ") : "N/A"}
+                        {user?.roles?.length > 0
+                          ? user.roles.join(", ")
+                          : "N/A"}
                       </span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Phone:</span>
-                      <span className="ml-2 text-gray-600">{user.phone || "N/A"}</span>
+                      <span className="ml-2 text-gray-600">
+                        {user?.phone || "N/A"}
+                      </span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">House:</span>
-                      <span className="ml-2 text-gray-600">{user.houseNo || "N/A"}</span>
+                      <span className="ml-2 text-gray-600">
+                        {user?.houseNo || "N/A"}
+                      </span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Block:</span>
                       <span className="ml-2 text-gray-600">
-                        {user.block ? `${user.block.blockCode}` : "N/A"}
+                        {user?.block ? `${user.block.blockCode}` : "N/A"}
                       </span>
                     </div>
                     {user.branch && (
                       <div className="sm:col-span-2">
-                        <span className="font-medium text-gray-700">Branch:</span>
+                        <span className="font-medium text-gray-700">
+                          Branch:
+                        </span>
                         <span className="ml-2 text-gray-600">
                           ({user.branch.branchCode}) {user.branch.branchName}
                         </span>
@@ -377,9 +509,12 @@ const Users = () => {
                     )}
                     {user.department && (
                       <div className="sm:col-span-2">
-                        <span className="font-medium text-gray-700">Department:</span>
+                        <span className="font-medium text-gray-700">
+                          Department:
+                        </span>
                         <span className="ml-2 text-gray-600">
-                          ({user.department.departmentCode}) {user.department.departmentName}
+                          ({user?.department?.departmentCode}){" "}
+                          {user?.department?.departmentName}
                         </span>
                       </div>
                     )}
@@ -391,34 +526,28 @@ const Users = () => {
         </div>
       </div>
 
-      {(isLoading || isSubmitting) && (
+      {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <Loading />
         </div>
       )}
 
       {isModalOpen && selectedUser && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md lg:max-w-lg max-h-[90vh] sm:max-h-[80vh] flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg sm:text-xl font-semibold">
                 {isEditing ? "Edit User" : "View User"}
               </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-600 hover:text-gray-800 p-1"
-              >
-                <FaTimes size={20} />
-              </button>
             </div>
             {isEditing ? (
-              <div className="overflow-y-auto flex-1 pr-2">
+              <div className="overflow-y-auto no-scrollbar flex-1 pr-2">
                 <form onSubmit={handleUpdateUser} className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Name
                     </label>
                     <input
@@ -427,12 +556,15 @@ const Users = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium mb-1"
+                    >
                       Email
                     </label>
                     <input
@@ -441,12 +573,56 @@ const Users = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                       required
                     />
                   </div>
+                  <div className="relative">
+                    <label className="block text-sm font-medium mb-1">
+                      Persons who Report Him.{" "}
+                    </label>
+
+                    {/* Dropdown Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsReportsToOpen(!isReportsToOpen)}
+                      className="w-full focus:outline-none focus:ring-2 focus:ring-primary px-3 py-2 border rounded-md text-left text-sm bg-white flex justify-between items-center"
+                    >
+                      <span className="text-gray-700">
+                        {formData.reportHim?.length
+                          ? reportToOptions
+                              .filter((p) => formData.reportHim.includes(p._id))
+                              .map((p) => p.name)
+                              .join(", ")
+                          : "Select persons"}
+                      </span>
+                      <IoChevronDown className="text-gray-400" size={16} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isReportsToOpen && (
+                      <div className="absolute  z-20 mt-1 w-full bg-white border rounded-md shadow max-h-48 overflow-y-auto no-scrollbar">
+                        {reportToOptions.map((person) => (
+                          <label
+                            key={person._id}
+                            className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.reportHim.includes(person._id)}
+                              onChange={() => handleReportsToToggle(person._id)}
+                            />
+                            {person.name} ({person.roles})
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-medium mb-2">Roles</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Roles
+                    </label>
                     <div className="space-y-1">
                       {roleOptions.map((role) => (
                         <div key={role} className="flex items-center">
@@ -459,14 +635,20 @@ const Users = () => {
                             onChange={handleInputChange}
                             className="mr-2"
                           />
-                          <label htmlFor={`role-${role}`} className="text-sm">{roleDisplay[role]}</label>
+                          <label htmlFor={`role-${role}`} className="text-sm">
+                            {roleDisplay[role]}
+                          </label>
                         </div>
                       ))}
                     </div>
                   </div>
-                  {(formData.roles.includes("EndUser") || formData.roles.includes("ServiceProvider")) && (
+                  {(formData.roles.includes("EndUser") ||
+                    formData.roles.includes("ServiceProvider")) && (
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium mb-1">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium mb-1"
+                      >
                         Phone
                       </label>
                       <input
@@ -475,7 +657,7 @@ const Users = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                         required
                       />
                     </div>
@@ -492,7 +674,7 @@ const Users = () => {
                           name="houseNo"
                           value={formData.houseNo}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                           required
                         />
                       </div>
@@ -505,7 +687,7 @@ const Users = () => {
                           name="block"
                           value={formData.block}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                           required
                         >
                           <option value="">Select Block</option>
@@ -521,7 +703,10 @@ const Users = () => {
                   {formData.roles.includes("ServiceProvider") && (
                     <>
                       <div>
-                        <label htmlFor="branch" className="block text-sm font-medium mb-1">
+                        <label
+                          htmlFor="branch"
+                          className="block text-sm font-medium mb-1"
+                        >
                           Branch
                         </label>
                         <select
@@ -529,19 +714,22 @@ const Users = () => {
                           name="branch"
                           value={formData.branch}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                           required
                         >
                           <option value="">Select Branch</option>
                           {dropdowns.branches.map((branch) => (
                             <option key={branch._id} value={branch._id}>
-                              ({branch.branchCode}) {branch.branchName}
+                              ({branch?.branchCode}) {branch?.branchName}
                             </option>
                           ))}
                         </select>
                       </div>
                       <div>
-                        <label htmlFor="department" className="block text-sm font-medium mb-1">
+                        <label
+                          htmlFor="department"
+                          className="block text-sm font-medium mb-1"
+                        >
                           Department
                         </label>
                         <select
@@ -549,13 +737,14 @@ const Users = () => {
                           name="department"
                           value={formData.department}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                           required
                         >
                           <option value="">Select Department</option>
                           {dropdowns.departments.map((department) => (
                             <option key={department._id} value={department._id}>
-                              ({department.departmentCode}) {department.departmentName}
+                              ({department.departmentCode}){" "}
+                              {department.departmentName}
                             </option>
                           ))}
                         </select>
@@ -564,78 +753,101 @@ const Users = () => {
                   )}
                   <div className="flex flex-col gap-4 sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4">
                     <button
-                      type="submit"
-                      className="bg-primary text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
-                      disabled={isLoading || isSubmitting}
-                    >
-                      Update
-                    </button>
-                    <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm order-2 sm:order-1"
+                      className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm order-2 sm:order-1"
                     >
                       Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
+                      disabled={isLoading}
+                    >
+                      Update
                     </button>
                   </div>
                 </form>
               </div>
             ) : (
-              <div className="overflow-y-auto flex-1">
+              <div className="overflow-y-auto no-scrollbar  flex-1">
                 <div className="space-y-3 text-sm">
                   <div>
                     <span className="font-medium text-gray-700">Name:</span>
-                    <span className="ml-2 text-gray-600">{selectedUser.name || "N/A"}</span>
+                    <span className="ml-2 text-gray-600">
+                      {selectedUser.name || "N/A"}
+                    </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Email:</span>
-                    <span className="ml-2 text-gray-600">{selectedUser.email || "N/A"}</span>
+                    <span className="ml-2 text-gray-600">
+                      {selectedUser.email || "N/A"}
+                    </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Roles:</span>
                     <span className="ml-2 text-gray-600">
-                      {selectedUser.roles?.length > 0 ? selectedUser.roles.join(", ") : "N/A"}
+                      {selectedUser.roles?.length > 0
+                        ? selectedUser.roles.join(", ")
+                        : "N/A"}
                     </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Phone:</span>
-                    <span className="ml-2 text-gray-600">{selectedUser.phone || "N/A"}</span>
+                    <span className="ml-2 text-gray-600">
+                      {selectedUser?.phone || "N/A"}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">House Number:</span>
-                    <span className="ml-2 text-gray-600">{selectedUser.houseNo || "N/A"}</span>
+                    <span className="font-medium text-gray-700">
+                      House Number:
+                    </span>
+                    <span className="ml-2 text-gray-600">
+                      {selectedUser?.houseNo || "N/A"}
+                    </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Block:</span>
                     <span className="ml-2 text-gray-600">
-                      {selectedUser.block ? `(${selectedUser.block.blockCode}) ${selectedUser.block.blockName}` : "N/A"}
+                      {selectedUser?.block
+                        ? `(${selectedUser?.block?.blockCode}) ${selectedUser?.block?.blockName}`
+                        : "N/A"}
                     </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Branch:</span>
                     <span className="ml-2 text-gray-600">
-                      {selectedUser.branch ? `(${selectedUser.branch.branchCode}) ${selectedUser.branch.branchName}` : "N/A"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Department:</span>
-                    <span className="ml-2 text-gray-600">
-                      {selectedUser.department
-                        ? `(${selectedUser.department.departmentCode}) ${selectedUser.department.departmentName}`
+                      {selectedUser?.branch
+                        ? `(${selectedUser.branch.branchCode}) ${selectedUser.branch.branchName}`
                         : "N/A"}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">Created At:</span>
+                    <span className="font-medium text-gray-700">
+                      Department:
+                    </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : "N/A"}
+                      {selectedUser?.department
+                        ? `(${selectedUser.department.departmentCode}) ${selectedUser.department.departmentName}`
+                        : "N/A"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="font-medium text-gray-700">
+                      Created At:
+                    </span>
+                    <span className="ml-2 text-gray-600">
+                      {selectedUser?.createdAt
+                        ? new Date(selectedUser?.createdAt).toLocaleString()
+                        : "N/A"}
                     </span>
                   </div>
                 </div>
                 <div className="flex justify-end mt-6 pt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm"
+                    className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm"
                   >
                     Close
                   </button>

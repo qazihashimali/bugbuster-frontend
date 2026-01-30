@@ -5,9 +5,9 @@ import toast from "react-hot-toast";
 
 const Assignedtasks = () => {
   const [issues, setIssues] = useState([]);
-  const [error, setError] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -27,14 +27,12 @@ const Assignedtasks = () => {
 
   const fetchIssues = async () => {
     setIsLoading(true);
-    const start = Date.now();
+
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
       if (!token || !user?._id) {
-        throw new Error(
-          "No authentication token or user ID found. Please log in again."
-        );
+        toast.error("Authentication error. Please log in again.");
       }
 
       const response = await fetch(
@@ -55,10 +53,8 @@ const Assignedtasks = () => {
           "Response text:",
           text
         );
-        throw new Error(
-          toast.error(
-            `Failed to fetch issues: ${response.status} ${response.statusText}`
-          )
+        toast.error(
+          `Failed to fetch issues: ${response.status} ${response.statusText}`
         );
       }
 
@@ -66,13 +62,10 @@ const Assignedtasks = () => {
       const filteredIssues = Array.isArray(data) ? data : data.issues || [];
       setIssues(filteredIssues);
 
-      if (Date.now() - start < 2000)
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 - (Date.now() - start))
-        );
+      // console.log("Filtered issues:", filteredIssues);
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -103,9 +96,7 @@ const Assignedtasks = () => {
 
   const handleUpdateIssue = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
-    const start = Date.now();
+    setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -116,10 +107,7 @@ const Assignedtasks = () => {
         return;
       }
 
-      if (
-        user._id !== selectedIssue.createdBy._id.toString() &&
-        user.email !== "Admin@gmail.com"
-      ) {
+      if (user._id !== selectedIssue.createdBy._id.toString()) {
         toast.error("You do not have permission to update this issue.");
         return;
       }
@@ -164,35 +152,25 @@ const Assignedtasks = () => {
         status: "pending",
         priority: "Medium",
       });
-
-      if (Date.now() - start < 2000) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 - (Date.now() - start))
-        );
-      }
     } catch (err) {
-      setError(err.message);
+      console.error("Update error:", err);
       toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleDeleteIssue = async (issue) => {
     if (!window.confirm("Are you sure you want to delete this issue?")) return;
 
-    setError("");
-    setIsSubmitting(true);
-    const start = Date.now();
+    setIsLoading(true);
+
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
       if (!token) toast.error("No authentication token found. Please log in.");
 
-      if (
-        user._id !== issue.createdBy._id.toString() &&
-        user.email !== "Admin@gmail.com"
-      ) {
+      if (user._id !== issue.createdBy._id.toString()) {
         toast.error("You do not have permission to delete this issue.");
         return;
       }
@@ -212,14 +190,11 @@ const Assignedtasks = () => {
       if (!response.ok) toast.error(`Failed to delete issue: ${data.message}`);
 
       setIssues(issues.filter((i) => i._id !== issue._id));
-      if (Date.now() - start < 2000)
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 - (Date.now() - start))
-        );
     } catch (err) {
-      setError(err.message);
+      console.error("Delete error:", err);
+      toast.error(err.message);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -244,11 +219,11 @@ const Assignedtasks = () => {
   return (
     <div
       className="relative container mx-auto p-3 sm:p-4 lg:p-6 bg-gray-100 min-h-screen"
-      aria-busy={isLoading || isSubmitting}
+      aria-busy={isLoading}
     >
       <div
         className={`bg-white shadow-md rounded-lg ${
-          isLoading || isSubmitting ? "blur-sm" : ""
+          isLoading ? "blur-sm" : ""
         }`}
       >
         <div className="bg-primary text-white p-3 sm:p-4 rounded-t-lg">
@@ -256,12 +231,6 @@ const Assignedtasks = () => {
             Tasks Assigned to Others
           </h1>
         </div>
-
-        {error && (
-          <div className="p-3 sm:p-4 text-red-600 text-sm sm:text-base">
-            {error}
-          </div>
-        )}
 
         <div className="p-3 sm:p-4 lg:p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -272,10 +241,10 @@ const Assignedtasks = () => {
             </div>
 
             {/* Desktop Table View with Scrollbar */}
-            <div className="hidden lg:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto no-scrollbar">
               <div className="min-w-[1000px]">
                 <table className="w-full table-auto">
-                  <thead className="bg-gray-100">
+                  <thead className="bg-gray-100 truncate">
                     <tr>
                       <th className="p-3 text-left text-sm font-medium">
                         Title
@@ -331,19 +300,19 @@ const Assignedtasks = () => {
                         <td className="p-3 flex justify-center space-x-2">
                           <button
                             onClick={() => handleViewIssue(issue)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaEye size={16} />
                           </button>
                           <button
                             onClick={() => handleEditIssue(issue)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaEdit size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteIssue(issue)}
-                            className="text-orange-600 hover:text-orange-800 p-1"
+                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
                           >
                             <FaTrash size={16} />
                           </button>
@@ -383,19 +352,19 @@ const Assignedtasks = () => {
                     <div className="flex space-x-2 ml-3">
                       <button
                         onClick={() => handleViewIssue(issue)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600  cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaEye size={16} />
                       </button>
                       <button
                         onClick={() => handleEditIssue(issue)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaEdit size={16} />
                       </button>
                       <button
                         onClick={() => handleDeleteIssue(issue)}
-                        className="text-orange-600 hover:text-orange-800 p-2"
+                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
                       >
                         <FaTrash size={16} />
                       </button>
@@ -446,28 +415,19 @@ const Assignedtasks = () => {
         </div>
       </div>
 
-      {(isLoading || isSubmitting) && (
+      {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <Loading />
         </div>
       )}
 
       {isModalOpen && selectedIssue && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md max-h-[90vh] sm:max-h-[80vh] flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg sm:text-xl font-semibold">
                 {isEditing ? "Edit Issue" : "View Issue"}
               </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-600 hover:text-gray-800 p-1"
-              >
-                <FaTimes size={20} />
-              </button>
             </div>
             {isEditing ? (
               <div className="overflow-y-auto flex-1 pr-2">
@@ -485,7 +445,7 @@ const Assignedtasks = () => {
                       name="userName"
                       value={formData.userName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                       required
                     />
                   </div>
@@ -501,7 +461,7 @@ const Assignedtasks = () => {
                       name="description"
                       value={formData?.description || ""}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                       rows="4"
                     />
                   </div>
@@ -517,7 +477,7 @@ const Assignedtasks = () => {
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                     >
                       <option value="pending">Pending</option>
                       <option value="in-progress">In Progress</option>
@@ -536,7 +496,7 @@ const Assignedtasks = () => {
                       name="priority"
                       value={formData.priority}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                     >
                       <option value="Low">Low</option>
                       <option value="Medium">Medium</option>
@@ -545,18 +505,18 @@ const Assignedtasks = () => {
                   </div>
                   <div className="flex flex-col gap-2 sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4">
                     <button
-                      type="submit"
-                      className="bg-primary text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
-                      disabled={isLoading || isSubmitting}
-                    >
-                      Update
-                    </button>
-                    <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm order-2 sm:order-1"
+                      className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm order-2 sm:order-1"
                     >
                       Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md text-sm order-1 sm:order-2"
+                      disabled={isLoading}
+                    >
+                      Update
                     </button>
                   </div>
                 </form>
@@ -575,13 +535,13 @@ const Assignedtasks = () => {
                       Description:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.description?.title || "N/A"}
+                      {selectedIssue?.description?.title ?? "N/A"}
                     </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Branch:</span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.branch?.branchName || "N/A"}
+                      {selectedIssue?.branch?.branchName || "N/A"}
                     </span>
                   </div>
                   <div>
@@ -596,13 +556,13 @@ const Assignedtasks = () => {
                     <span className="font-medium text-gray-700">Status:</span>
                     <span className="ml-2 text-gray-600">
                       {statusDisplay[selectedIssue.status] ||
-                        selectedIssue.status}
+                        selectedIssue?.status}
                     </span>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Priority:</span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.priority}
+                      {selectedIssue?.priority}
                     </span>
                   </div>
                   <div>
@@ -610,7 +570,7 @@ const Assignedtasks = () => {
                       Assigned To:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.assignedTo?.name || "N/A"}
+                      {selectedIssue?.assignedTo?.name || "N/A"}
                     </span>
                   </div>
                   <div>
@@ -618,7 +578,7 @@ const Assignedtasks = () => {
                       Created By:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue.createdBy?.name || "N/A"}
+                      {selectedIssue?.createdBy?.name || "N/A"}
                     </span>
                   </div>
                   <div>
@@ -626,14 +586,14 @@ const Assignedtasks = () => {
                       Created At:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {new Date(selectedIssue.createdAt).toLocaleDateString()}
+                      {new Date(selectedIssue?.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-end mt-6 pt-4 border-t">
+                <div className="flex justify-end mt-6 pt-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 text-sm"
+                    className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm"
                   >
                     Close
                   </button>

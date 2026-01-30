@@ -14,12 +14,7 @@ import {
   Legend,
 } from "chart.js";
 
-import {
-  FaScaleBalanced,
-  FaClock,
-  FaStar,
-  FaStarHalfStroke,
-} from "react-icons/fa6";
+import { FaScaleBalanced, FaStar, FaStarHalfStroke } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { IoChevronDown } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
@@ -170,109 +165,6 @@ const advanceTasksData = [
   },
 ];
 
-// const paymentSnapshotData = {
-//   invoiceProgress: "+18%",
-//   amounts: [
-//     {
-//       label: "Outstanding Amount",
-//       value: "7,839",
-//       percentage: "+3.98%",
-//       color: "bg-orange-500",
-//     },
-//     {
-//       label: "Overdue Amount",
-//       value: "5,645",
-//       percentage: "+1.78%",
-//       color: "bg-gray-900",
-//     },
-//   ],
-// };
-
-// const subscriptionData = {
-//   ALL: [
-//     {
-//       reference: "Microsoft Office 365",
-//       name: "Per User",
-//       createdDate: "150",
-//       nextRun: "150",
-//       status: "150",
-//     },
-//     {
-//       reference: "Adobe Photoshop",
-//       name: "Per Device",
-//       createdDate: "75",
-//       nextRun: "75",
-//       status: "75",
-//     },
-//     {
-//       reference: "Zoom Pro",
-//       name: "Per User",
-//       createdDate: "120",
-//       nextRun: "120",
-//       status: "120",
-//     },
-//     {
-//       reference: "GitHub Enterprise",
-//       name: "Per User",
-//       createdDate: "180",
-//       nextRun: "180",
-//       status: "180",
-//     },
-//   ],
-//   Invoices: [
-//     {
-//       reference: "Invoice #001",
-//       name: "Client A",
-//       createdDate: "2025-04-01",
-//       nextRun: "2025-05-01",
-//       status: "Pending",
-//     },
-//     {
-//       reference: "Invoice #002",
-//       name: "Client B",
-//       createdDate: "2025-04-10",
-//       nextRun: "2025-05-10",
-//       status: "Paid",
-//     },
-//   ],
-//   Bills: [
-//     {
-//       reference: "Bill #101",
-//       name: "Vendor X",
-//       createdDate: "2025-04-05",
-//       nextRun: "2025-05-05",
-//       status: "Due",
-//     },
-//   ],
-//   "Simple Bills": [
-//     {
-//       reference: "Simple Bill #201",
-//       name: "Supplier Y",
-//       createdDate: "2025-04-15",
-//       nextRun: "2025-05-15",
-//       status: "Pending",
-//     },
-//   ],
-// };
-
-const Alert = ({ type, message, onClose }) => {
-  const alertStyles = {
-    success: "bg-green-100 border-green-500 text-green-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-  };
-
-  return (
-    <div
-      className={`border-l-4 p-4 mb-4 flex justify-between items-center ${alertStyles[type]}`}
-    >
-      <p>{message}</p>
-      <button onClick={onClose} className="text-gray-700 hover:text-gray-900">
-        <FaClock />
-      </button>
-    </div>
-  );
-};
-
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
 
@@ -283,16 +175,16 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
         <p className="mb-4">{message}</p>
         <div className="flex justify-end space-x-4">
           <button
-            onClick={onConfirm}
-            className="bg-primary text-white px-4 py-2 rounded-md"
-          >
-            Yes
-          </button>
-          <button
             onClick={onClose}
-            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800"
+            className="bg-black cursor-pointer text-white px-4 py-2 rounded-md"
           >
             No
+          </button>
+          <button
+            onClick={onConfirm}
+            className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md"
+          >
+            Yes
           </button>
         </div>
       </div>
@@ -307,7 +199,7 @@ const Dashboard = () => {
 
   const [user, setUser] = useState(null);
   const [issues, setIssues] = useState([]);
-  const [alert, setAlert] = useState({ type: "", message: "", show: false });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -323,11 +215,6 @@ const Dashboard = () => {
   // const [activeTab, setActiveTab] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("All");
   const [assignedTasks, setAssignedTasks] = useState([]);
-
-  // const showAlert = (type, message) => {
-  //   setAlert({ type, message, show: true });
-  //   setTimeout(() => setAlert({ type: "", message: "", show: false }), 5000);
-  // };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -575,12 +462,11 @@ const Dashboard = () => {
       return;
     }
 
-    setAlert({ type: "", message: "", show: false });
     setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      if (!token) toast.error("No authentication token found");
 
       const payload = {};
       if (
@@ -625,7 +511,7 @@ const Dashboard = () => {
       const data = await response.json();
       if (!response.ok) {
         console.error("Server response:", data);
-        throw new Error(
+        toast.error(
           data.message || `Failed to update task: ${response.statusText}`
         );
       }
@@ -674,8 +560,7 @@ const Dashboard = () => {
       setIsLoading(true);
       try {
         const token = localStorage.getItem("token");
-        if (!token) throw new Error("No authentication token found");
-
+        if (!token) toast.error("No authentication token found");
         // Call the reopen endpoint
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/issues/${
@@ -693,10 +578,8 @@ const Dashboard = () => {
         const data = await response.json();
         if (!response.ok) {
           console.error("Server response:", data);
-          throw new Error(
-            toast.error(
-              data.message || `Failed to reopen task: ${response.statusText}`
-            )
+          toast.error(
+            data.message || `Failed to reopen task: ${response.statusText}`
           );
         }
 
@@ -877,31 +760,46 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          {alert.show && (
-            <Alert
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert({ type: "", message: "", show: false })}
-            />
-          )}
 
           <div className="p-6">
             <div className="bg-white shadow rounded-lg overflow-hidden">
               <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-xs min-w-[1200px]">
                   <thead className="bg-gray-100 truncate">
-                    <tr className="text-left text-gray-400">
-                      <th className="p-3">Assigned By</th>
-                      <th className="p-3">Branch</th>
-                      <th className="p-3">Department</th>
-                      <th className="p-3">Assigned To</th>
-                      <th className="p-3">Description</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Priority</th>
-                      <th className="p-3">Attachment</th>
-                      <th className="p-3">FeedBack</th>
-                      <th className="p-3">Rating</th>
-                      <th className="p-3">Comments</th>
+                    <tr className="text-gray-800">
+                      <th className="p-3 text-left text-sm font-medium">
+                        Assigned By
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Branch
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Department
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Assigned To
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Description
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Status
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Priority
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Attachment
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        FeedBack
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Rating
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Comments
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -917,7 +815,7 @@ const Dashboard = () => {
                           onClick={() => handleViewIssue(issue)}
                         >
                           <td
-                            className={`p-3 ${
+                            className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
@@ -926,29 +824,29 @@ const Dashboard = () => {
                             {issue.createdBy?.name || "N/A"}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
                             } `}
                           >
                             {issue.branch
-                              ? `(${issue.branch.branchCode}) ${issue.branch.branchName}`
+                              ? `${issue.branch.branchName}`
                               : "N/A"}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
                             } `}
                           >
                             {issue.department
-                              ? `(${issue.department.departmentCode}) ${issue.department.departmentName}`
+                              ? `${issue.department.departmentName}`
                               : "N/A"}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3  ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
@@ -959,7 +857,7 @@ const Dashboard = () => {
                               : "N/A"}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
@@ -1029,13 +927,17 @@ const Dashboard = () => {
                             {renderStars(issue.rating)}
                           </td>
                           <td
-                            className={`p-3 ${
+                            className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
                             } `}
                           >
-                            {issue.comments ? `${issue.comments}` : "None"}
+                            {issue.comments
+                              ? issue.comments.length > 20
+                                ? issue.comments.slice(0, 20) + "..."
+                                : issue.comments
+                              : "N/A"}
                           </td>
                         </tr>
                       ) : null
@@ -1058,19 +960,10 @@ const Dashboard = () => {
         </div>
         {/* Modal for Task Details */}
         {isModalOpen && selectedIssue && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-          >
-            <div className="bg-white rounded-lg px-6 py-4 w-full max-w-3xl h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg px-6 py-4 w-full max-w-3xl h-[80vh] overflow-y-auto no-scrollbar">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Task Details</h2>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <MdCancel size={24} className="color-primary" />
-                </button>
               </div>
               <div>
                 <p>
@@ -1097,7 +990,7 @@ const Dashboard = () => {
                 </p>
                 <p>
                   <strong>Description:</strong>{" "}
-                  {selectedIssue?.description?.title || "N/A"}
+                  {selectedIssue?.description?.description || "N/A"}
                 </p>
                 <p>
                   <strong>TimeLine:</strong>{" "}
@@ -1190,7 +1083,7 @@ const Dashboard = () => {
                                     status: e.target.value,
                                   }))
                                 }
-                                className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className="w-full px-3 py-2 border rounded-md appearance-none pr-10 focus:outline-none focus:ring-2 focus:ring-primary"
                                 required={canUpdateStatus}
                               >
                                 <option value="pending">Pending</option>
@@ -1238,7 +1131,7 @@ const Dashboard = () => {
                                   feedback: e.target.value,
                                 }))
                               }
-                              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                               rows="4"
                               placeholder="Enter feedback here..."
                             />
@@ -1262,7 +1155,7 @@ const Dashboard = () => {
                                   comment: e.target.value,
                                 }))
                               }
-                              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                               rows="3"
                               placeholder="Enter your comment here..."
                             />
@@ -1274,10 +1167,17 @@ const Dashboard = () => {
                         canAddComment ? (
                           <div className="flex justify-end space-x-4">
                             <button
+                              type="button"
+                              onClick={() => setIsModalOpen(false)}
+                              className="bg-black cursor-pointer text-white px-4 py-2 rounded-md "
+                            >
+                              Cancel
+                            </button>
+                            <button
                               type="submit"
                               disabled={isLoading}
-                              className={`bg-primary text-white px-4 py-2 rounded-md flex items-center justify-center gap-2
-    ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-primary/90"}
+                              className={`bg-primary cursor-pointer text-white px-4 py-2 rounded-md flex items-center justify-center gap-2
+    ${isLoading ? "opacity-70 cursor-not-allowed" : ""}
   `}
                             >
                               {isLoading && (
@@ -1286,14 +1186,6 @@ const Dashboard = () => {
                               <span>
                                 {isLoading ? "Updating..." : "Update Task"}
                               </span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => setIsModalOpen(false)}
-                              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800"
-                            >
-                              Cancel
                             </button>
                           </div>
                         ) : (
@@ -1585,54 +1477,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Subscription Section */}
-        {/* <div className="bg-white rounded-lg shadow">
-          <div className="bg-primary text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Welcome to NITSEL</h3>
-          </div>
-          <div className="p-6">
-            <div className="flex space-x-4 mb-4">
-              {["ALL", "Invoices", "Bills", "Simple Bills"].map((tab) => (
-                <button
-                  key={tab}
-                  className={`border-b-2 pb-1 ${
-                    activeTab === tab
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-gray-600"
-                  }`}
-                  onClick={() => handleTabClick(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-left text-gray-400 border-b border-gray-200">
-                  <th className="pb-3 w-1/4">Reference</th>
-                  <th className="pb-3 w-1/4">Name</th>
-                  <th className="pb-3 w-1/6">Created Date</th>
-                  <th className="pb-3 w-1/6">Date next run</th>
-                  <th className="pb-3 w-1/6">Status</th>
-                  <th className="pb-3 w-1/6">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subscriptionData[activeTab].map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100">
-                    <td className="py-4 text-gray-600">{item.reference}</td>
-                    <td className="py-4 text-gray-600">{item.name}</td>
-                    <td className="py-4 text-gray-600">{item.createdDate}</td>
-                    <td className="py-4 text-gray-600">{item.nextRun}</td>
-                    <td className="py-4 text-gray-600">{item.status}</td>
-                    <td className="py-4 text-gray-600"></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div> */}
       </main>
     </div>
   );
