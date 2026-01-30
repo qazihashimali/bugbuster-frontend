@@ -338,11 +338,13 @@ const Auth = () => {
         const data = await response.json();
         if (!response.ok) toast.error(data.message || "Something went wrong");
 
-        setVerifiedEmail(email);
-        setResendAttempts(data.resendAttempts || 0);
-        setShowOtpInput(true);
-        setTimer(40);
-        setIsTimerActive(true);
+        if (data && data.email) {
+          setVerifiedEmail(email);
+          setResendAttempts(data.resendAttempts || 0);
+          setShowOtpInput(true);
+          setTimer(40);
+          setIsTimerActive(true);
+        }
       } else {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/auth/verify-otp`,
