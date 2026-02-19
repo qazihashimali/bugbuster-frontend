@@ -57,7 +57,7 @@ const getAllCompanies = async () => {
     }
 
     const data = await response.json();
-    return data.companies;
+    return data;
   } catch (error) {
     toast.error(error.message || "Failed to fetch companies");
   }
