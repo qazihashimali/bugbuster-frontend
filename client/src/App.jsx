@@ -38,9 +38,9 @@ function App() {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             onLogout={handleLogout}
-            className={`fixed sm:static inset-y-0 left-0 z-50 w-64 sm:w-64 bg-white transform ${
-              isOpen ? "translate-x-0" : "-translate-x-full"
-            } sm:translate-x-0 transition-transform duration-300 ease-in-out`}
+            // className={`fixed sm:static inset-y-0 left-0 z-50 w-64 sm:w-64 bg-white transform ${
+            //   isOpen ? "translate-x-0" : "-translate-x-full"
+            // } sm:translate-x-0 transition-transform duration-300 ease-in-out`}
           />
         )}
 

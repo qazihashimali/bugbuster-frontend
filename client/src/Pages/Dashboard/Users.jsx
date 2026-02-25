@@ -5,6 +5,10 @@ import Loading from "../../Components/Loading";
 import toast from "react-hot-toast";
 
 const Users = () => {
+  const user =
+    (localStorage.getItem("user") &&
+      JSON.parse(localStorage.getItem("user"))) ||
+    null;
   const [users, setUsers] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +17,8 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [filterRole, setFilterRole] = useState("All");
+  const [filterCompany, setFilterCompany] = useState("All");
+  const [companies, setCompanies] = useState([]);
   const [dropdowns, setDropdowns] = useState({
     blocks: [],
     branches: [],
@@ -67,6 +73,7 @@ const Users = () => {
 
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : data.users || []);
+      console.log(data);
       if (Date.now() - start < 2000)
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
@@ -79,13 +86,46 @@ const Users = () => {
     }
   };
 
-  const fetchDropdowns = async () => {
+  const getAllCompanies = async () => {
     try {
+      if (parentDB !== user?.company) {
+        return;
+      }
       const token = localStorage.getItem("token");
-      if (!token) toast.error("No authentication token found.");
+      if (!token) toast.error("No authentication token found");
 
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/dropdowns`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/company`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(
+          errorData.message || `HTTP error! Status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch companies");
+    }
+  };
+
+  const fetchDropdowns = async (companyName = "") => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/auth/dropdowns?company=${encodeURIComponent(companyName)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -93,20 +133,8 @@ const Users = () => {
           },
         }
       );
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error(
-          "Dropdowns response status:",
-          response.status,
-          "Response text:",
-          text
-        );
-        toast.error(
-          `Failed to fetch dropdowns: ${response.status} ${response.statusText}`
-        );
-      }
-
+      if (!response.ok)
+        toast.error(`Failed to fetch dropdowns: ${response.status}`);
       const data = await response.json();
       setDropdowns({
         blocks: data.blocks || [],
@@ -114,7 +142,6 @@ const Users = () => {
         departments: data.departments || [],
       });
     } catch (err) {
-      console.error("Fetch dropdowns error:", err);
       toast.error(err.message);
     }
   };
@@ -122,6 +149,9 @@ const Users = () => {
   useEffect(() => {
     fetchUsers();
     fetchDropdowns();
+    getAllCompanies().then((data) => {
+      setCompanies(data || []);
+    });
   }, []);
 
   const handleViewUser = (user) => {
@@ -137,15 +167,18 @@ const Users = () => {
       email: user.email || "",
       roles: user.roles || [],
       phone: user.phone || "",
-      // houseNo: user.houseNo || "",
-      // block: user.block?._id || "",
       branch: user.branch?._id || "",
       department: user.department?._id || "",
       reportHim: user.reportHim || [],
     });
+
+    fetchDropdowns(user.company); // pass the company name directly
+
     setIsEditing(true);
     setIsModalOpen(true);
   };
+
+  const parentDB = import.meta.env.VITE_ALLOWED_COMPANIES;
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
@@ -297,13 +330,21 @@ const Users = () => {
         : [id],
     }));
   };
-  const filteredUsers =
-    filterRole === "All"
-      ? users
-      : users.filter((user) => user.roles.includes(filterRole));
+
+  const filteredUsers = users.filter((user) => {
+    const roleMatch = filterRole === "All" || user.roles.includes(filterRole);
+
+    const companyMatch =
+      filterCompany === "All" || user.company === filterCompany;
+
+    return roleMatch && companyMatch;
+  });
 
   const reportToOptions = users.filter(
-    (u) => u._id !== selectedUser?._id && u.roles.includes("ServiceProvider")
+    (u) =>
+      u?._id !== selectedUser?._id &&
+      u.roles.includes("ServiceProvider") &&
+      u.company === selectedUser?.company
   );
 
   return (
@@ -328,22 +369,46 @@ const Users = () => {
               <h2 className="text-base sm:text-lg font-semibold">
                 Users Details
               </h2>
-              <div className="relative w-full sm:w-auto">
-                <select
-                  value={filterRole}
-                  onChange={(e) => setFilterRole(e.target.value)}
-                  className="border bg-white rounded p-2 text-sm text-gray-800 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto min-w-[140px]"
-                >
-                  <option value="All">All Roles</option>
-                  {roleOptions.map((role) => (
-                    <option key={role} value={role}>
-                      {roleDisplay[role]}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <IoChevronDown className="text-gray-400" size={12} />
+              <div className="flex justify-end items-center space-x-4">
+                {/* Role Dropdown */}
+                <div className="relative w-full sm:w-auto">
+                  <select
+                    value={filterRole}
+                    onChange={(e) => setFilterRole(e.target.value)}
+                    className="border bg-white rounded p-2 text-sm text-gray-800 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto min-w-[140px]"
+                  >
+                    <option value="All">All Roles</option>
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {roleDisplay[role]}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <IoChevronDown className="text-gray-400" size={12} />
+                  </div>
                 </div>
+
+                {/* Company Dropdown (conditional) */}
+                {parentDB === user?.company && (
+                  <div className="relative w-full sm:w-auto">
+                    <select
+                      value={filterCompany}
+                      onChange={(e) => setFilterCompany(e.target.value)}
+                      className="border bg-white rounded p-2 text-sm text-gray-800 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto min-w-[140px]"
+                    >
+                      <option value="All">All Companies</option>
+                      {companies.map((company) => (
+                        <option key={company._id} value={company.name}>
+                          {company.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <IoChevronDown className="text-gray-400" size={12} />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

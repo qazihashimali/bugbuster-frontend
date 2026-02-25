@@ -115,7 +115,7 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       name: "Descriptions",
       icon: <MdDescription />,
       route: "/add-descriptions",
-      allowedRoles: ["SuperAdmin", "Admin", "ServiceProvider"], // All roles can access
+      allowedRoles: ["SuperAdmin", "Admin"], // All roles can access
     },
     // {
     //   name: "Logout",
@@ -160,7 +160,6 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
           className={`flex items-center ${
             isOpen ? "justify-between" : "justify-center"
           } p-4 cursor-pointer rounded-lg mx-2 transition-colors duration-200`}
-          onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen && (
             <img
@@ -169,7 +168,10 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
               alt="logo"
             />
           )}
-          <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+          <div
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
+          >
             {isOpen ? (
               <FaRegArrowAltCircleLeft className="w-8 h-8" />
             ) : (
