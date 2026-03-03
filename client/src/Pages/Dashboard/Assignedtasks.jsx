@@ -85,8 +85,8 @@ const Assignedtasks = () => {
     setSelectedIssue(issue);
     setFormData({
       userName: issue.userName,
-      description: issue.description?.description || "",
-      descriptionId: issue.description?._id,
+      description: issue.descriptions?.[0]?.description || "",
+      descriptionId: issue.descriptions?.[0]?._id || "",
       status: issue.status,
       priority: issue.priority,
     });
@@ -280,7 +280,9 @@ const Assignedtasks = () => {
                       >
                         <td className="p-3 text-sm">{issue?.userName}</td>
                         <td className="p-3 text-sm">
-                          {truncateDescription(issue.description?.description)}
+                          {truncateDescription(
+                            issue.descriptions?.[0]?.description
+                          )}
 
                           {/* {issue.description?.title || "N/A"} */}
                         </td>
@@ -345,7 +347,7 @@ const Assignedtasks = () => {
                         {issue.userName}
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {truncateDescription(issue?.description?.title)}
+                        {truncateDescription(issue?.descriptions?.[0]?.title)}
                         {/* {issue.description?.title || "N/A"} */}
                       </p>
                     </div>
@@ -535,7 +537,7 @@ const Assignedtasks = () => {
                       Description:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedIssue?.description?.title ?? "N/A"}
+                      {selectedIssue?.descriptions?.[0]?.title || "N/A"}
                     </span>
                   </div>
                   <div>

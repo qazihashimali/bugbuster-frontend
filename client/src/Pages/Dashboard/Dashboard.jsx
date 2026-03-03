@@ -13,11 +13,13 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { FaEdit } from "react-icons/fa";
+import { MdCancel, MdCheck, MdClose } from "react-icons/md";
 
 import { FaScaleBalanced, FaStar, FaStarHalfStroke } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { IoChevronDown } from "react-icons/io5";
-import { MdCancel } from "react-icons/md";
+
 import { Link } from "react-router-dom";
 import { BsFillBugFill } from "react-icons/bs";
 import { SiGoogletasks } from "react-icons/si";
@@ -215,6 +217,9 @@ const Dashboard = () => {
   // const [activeTab, setActiveTab] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("All");
   const [assignedTasks, setAssignedTasks] = useState([]);
+  const [editingFeedback, setEditingFeedback] = useState(null); // { id, feedback, rating }
+  const [editingComment, setEditingComment] = useState(null); // { id, text }
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -681,43 +686,43 @@ const Dashboard = () => {
     return `${import.meta.env.VITE_BACKEND_URL}/${attachment}`;
   };
 
-  const truncateDescription = (description) => {
-    if (!description) return "";
-    const words = description?.title.trim().split(" ");
-    if (words.length <= 2) return description?.title;
-    return `${words.slice(0, 2).join(" ")}...`;
-  };
+  // const truncateDescription = (description) => {
+  //   if (!description) return "";
+  //   const words = description?.title.trim().split(" ");
+  //   if (words.length <= 2) return description?.title;
+  //   return `${words.slice(0, 2).join(" ")}...`;
+  // };
 
-  const renderStars = (rating) => {
-    if (rating === null || rating === undefined || rating === 0) {
-      return (
-        <div className="flex">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <FaStar key={star} className="w-4 h-4 text-gray-300" />
-          ))}
-        </div>
-      );
-    }
-    return (
-      <div className="flex">
-        {[1, 2, 3, 4, 5].map((star) => {
-          const starValue = star;
-          if (rating >= starValue) {
-            return <FaStar key={star} className="w-4 h-4 text-yellow-400" />;
-          } else if (rating >= starValue - 0.5) {
-            return (
-              <FaStarHalfStroke
-                key={star}
-                className="w-4 h-4 text-yellow-400"
-              />
-            );
-          } else {
-            return <FaStar key={star} className="w-4 h-4 text-gray-300" />;
-          }
-        })}
-      </div>
-    );
-  };
+  // const renderStars = (rating) => {
+  //   if (rating === null || rating === undefined || rating === 0) {
+  //     return (
+  //       <div className="flex">
+  //         {[1, 2, 3, 4, 5].map((star) => (
+  //           <FaStar key={star} className="w-4 h-4 text-gray-300" />
+  //         ))}
+  //       </div>
+  //     );
+  //   }
+  //   return (
+  //     <div className="flex">
+  //       {[1, 2, 3, 4, 5].map((star) => {
+  //         const starValue = star;
+  //         if (rating >= starValue) {
+  //           return <FaStar key={star} className="w-4 h-4 text-yellow-400" />;
+  //         } else if (rating >= starValue - 0.5) {
+  //           return (
+  //             <FaStarHalfStroke
+  //               key={star}
+  //               className="w-4 h-4 text-yellow-400"
+  //             />
+  //           );
+  //         } else {
+  //           return <FaStar key={star} className="w-4 h-4 text-gray-300" />;
+  //         }
+  //       })}
+  //     </div>
+  //   );
+  // };
 
   const renderEditableStars = (rating, onStarClick) => {
     return (
@@ -745,6 +750,152 @@ const Dashboard = () => {
         })}
       </div>
     );
+  };
+
+  const handleEditFeedbackStarClick = (starIndex) => {
+    const starValue = starIndex + 1;
+    const currentRating = editingFeedback?.rating ?? 0;
+    let newRating;
+    if (currentRating === starValue) newRating = starValue - 0.5;
+    else if (currentRating === starValue - 0.5) newRating = starValue;
+    else newRating = starValue - 0.5;
+    setEditingFeedback((prev) => ({ ...prev, rating: newRating }));
+  };
+
+  const handleEditFeedback = (fb) => {
+    setEditingFeedback({
+      id: fb._id,
+      feedback: fb.feedback || "",
+      rating: fb.rating || 0,
+    });
+  };
+
+  const handleSaveFeedback = async () => {
+    if (!editingFeedback?.id || !selectedIssue?._id) return;
+    setEditLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${
+          selectedIssue._id
+        }/feedback/${editingFeedback.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            feedback: editingFeedback.feedback,
+            rating: editingFeedback.rating,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.message || "Failed to update feedback");
+        return;
+      }
+      setSelectedIssue((prev) => ({
+        ...prev,
+        feedbacks: prev.feedbacks.map((fb) =>
+          fb._id === editingFeedback.id
+            ? {
+                ...fb,
+                feedback: editingFeedback.feedback,
+                rating: editingFeedback.rating,
+              }
+            : fb
+        ),
+      }));
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === selectedIssue._id
+            ? {
+                ...issue,
+                feedbacks: issue.feedbacks.map((fb) =>
+                  fb._id === editingFeedback.id
+                    ? {
+                        ...fb,
+                        feedback: editingFeedback.feedback,
+                        rating: editingFeedback.rating,
+                      }
+                    : fb
+                ),
+              }
+            : issue
+        )
+      );
+      toast.success("Feedback updated successfully!");
+      setEditingFeedback(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to update feedback");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    setEditingComment({ id: comment._id, text: comment.text || "" });
+  };
+
+  const handleSaveComment = async () => {
+    if (!editingComment?.id || !selectedIssue?._id) return;
+    setEditLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/issues/${
+          selectedIssue._id
+        }/comment/${editingComment.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: editingComment.text }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.message || "Failed to update comment");
+        return;
+      }
+      setSelectedIssue((prev) => ({
+        ...prev,
+        comments: prev.comments.map((c) =>
+          c._id === editingComment.id ? { ...c, text: editingComment.text } : c
+        ),
+      }));
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === selectedIssue._id
+            ? {
+                ...issue,
+                comments: issue.comments.map((c) =>
+                  c._id === editingComment.id
+                    ? { ...c, text: editingComment.text }
+                    : c
+                ),
+              }
+            : issue
+        )
+      );
+      toast.success("Comment updated successfully!");
+      setEditingComment(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to update comment");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const isWithin5Minutes = (dateString) => {
+    if (!dateString) return false;
+    const created = new Date(dateString);
+    const now = new Date();
+    return (now - created) / 1000 / 60 < 5;
   };
 
   return (
@@ -809,9 +960,9 @@ const Dashboard = () => {
                       <th className="p-3 text-left text-sm font-medium">
                         FeedBack
                       </th>
-                      <th className="p-3 text-left text-sm font-medium">
+                      {/* <th className="p-3 text-left text-sm font-medium">
                         Rating
-                      </th>
+                      </th> */}
                       <th className="p-3 text-left text-sm font-medium">
                         Comments
                       </th>
@@ -876,9 +1027,11 @@ const Dashboard = () => {
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
-                            } `}
+                            }`}
                           >
-                            {truncateDescription(issue.description) || "N/A"}
+                            {issue.descriptions?.length > 0
+                              ? issue.descriptions[0].description
+                              : "N/A"}
                           </td>
                           <td
                             className={`p-3 truncate ${
@@ -928,11 +1081,22 @@ const Dashboard = () => {
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
-                            } `}
+                            }`}
                           >
-                            {issue.feedback || "N/A"}
+                            <td
+                              className={`p-3 truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {issue.feedbacks && issue.feedbacks.length > 0
+                                ? issue.feedbacks[issue.feedbacks.length - 1]
+                                    .feedback || "N/A"
+                                : "N/A"}
+                            </td>
                           </td>
-                          <td
+                          {/* <td
                             className={`p-3 ${
                               issue.status === "resolved"
                                 ? "text-white"
@@ -940,7 +1104,7 @@ const Dashboard = () => {
                             } `}
                           >
                             {renderStars(issue.rating)}
-                          </td>
+                          </td> */}
                           <td
                             className={`p-3 text-sm truncate ${
                               issue.status === "resolved"
@@ -948,10 +1112,9 @@ const Dashboard = () => {
                                 : "text-gray-600"
                             } `}
                           >
-                            {issue.comments
-                              ? issue.comments.length > 20
-                                ? issue.comments.slice(0, 20) + "..."
-                                : issue.comments
+                            {Array.isArray(issue.comments) &&
+                            issue.comments.length > 0
+                              ? issue.comments[issue.comments.length - 1].text
                               : "N/A"}
                           </td>
                         </tr>
@@ -1003,10 +1166,46 @@ const Dashboard = () => {
                     ? `${selectedIssue.assignedTo.name} (${selectedIssue.assignedTo.email})`
                     : "N/A"}
                 </p>
-                <p>
-                  <strong>Description:</strong>{" "}
-                  {selectedIssue?.description?.description || "N/A"}
-                </p>
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Descriptions</h3>
+
+                  {selectedIssue?.descriptions?.length > 0 ? (
+                    <div className="border rounded overflow-hidden">
+                      <div className="max-h-40 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-100 sticky top-0">
+                            <tr>
+                              <th className="p-2 text-left">#</th>
+                              <th className="p-2 text-left">Description</th>
+                              <th className="p-2 text-left">Type</th>
+                              <th className="p-2 text-left">Created At</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedIssue.descriptions.map((d, index) => (
+                              <tr key={d._id || index} className="border-t">
+                                <td className="p-2">{index + 1}</td>
+                                <td className="p-2 break-words max-w-[250px]">
+                                  {d.description}
+                                </td>
+                                <td className="p-2">{d.type || "-"}</td>
+                                <td className="p-2">
+                                  {d.createdAt
+                                    ? new Date(d.createdAt).toLocaleString()
+                                    : "-"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No description provided
+                    </p>
+                  )}
+                </div>
                 <p>
                   <strong>TimeLine:</strong>{" "}
                   {selectedIssue?.description?.timeline || "N/A"}-
@@ -1039,19 +1238,233 @@ const Dashboard = () => {
                     ? new Date(selectedIssue.createdAt).toLocaleString()
                     : "N/A"}
                 </p>
-                <p>
-                  <strong>Feedback:</strong>{" "}
-                  {selectedIssue.feedback || "No feedback provided"}
-                </p>
-                {/* Comments Section */}
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">Comments</h3>
-                  {selectedIssue.comments ? (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {selectedIssue.comments}
+                  <h3 className="text-lg font-semibold mb-2">Feedback</h3>
+
+                  {Array.isArray(selectedIssue.feedbacks) &&
+                  selectedIssue.feedbacks.length > 0 ? (
+                    <div className="border rounded overflow-hidden">
+                      <div className="max-h-30 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-100 sticky top-0">
+                            <tr>
+                              <th className="p-2 text-left">#</th>
+                              <th className="p-2 text-left">Feedback</th>
+                              <th className="p-2 text-center">Rating</th>
+                              <th className="p-2 text-center">Edit</th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {selectedIssue.feedbacks.map((fb, index) => (
+                              <tr key={fb._id || index} className="border-t">
+                                <td className="p-2">{index + 1}</td>
+                                <td className="p-2 break-words max-w-[220px]">
+                                  {editingFeedback?.id === fb._id ? (
+                                    <textarea
+                                      className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                      rows={3}
+                                      value={editingFeedback.feedback}
+                                      onChange={(e) =>
+                                        setEditingFeedback((prev) => ({
+                                          ...prev,
+                                          feedback: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  ) : (
+                                    fb.feedback || "No feedback"
+                                  )}
+                                </td>
+                                <td className="p-2 text-center">
+                                  {editingFeedback?.id === fb._id ? (
+                                    <div className="flex justify-center">
+                                      {renderEditableStars(
+                                        editingFeedback.rating,
+                                        handleEditFeedbackStarClick
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-yellow-500">
+                                      {fb.rating ? `⭐ ${fb.rating}/5` : "-"}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-2 text-center">
+                                  {editingFeedback?.id === fb._id ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={handleSaveFeedback}
+                                        disabled={editLoading}
+                                        className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                        title="Save"
+                                      >
+                                        {editLoading ? (
+                                          <span className="inline-block h-4 w-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                          <MdCheck className="w-5 h-5" />
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingFeedback(null)}
+                                        disabled={editLoading}
+                                        className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                                        title="Cancel"
+                                      >
+                                        <MdClose className="w-5 h-5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    user?._id &&
+                                    fb.createdBy?._id?.toString() ===
+                                      user._id.toString() && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleEditFeedback(fb)}
+                                        disabled={
+                                          !isWithin5Minutes(fb.createdAt)
+                                        }
+                                        title={
+                                          !isWithin5Minutes(fb.createdAt)
+                                            ? "Edit window has expired (5 min)"
+                                            : "Edit feedback"
+                                        }
+                                        className={`${
+                                          !isWithin5Minutes(fb.createdAt)
+                                            ? "text-gray-300 cursor-not-allowed"
+                                            : "text-blue-600 hover:text-blue-800"
+                                        }`}
+                                      >
+                                        <FaEdit />
+                                      </button>
+                                    )
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   ) : (
-                    "No comments yet"
+                    <p className="text-sm text-gray-500">
+                      No feedback provided
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Comments</h3>
+
+                  {Array.isArray(selectedIssue.comments) &&
+                  selectedIssue.comments.length > 0 ? (
+                    <div className="border rounded overflow-hidden">
+                      <div className="max-h-30 overflow-y-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-100 sticky top-0">
+                            <tr>
+                              <th className="p-2 text-left">#</th>
+                              <th className="p-2 text-left">Comment</th>
+                              <th className="p-2 text-left">Date</th>
+                              <th className="p-2 text-center">Edit</th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {selectedIssue.comments.map((comment, index) => (
+                              <tr
+                                key={comment._id || index}
+                                className="border-t"
+                              >
+                                <td className="p-2">{index + 1}</td>
+                                <td className="p-2 break-words max-w-[200px]">
+                                  {editingComment?.id === comment._id ? (
+                                    <textarea
+                                      className="w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                                      rows={3}
+                                      value={editingComment.text}
+                                      onChange={(e) =>
+                                        setEditingComment((prev) => ({
+                                          ...prev,
+                                          text: e.target.value,
+                                        }))
+                                      }
+                                    />
+                                  ) : (
+                                    comment.text || "No comment"
+                                  )}
+                                </td>
+                                <td className="p-2 text-xs text-gray-500">
+                                  {comment.commentedAt
+                                    ? new Date(
+                                        comment.commentedAt
+                                      ).toLocaleString()
+                                    : ""}
+                                </td>
+                                <td className="p-2 text-center">
+                                  {editingComment?.id === comment._id ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={handleSaveComment}
+                                        disabled={editLoading}
+                                        className="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                        title="Save"
+                                      >
+                                        {editLoading ? (
+                                          <span className="inline-block h-4 w-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                          <MdCheck className="w-5 h-5" />
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingComment(null)}
+                                        disabled={editLoading}
+                                        className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                                        title="Cancel"
+                                      >
+                                        <MdClose className="w-5 h-5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    user?._id &&
+                                    comment.commentedBy?._id?.toString() ===
+                                      user._id.toString() && (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleEditComment(comment)
+                                        }
+                                        disabled={
+                                          !isWithin5Minutes(comment.commentedAt)
+                                        }
+                                        title={
+                                          !isWithin5Minutes(comment.commentedAt)
+                                            ? "Edit window has expired (5 min)"
+                                            : "Edit comment"
+                                        }
+                                        className={`${
+                                          !isWithin5Minutes(comment.commentedAt)
+                                            ? "text-gray-300 cursor-not-allowed"
+                                            : "text-blue-600 hover:text-blue-800"
+                                        }`}
+                                      >
+                                        <FaEdit />
+                                      </button>
+                                    )
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No comments yet</p>
                   )}
                 </div>
                 {user ? (

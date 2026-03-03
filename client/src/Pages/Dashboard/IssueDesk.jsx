@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { IoChevronDown } from "react-icons/io5";
-import { FaPlusCircle } from "react-icons/fa";
+import { FaPlusCircle, FaPlus, FaTrash } from "react-icons/fa"; // added FaPlus, FaTrash
 import Loading from "../../Components/Loading";
 import toast from "react-hot-toast";
 
@@ -11,14 +11,17 @@ export default function IssueDesk() {
     branch: "",
     department: "",
     assignedTo: "",
-    description: "",
+    descriptions: [], // now array
     priority: "Medium",
     attachment: null,
     status: "pending",
   });
-  const [selectedDescription, setSelectedDescription] = useState("");
+
+  const [selectedDescriptions, setSelectedDescriptions] = useState([]); // array of _id for predefined
+  const [customDescriptions, setCustomDescriptions] = useState([]); // array of strings
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState({});
+
   const [dropdowns, setDropdowns] = useState({
     branches: [],
     departments: [],
@@ -112,6 +115,42 @@ export default function IssueDesk() {
     }
   }, [formData.branch, formData.department, dropdowns.users]);
 
+  // Sync selections → formData.descriptions
+  useEffect(() => {
+    const predefinedIds = selectedDescriptions; // already array of _id strings
+
+    const customs = customDescriptions.filter((text) => text.trim() !== "");
+
+    setFormData((prev) => ({
+      ...prev,
+      descriptions: [...predefinedIds, ...customs],
+    }));
+  }, [selectedDescriptions, customDescriptions]);
+
+  const toggleDescription = (descId) => {
+    setSelectedDescriptions((prev) =>
+      prev.includes(descId)
+        ? prev.filter((id) => id !== descId)
+        : [...prev, descId]
+    );
+  };
+
+  const addCustomDescription = () => {
+    setCustomDescriptions((prev) => [...prev, ""]);
+  };
+
+  const removeCustomDescription = (index) => {
+    setCustomDescriptions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateCustomDescription = (index, value) => {
+    setCustomDescriptions((prev) => {
+      const newArr = [...prev];
+      newArr[index] = value;
+      return newArr;
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (
@@ -125,30 +164,18 @@ export default function IssueDesk() {
     }
   };
 
-  const handleDescriptionSelect = (description) => {
-    if (description === "custom") {
-      setSelectedDescription({ title: "custom" });
-      setFormData((prev) => ({ ...prev, description: "" }));
-    } else if (description) {
-      setSelectedDescription(description);
-      setFormData((prev) => ({
-        ...prev,
-        description: description._id,
-      }));
-    }
-    setIsDescriptionOpen(false);
-  };
-
-  const handleCustomDescriptionChange = (e) => {
-    setFormData({ ...formData, description: e.target.value });
-  };
-
   const handleFileChange = (e) => {
     setFormData({ ...formData, attachment: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.descriptions.length === 0) {
+      toast.error("Please select or enter at least one description");
+      return;
+    }
+
     setIsLoading(true);
 
     const start = Date.now();
@@ -161,7 +188,7 @@ export default function IssueDesk() {
       formDataToSend.append("branch", formData.branch);
       formDataToSend.append("department", formData.department);
       formDataToSend.append("assignedTo", formData.assignedTo);
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("description", formData.descriptions);
       formDataToSend.append("priority", formData.priority);
       formDataToSend.append("status", formData.status);
       if (formData.attachment) {
@@ -182,30 +209,28 @@ export default function IssueDesk() {
       const data = await response.json();
       if (!response.ok) toast.error(data.message || "Failed to submit issue");
 
-      if (!data.issue) toast.error("Invalid response: issue data missing");
-
+      // Reset
       setFormData({
         userName: user?.name || "",
         branch: "",
         department: "",
         assignedTo: "",
-        description: "",
+        descriptions: [],
         priority: "Medium",
         attachment: null,
         status: "pending",
       });
-      setSelectedDescription("");
-      setIsDetailsOpen({});
+      setSelectedDescriptions([]);
+      setCustomDescriptions([]);
       setIsDescriptionOpen(false);
-      const attachmentInput = document.getElementById("attachment");
-      if (attachmentInput) {
-        attachmentInput.value = null;
-      }
+      setIsDetailsOpen({});
 
-      if (Date.now() - start < 2000)
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 - (Date.now() - start))
-        );
+      const attachmentInput = document.getElementById("attachment");
+      if (attachmentInput) attachmentInput.value = null;
+
+      if (Date.now() - start < 2000) {
+        await new Promise((r) => setTimeout(r, 2000 - (Date.now() - start)));
+      }
       toast.success("Issue submitted successfully!");
     } catch (err) {
       console.error(err);
@@ -214,6 +239,9 @@ export default function IssueDesk() {
       setIsLoading(false);
     }
   };
+
+  const hasAnyDescription =
+    selectedDescriptions.length > 0 || customDescriptions.some((t) => t.trim());
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -230,10 +258,11 @@ export default function IssueDesk() {
           <div className="bg-white rounded-lg p-6">
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
+                {/* User Name – unchanged */}
                 <div>
                   <label
                     htmlFor="userName"
-                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                    className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                   >
                     User Name
                   </label>
@@ -249,10 +278,12 @@ export default function IssueDesk() {
                     required
                   />
                 </div>
+
+                {/* Branch – unchanged */}
                 <div>
                   <label
                     htmlFor="branch"
-                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                    className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                   >
                     Branch
                   </label>
@@ -277,10 +308,12 @@ export default function IssueDesk() {
                     </div>
                   </div>
                 </div>
+
+                {/* Department – unchanged */}
                 <div>
                   <label
                     htmlFor="department"
-                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                    className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                   >
                     Department
                   </label>
@@ -306,10 +339,12 @@ export default function IssueDesk() {
                     </div>
                   </div>
                 </div>
+
+                {/* Assigned To – unchanged */}
                 <div>
                   <label
                     htmlFor="assignedTo"
-                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                    className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                   >
                     Assigned To
                   </label>
@@ -336,15 +371,14 @@ export default function IssueDesk() {
                 </div>
               </div>
 
-              {/* Description and Priority Section - Side by Side */}
+              {/* Description and Priority Section - Side by Side – layout unchanged */}
               <div className="mt-6 flex gap-6 items-start">
-                {/* Priority and Attachment Section */}
+                {/* Priority and Attachment – unchanged */}
                 <div className="flex-shrink-0 w-64 space-y-4">
-                  {/* Priority */}
                   <div>
                     <label
                       htmlFor="priority"
-                      className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                      className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                     >
                       Priority
                     </label>
@@ -367,11 +401,10 @@ export default function IssueDesk() {
                     </div>
                   </div>
 
-                  {/* Attachment */}
                   <div>
                     <label
                       htmlFor="attachment"
-                      className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                      className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                     >
                       Attachment
                     </label>
@@ -402,11 +435,11 @@ export default function IssueDesk() {
                   </div>
                 </div>
 
-                {/* Description Section */}
+                {/* Description – modified for multiple */}
                 <div className="flex-1">
                   <label
                     htmlFor="addDescription"
-                    className="block text-sm font-medium  mb-1 bg-white w-fit relative top-[13px]  ml-[14px] px-1 z-20"
+                    className="block text-sm font-medium mb-1 bg-white w-fit relative top-[13px] ml-[14px] px-1 z-20"
                   >
                     Add Description
                   </label>
@@ -417,12 +450,16 @@ export default function IssueDesk() {
                       onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
                     >
                       <span>
-                        {selectedDescription
-                          ? selectedDescription.title
+                        {hasAnyDescription
+                          ? `${
+                              selectedDescriptions.length +
+                              customDescriptions.filter((t) => t.trim()).length
+                            } selected`
                           : "Select Descriptions"}
                       </span>
                       <IoChevronDown className="text-gray-400" size={16} />
                     </button>
+
                     {isDescriptionOpen && (
                       <ul className="absolute w-full bg-white border border-gray-200 rounded-md mt-1 z-50 max-h-40 overflow-y-auto shadow-lg backdrop-blur-0 bg-opacity-100">
                         <li className="px-4 py-2 text-gray-800 font-semibold">
@@ -432,15 +469,15 @@ export default function IssueDesk() {
                           <div key={desc._id}>
                             <li
                               className="px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                              onClick={() => handleDescriptionSelect(desc)}
+                              onClick={() => toggleDescription(desc._id)}
                             >
                               <div className="flex items-center">
                                 <input
                                   type="checkbox"
-                                  checked={
-                                    selectedDescription?._id === desc._id
-                                  }
-                                  onChange={() => {}}
+                                  checked={selectedDescriptions.includes(
+                                    desc._id
+                                  )}
+                                  readOnly
                                   className="mr-2 h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-primary"
                                 />
                                 <span>{desc?.title}</span>
@@ -472,38 +509,51 @@ export default function IssueDesk() {
                         ))}
                         <li
                           className="px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                          onClick={() => handleDescriptionSelect("custom")}
+                          onClick={() => {
+                            addCustomDescription();
+                            setIsDescriptionOpen(false);
+                          }}
                         >
                           <div className="flex items-center w-full">
-                            <input
-                              type="checkbox"
-                              checked={selectedDescription?.title?.includes(
-                                "custom"
-                              )}
-                              onChange={() => {}}
-                              className="mr-2 h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-primary"
-                            />
+                            <FaPlus className="mr-2 text-orange-600" />
                             <span>Add Custom Description</span>
                           </div>
                         </li>
                       </ul>
                     )}
-
-                    {selectedDescription.title?.includes("custom") && (
-                      <div className="mt-2">
-                        <textarea
-                          id="description"
-                          name="description"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 text-black placeholder-gray-500"
-                          rows="4"
-                          value={formData.description}
-                          onChange={handleCustomDescriptionChange}
-                          placeholder="Enter custom issue description"
-                          required
-                        ></textarea>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Custom descriptions appear below dropdown */}
+                  {customDescriptions.map((text, index) => (
+                    <div key={index} className="mt-3 relative">
+                      <textarea
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 text-black placeholder-gray-500"
+                        rows="4"
+                        value={text}
+                        onChange={(e) =>
+                          updateCustomDescription(index, e.target.value)
+                        }
+                        placeholder={`Custom description ${index + 1}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeCustomDescription(index)}
+                        className="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-white p-1 rounded-full shadow"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {customDescriptions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={addCustomDescription}
+                      className="mt-2 text-orange-600 hover:text-orange-800 flex items-center text-sm"
+                    >
+                      <FaPlus className="mr-1" /> Add another custom description
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -516,18 +566,17 @@ export default function IssueDesk() {
                       branch: "",
                       department: "",
                       assignedTo: "",
-                      description: "",
+                      descriptions: [],
                       priority: "Medium",
                       attachment: null,
                       status: "pending",
                     });
-                    setSelectedDescription("");
-                    setIsDetailsOpen({});
+                    setSelectedDescriptions([]);
+                    setCustomDescriptions([]);
                     setIsDescriptionOpen(false);
+                    setIsDetailsOpen({});
                     const attachment = document.getElementById("attachment");
-                    if (attachment) {
-                      attachment.value = "";
-                    }
+                    if (attachment) attachment.value = "";
                   }}
                   className="bg-black cursor-pointer text-white px-4 py-2 rounded-md"
                 >
@@ -536,11 +585,7 @@ export default function IssueDesk() {
                 <button
                   type="submit"
                   className="bg-primary cursor-pointer text-white px-4 py-2 rounded-md flex items-center"
-                  disabled={
-                    isLoading ||
-                    (!formData.description &&
-                      !selectedDescription.title?.includes("custom"))
-                  }
+                  disabled={isLoading || !hasAnyDescription}
                 >
                   <FaPlusCircle className="mr-2" /> Add
                 </button>

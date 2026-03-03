@@ -281,18 +281,17 @@ const MyTasks = () => {
                         <td className="p-3 text-sm">
                           {issue?.priority || "N/A"}
                         </td>
+
                         <td className="p-3 text-sm">
-                          <td className="p-3 text-sm">
-                            {issue?.furtherAssignedTo?.length > 0
-                              ? issue.furtherAssignedTo
-                                  .map((u) => u.name)
-                                  .join(", ")
-                              : "N/A"}
-                          </td>
+                          {issue?.furtherAssignedTo?.length > 0
+                            ? issue.furtherAssignedTo
+                                .map((u) => u.name)
+                                .join(", ")
+                            : "N/A"}
                         </td>
 
                         <td className="p-3 text-sm">
-                          {issue.description?.title || "N/A"}
+                          {issue.descriptions?.[0]?.title || "N/A"}
                         </td>
 
                         <td className="p-3 flex justify-center space-x-2">
@@ -468,7 +467,7 @@ const MyTasks = () => {
                 </p>
                 <p className="mb-2">
                   <strong>Description:</strong>{" "}
-                  {selectedIssue.description?.title || "N/A"}
+                  {selectedIssue.descriptions?.[0]?.title || "N/A"}
                 </p>
                 <p className="mb-2">
                   <strong>Branch:</strong>{" "}
