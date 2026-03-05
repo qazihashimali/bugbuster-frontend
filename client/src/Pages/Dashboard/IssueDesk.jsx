@@ -74,6 +74,7 @@ export default function IssueDesk() {
             );
           }
           const dropdownData = await dropdownResponse.json();
+          console.log(dropdowns.descriptions);
 
           setDropdowns({
             branches: Array.isArray(dropdownData.branches)
@@ -480,7 +481,7 @@ export default function IssueDesk() {
                                   readOnly
                                   className="mr-2 h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-primary"
                                 />
-                                <span>{desc?.title}</span>
+                                <span>{desc?.description}</span>
                               </div>
                               <button
                                 type="button"
