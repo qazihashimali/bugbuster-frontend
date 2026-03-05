@@ -30,15 +30,12 @@ const Navbar = () => {
         toast.error("Missing token or user ID");
         return;
       }
-      const response = await fetch(
-        `${API_BASE_URL}/api/issues/${userData._id}/activities`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/issues/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (!response.ok) {
         const errorText = await response.text();
         toast.error(
@@ -153,7 +150,7 @@ const Navbar = () => {
         return;
       }
       const response = await fetch(
-        `${API_BASE_URL}/api/issues/activities/mark-all-as-read`,
+        `${API_BASE_URL}/api/issues/notifications/mark-all-as-read`,
         {
           method: "PUT",
           headers: {
