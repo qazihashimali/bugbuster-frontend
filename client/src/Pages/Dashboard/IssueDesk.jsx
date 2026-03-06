@@ -74,7 +74,7 @@ export default function IssueDesk() {
             );
           }
           const dropdownData = await dropdownResponse.json();
-          console.log(dropdowns.descriptions);
+          // console.log(dropdowns.descriptions);
 
           setDropdowns({
             branches: Array.isArray(dropdownData.branches)
@@ -108,8 +108,9 @@ export default function IssueDesk() {
       const filtered = dropdowns.users.filter(
         (user) =>
           user.branch === formData.branch &&
-          user.department === formData.department
+          user.departments?.includes(formData.department)
       );
+
       setDropdowns((prev) => ({ ...prev, filteredUsers: filtered }));
     } else {
       setDropdowns((prev) => ({ ...prev, filteredUsers: prev.users }));

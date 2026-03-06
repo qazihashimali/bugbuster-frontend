@@ -10,7 +10,7 @@ const Users = () => {
       JSON.parse(localStorage.getItem("user"))) ||
     null;
   const [users, setUsers] = useState([]);
-
+  const [isDepartmentOpen, setIsDepartmentOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isReportsToOpen, setIsReportsToOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,7 +32,7 @@ const Users = () => {
     houseNo: "",
     block: "",
     branch: "",
-    department: "",
+    departments: [],
     reportHim: [],
   });
 
@@ -168,7 +168,7 @@ const Users = () => {
       roles: user.roles || [],
       phone: user.phone || "",
       branch: user.branch?._id || "",
-      department: user.department?._id || "",
+      departments: user.departments?.map((d) => d._id) || [],
       reportHim: user.reportHim || [],
     });
 
@@ -198,7 +198,7 @@ const Users = () => {
       }
       if (
         formData.roles.includes("ServiceProvider") &&
-        (!formData.branch || !formData.department)
+        (!formData.branch || !formData.departments)
       ) {
         toast.error("Branch and department are required for selected role");
       }
@@ -230,7 +230,7 @@ const Users = () => {
         roles: [],
         phone: "",
         branch: "",
-        department: "",
+        departments: [],
         reportHim: [],
       });
 
@@ -296,7 +296,6 @@ const Users = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked, selectedOptions } = e.target;
 
-    // Roles checkbox
     if (type === "checkbox" && name === "roles") {
       setFormData((prev) => ({
         ...prev,
@@ -307,10 +306,15 @@ const Users = () => {
       return;
     }
 
-    // Reports To (multi-select)
     if (name === "reportHim") {
       const values = Array.from(selectedOptions, (o) => o.value);
       setFormData((prev) => ({ ...prev, reportHim: values }));
+      return;
+    }
+
+    if (name === "departments") {
+      const values = Array.from(selectedOptions, (o) => o.value);
+      setFormData((prev) => ({ ...prev, departments: values }));
       return;
     }
 
@@ -346,6 +350,15 @@ const Users = () => {
       u.roles.includes("ServiceProvider") &&
       u.company === selectedUser?.company
   );
+
+  const handleDepartmentToggle = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      departments: prev.departments.includes(id)
+        ? prev.departments.filter((d) => d !== id)
+        : [...prev.departments, id],
+    }));
+  };
 
   return (
     <div
@@ -467,8 +480,13 @@ const Users = () => {
                             : "N/A"}
                         </td>
                         <td className="p-3 text-sm">
-                          {user.department
-                            ? `(${user.department.departmentCode}) ${user.department.departmentName}`
+                          {user.departments?.length
+                            ? user.departments
+                                .map(
+                                  (d) =>
+                                    `(${d.departmentCode}) ${d.departmentName}`
+                                )
+                                .join(", ")
                             : "N/A"}
                         </td>
                         <td className="p-3 flex justify-center space-x-2">
@@ -572,14 +590,17 @@ const Users = () => {
                         </span>
                       </div>
                     )}
-                    {user.department && (
+                    {user.departments?.length > 0 && (
                       <div className="sm:col-span-2">
                         <span className="font-medium text-gray-700">
-                          Department:
+                          Departments:
                         </span>
                         <span className="ml-2 text-gray-600">
-                          ({user?.department?.departmentCode}){" "}
-                          {user?.department?.departmentName}
+                          {user.departments
+                            .map(
+                              (d) => `(${d.departmentCode}) ${d.departmentName}`
+                            )
+                            .join(", ")}
                         </span>
                       </div>
                     )}
@@ -790,29 +811,53 @@ const Users = () => {
                           ))}
                         </select>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="department"
-                          className="block text-sm font-medium mb-1"
-                        >
-                          Department
+                      <div className="relative">
+                        <label className="block text-sm font-medium mb-1">
+                          Departments
                         </label>
-                        <select
-                          id="department"
-                          name="department"
-                          value={formData.department}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                          required
+
+                        {/* Dropdown Button */}
+                        <button
+                          type="button"
+                          onClick={() => setIsDepartmentOpen(!isDepartmentOpen)}
+                          className="w-full focus:outline-none focus:ring-2 focus:ring-primary px-3 py-2 border rounded-md text-left text-sm bg-white flex justify-between items-center"
                         >
-                          <option value="">Select Department</option>
-                          {dropdowns.departments.map((department) => (
-                            <option key={department._id} value={department._id}>
-                              ({department.departmentCode}){" "}
-                              {department.departmentName}
-                            </option>
-                          ))}
-                        </select>
+                          <span className="text-gray-700">
+                            {formData.departments?.length
+                              ? dropdowns.departments
+                                  .filter((d) =>
+                                    formData.departments.includes(d._id)
+                                  )
+                                  .map((d) => d.departmentName)
+                                  .join(", ")
+                              : "Select departments"}
+                          </span>
+
+                          <IoChevronDown className="text-gray-400" size={16} />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isDepartmentOpen && (
+                          <div className="absolute z-20 mt-1 w-full bg-white border rounded-md shadow max-h-48 overflow-y-auto no-scrollbar">
+                            {dropdowns.departments.map((dept) => (
+                              <label
+                                key={dept._id}
+                                className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formData.departments.includes(
+                                    dept._id
+                                  )}
+                                  onChange={() =>
+                                    handleDepartmentToggle(dept._id)
+                                  }
+                                />
+                                ({dept.departmentCode}) {dept.departmentName}
+                              </label>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </>
                   )}

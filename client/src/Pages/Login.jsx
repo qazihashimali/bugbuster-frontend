@@ -19,7 +19,8 @@ const Auth = () => {
   });
   const [phone, setPhone] = useState("");
   const [branch, setBranch] = useState("");
-  const [department, setDepartment] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false);
   const [company, setCompany] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -123,7 +124,7 @@ const Auth = () => {
       }
       setCompanyResults(results);
       setBranch("");
-      setDepartment("");
+      setDepartments([]);
       if (data.dropdowns) {
         setDropdowns((prev) => {
           const newState = {
@@ -145,7 +146,7 @@ const Auth = () => {
       setCompanyResults([]);
       setIsCompanyNotFound(true);
       setBranch("");
-      setDepartment("");
+      setDepartments([]);
     }
   }, []);
 
@@ -158,7 +159,7 @@ const Auth = () => {
       setIsCompanyNotFound(false);
 
       setBranch("");
-      setDepartment("");
+      setDepartments([]);
 
       // Fetch branches and departments for the selected company
       const data = await upsertCompany(companyName);
@@ -322,7 +323,7 @@ const Auth = () => {
           roles: selectedRoles,
           phone,
           branch,
-          department,
+          departments,
           company,
         };
 
@@ -365,7 +366,7 @@ const Auth = () => {
         setRoles({ EndUser: false, ServiceProvider: false });
         setPhone("");
         setBranch("");
-        setDepartment("");
+        setDepartments([]);
         setCompany("");
         setOtp("");
         setShowOtpInput(false);
@@ -542,22 +543,48 @@ const Auth = () => {
                         ))}
                       </select>
                     </div>
-                    <div className="mb-[15px]">
-                      <select
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                        className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] outline-none box-border"
-                        required
-                      >
-                        <option value="">Select Department</option>
+                    <div className="mb-[15px] relative">
+                      <label className="block mb-[5px] text-[14px] text-[#333]">
+                        Select Departments:
+                      </label>
 
-                        {dropdowns.departments.map((department) => (
-                          <option key={department._id} value={department._id}>
-                            {department.departmentName} (
-                            {department.departmentCode})
-                          </option>
-                        ))}
-                      </select>
+                      {/* Dropdown button */}
+                      <div
+                        className="w-full px-[12px] py-[10px] border border-[#E0E0E0] rounded-[3px] text-[14px] cursor-pointer bg-white"
+                        onClick={() => setIsDepartmentsOpen((prev) => !prev)}
+                      >
+                        {departments.length > 0
+                          ? `${departments.length} selected`
+                          : "Select Departments"}
+                      </div>
+
+                      {/* Dropdown list */}
+                      {isDepartmentsOpen && (
+                        <div className="absolute z-50 w-full mt-[2px] max-h-[200px] overflow-y-auto border border-[#E0E0E0] rounded-[3px] bg-white shadow-md">
+                          {dropdowns.departments.map((dept) => (
+                            <label
+                              key={dept._id}
+                              className="flex items-center px-[10px] py-[8px] text-[14px] cursor-pointer hover:bg-[#f5f5f5]"
+                            >
+                              <input
+                                type="checkbox"
+                                value={dept._id}
+                                checked={departments.includes(dept._id)}
+                                onChange={(e) => {
+                                  const { checked, value } = e.target;
+                                  setDepartments((prev) =>
+                                    checked
+                                      ? [...prev, value]
+                                      : prev.filter((id) => id !== value)
+                                  );
+                                }}
+                                className="mr-2"
+                              />
+                              {dept.departmentName} ({dept.departmentCode})
+                            </label>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -836,7 +863,7 @@ const Auth = () => {
                         setRoles({ EndUser: false, ServiceProvider: false });
                         setPhone("");
                         setBranch("");
-                        setDepartment("");
+                        setDepartments([]);
                         setCompany("");
                         setOtp("");
                         setShowOtpInput(false);
@@ -889,7 +916,7 @@ const Auth = () => {
                     setRoles({ EndUser: false, ServiceProvider: false });
                     setPhone("");
                     setBranch("");
-                    setDepartment("");
+                    setDepartments([]);
                     setCompany("");
                     setOtp("");
                     setShowOtpInput(false);
