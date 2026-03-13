@@ -12,6 +12,7 @@ import Reviews from "./Pages/Dashboard/Reviews";
 import AddDescriptions from "./Pages/Dashboard/AddDescriptions";
 import Auth from "./Pages/Login";
 import Company from "./Pages/Dashboard/Company";
+import MyTeam from "./Pages/Dashboard/MyTeam";
 
 const appRoutes = [
   { path: "/", element: <Auth /> },
@@ -28,7 +29,7 @@ const appRoutes = [
   { path: "/reviews", element: <Reviews /> },
   { path: "/add-descriptions", element: <AddDescriptions /> },
   { path: "/companies", element: <Company /> },
-
+  { path: "/my-team", element: <MyTeam /> },
 ];
 
 export default appRoutes;

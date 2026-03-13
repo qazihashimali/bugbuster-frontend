@@ -1,20 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import Chart from "chart.js/auto";
-import {
-  Chart as ChartJS,
-  LineController,
-  BarController,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import React, { useEffect, useState } from "react";
+
 import { FaEdit } from "react-icons/fa";
-import { MdCancel, MdCheck, MdClose } from "react-icons/md";
+import { MdCheck, MdClose } from "react-icons/md";
 
 import { FaScaleBalanced, FaStar, FaStarHalfStroke } from "react-icons/fa6";
 import { RiAccountCircleFill } from "react-icons/ri";
@@ -26,96 +13,23 @@ import { SiGoogletasks } from "react-icons/si";
 import { TiThList } from "react-icons/ti";
 import toast from "react-hot-toast";
 import Loading from "../../Components/Loading";
-
-// Register Chart.js components
-ChartJS.register(
-  LineController,
-  BarController,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend
-);
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 // Revenue and Expense Data
-const revenueExpenseData = {
-  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-  datasets: [
-    {
-      label: "Revenue",
-      data: [1200, 1900, 1500, 2000, 1800, 2200, 2100, 1876],
-      borderColor: "#F97316",
-      backgroundColor: "rgba(249, 115, 22, 0.2)",
-      fill: true,
-    },
-    {
-      label: "Expense",
-      data: [800, 1000, 1200, 1100, 1300, 1250, 1400, 1235],
-      borderColor: "#3B82F6",
-      backgroundColor: "rgba(59, 130, 246, 0.2)",
-      fill: true,
-    },
-  ],
-  summary: [
-    { label: "Revenue", value: "$1,876,580" },
-    { label: "Expense", value: "$1,235,100" },
-  ],
-};
-
-const vendorsData = {
-  labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  datasets: [
-    {
-      label: "Vendor A",
-      data: [300, 400, 200, 350, 300, 250, 400],
-      backgroundColor: "#1F2937",
-    },
-    {
-      label: "Vendor B",
-      data: [200, 300, 150, 200, 250, 200, 300],
-      backgroundColor: "#3B82F6",
-    },
-    {
-      label: "Vendor C",
-      data: [100, 150, 100, 150, 100, 150, 200],
-      backgroundColor: "#93C5FD",
-    },
-  ],
-};
-
-const customersData = {
-  labels: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ],
-  datasets: [
-    {
-      label: "New Customers",
-      data: [300, 500, 700, 400, 600, 300, 500, 400, 600, 800, 500, 400],
-      borderColor: "#1F2937",
-    },
-    {
-      label: "Returning Customers",
-      data: [200, 300, 400, 300, 400, 200, 300, 200, 400, 500, 300, 200],
-      borderColor: "#FF6200",
-    },
-  ],
-  revenueNote: "Oct 2028 Revenue: $150,303.98",
-};
 
 const generalTasksData = [
   {
@@ -195,10 +109,6 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
 };
 
 const Dashboard = () => {
-  const revenueChartRef = useRef(null);
-  const vendorsChartRef = useRef(null);
-  const customersChartRef = useRef(null);
-
   const [user, setUser] = useState(null);
   const [issues, setIssues] = useState([]);
 
@@ -220,6 +130,9 @@ const Dashboard = () => {
   const [editingFeedback, setEditingFeedback] = useState(null); // { id, feedback, rating }
   const [editingComment, setEditingComment] = useState(null); // { id, text }
   const [editLoading, setEditLoading] = useState(false);
+
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsType, setAnalyticsType] = useState("daily"); // daily | monthly | yearly
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -279,7 +192,7 @@ const Dashboard = () => {
       }
 
       let data = await response.json();
-      console.log("Fetched issues:", data);
+      // console.log("Fetched issues:", data);
 
       // Validate and filter out invalid issues
       // data = data.filter((issue) => {
@@ -316,6 +229,26 @@ const Dashboard = () => {
     }
   };
 
+  const fetchAnalytics = async (type = "daily") => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/issues/analytics/stats?type=${type}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      setAnalytics(await res.json());
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
   const fetchAssignedTasks = async () => {
     setIsLoading(true);
     try {
@@ -363,6 +296,7 @@ const Dashboard = () => {
     if (user) {
       fetchIssues();
       fetchAssignedTasks();
+      fetchAnalytics(analyticsType);
       const interval = setInterval(() => {
         fetchIssues();
         fetchAssignedTasks();
@@ -620,57 +554,6 @@ const Dashboard = () => {
     setSelectedIssue(null);
   };
 
-  useEffect(() => {
-    const revenueChartContainer = revenueChartRef.current?.getContext("2d");
-    const vendorsChartContainer = vendorsChartRef.current?.getContext("2d");
-    const customersChartContainer = customersChartRef.current?.getContext("2d");
-
-    if (
-      !revenueChartContainer ||
-      !vendorsChartContainer ||
-      !customersChartContainer
-    ) {
-      console.error("Chart canvas context not found");
-      return;
-    }
-
-    const commonOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "top" },
-        title: { display: false },
-      },
-      scales: {
-        y: { beginAtZero: true },
-      },
-    };
-
-    const revenueChart = new Chart(revenueChartContainer, {
-      type: "line",
-      data: revenueExpenseData,
-      options: commonOptions,
-    });
-
-    const vendorsChart = new Chart(vendorsChartContainer, {
-      type: "bar",
-      data: vendorsData,
-      options: commonOptions,
-    });
-
-    const customersChart = new Chart(customersChartContainer, {
-      type: "line",
-      data: customersData,
-      options: commonOptions,
-    });
-
-    return () => {
-      revenueChart.destroy();
-      vendorsChart.destroy();
-      customersChart.destroy();
-    };
-  }, []);
-
   // const handleTabClick = (tab) => {
   //   setActiveTab(tab);
   // };
@@ -897,6 +780,9 @@ const Dashboard = () => {
     const now = new Date();
     return (now - created) / 1000 / 60 < 5;
   };
+  useEffect(() => {
+    if (user) fetchAnalytics(analyticsType);
+  }, [analyticsType]);
 
   return (
     <div className="bg-[#EFEFEF]">
@@ -918,7 +804,7 @@ const Dashboard = () => {
               >
                 <option value="All">All</option>
                 <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
+                <option value="in-Progress">In Progress</option>
                 <option value="Resolved">Resolved</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -1076,26 +962,20 @@ const Dashboard = () => {
                               "None"
                             )}
                           </td>
+
                           <td
-                            className={`p-3 ${
+                            className={`p-3 truncate ${
                               issue.status === "resolved"
                                 ? "text-white"
                                 : "text-gray-600"
                             }`}
                           >
-                            <td
-                              className={`p-3 truncate ${
-                                issue.status === "resolved"
-                                  ? "text-white"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              {issue.feedbacks && issue.feedbacks.length > 0
-                                ? issue.feedbacks[issue.feedbacks.length - 1]
-                                    .feedback || "N/A"
-                                : "N/A"}
-                            </td>
+                            {issue.feedbacks && issue.feedbacks.length > 0
+                              ? issue.feedbacks[issue.feedbacks.length - 1]
+                                  .feedback || "N/A"
+                              : "N/A"}
                           </td>
+
                           {/* <td
                             className={`p-3 ${
                               issue.status === "resolved"
@@ -1170,7 +1050,7 @@ const Dashboard = () => {
                   <h3 className="text-lg font-semibold mb-2">Descriptions</h3>
 
                   {selectedIssue?.descriptions?.length > 0 ? (
-                    <div className="border rounded overflow-hidden">
+                    <div className="border border-gray-300 rounded overflow-hidden">
                       <div className="max-h-40 overflow-y-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-100 sticky top-0">
@@ -1183,7 +1063,10 @@ const Dashboard = () => {
                           </thead>
                           <tbody>
                             {selectedIssue.descriptions.map((d, index) => (
-                              <tr key={d._id || index} className="border-t">
+                              <tr
+                                key={d._id || index}
+                                className="border-t border-gray-300"
+                              >
                                 <td className="p-2">{index + 1}</td>
                                 <td className="p-2 break-words max-w-[250px]">
                                   {d.description}
@@ -1206,44 +1089,46 @@ const Dashboard = () => {
                     </p>
                   )}
                 </div>
-                <p>
-                  <strong>TimeLine:</strong>{" "}
-                  {selectedIssue?.description?.timeline || "N/A"}-
-                  {selectedIssue?.description?.timeUnit}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedIssue.status || "N/A"}
-                </p>
-                <p>
-                  <strong>Priority:</strong> {selectedIssue.priority || "N/A"}
-                </p>
-                <p>
-                  <strong>Attachment:</strong>{" "}
-                  {selectedIssue.attachment ? (
-                    <a
-                      href={getAttachmentUrl(selectedIssue.attachment)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Download
-                    </a>
-                  ) : (
-                    "None"
-                  )}
-                </p>
-                <p>
-                  <strong>Created At:</strong>{" "}
-                  {selectedIssue.createdAt
-                    ? new Date(selectedIssue.createdAt).toLocaleString()
-                    : "N/A"}
-                </p>
+                <div className="mt-4">
+                  <p>
+                    <strong>TimeLine:</strong>{" "}
+                    {selectedIssue?.description?.timeline || "N/A"}-
+                    {selectedIssue?.description?.timeUnit}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {selectedIssue.status || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Priority:</strong> {selectedIssue.priority || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Attachment:</strong>{" "}
+                    {selectedIssue.attachment ? (
+                      <a
+                        href={getAttachmentUrl(selectedIssue.attachment)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Download
+                      </a>
+                    ) : (
+                      "None"
+                    )}
+                  </p>
+                  <p>
+                    <strong>Created At:</strong>{" "}
+                    {selectedIssue.createdAt
+                      ? new Date(selectedIssue.createdAt).toLocaleString()
+                      : "N/A"}
+                  </p>
+                </div>
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold mb-2">Feedback</h3>
 
                   {Array.isArray(selectedIssue.feedbacks) &&
                   selectedIssue.feedbacks.length > 0 ? (
-                    <div className="border rounded overflow-hidden">
+                    <div className="border border-gray-300 rounded overflow-hidden">
                       <div className="max-h-30 overflow-y-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-100 sticky top-0">
@@ -1257,7 +1142,10 @@ const Dashboard = () => {
 
                           <tbody>
                             {selectedIssue.feedbacks.map((fb, index) => (
-                              <tr key={fb._id || index} className="border-t">
+                              <tr
+                                key={fb._id || index}
+                                className="border-t border-gray-300"
+                              >
                                 <td className="p-2">{index + 1}</td>
                                 <td className="p-2 break-words max-w-[220px]">
                                   {editingFeedback?.id === fb._id ? (
@@ -1360,7 +1248,7 @@ const Dashboard = () => {
 
                   {Array.isArray(selectedIssue.comments) &&
                   selectedIssue.comments.length > 0 ? (
-                    <div className="border rounded overflow-hidden">
+                    <div className="border border-gray-300 rounded overflow-hidden">
                       <div className="max-h-30 overflow-y-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-100 sticky top-0">
@@ -1376,7 +1264,7 @@ const Dashboard = () => {
                             {selectedIssue.comments.map((comment, index) => (
                               <tr
                                 key={comment._id || index}
-                                className="border-t"
+                                className="border-t border-gray-300"
                               >
                                 <td className="p-2">{index + 1}</td>
                                 <td className="p-2 break-words max-w-[200px]">
@@ -1803,36 +1691,112 @@ const Dashboard = () => {
         </div>
 
         {/* Middle Section: Revenue and Expense, Vendors */}
+        {/* Middle Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Daily Ticket Trend */}
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Revenue and Expense</h3>
-              <select className="border rounded p-1 text-sm">
-                <option>8 Months</option>
+              <h3 className="text-lg font-semibold">Ticket Trend</h3>
+              <select
+                value={analyticsType}
+                onChange={(e) => {
+                  setAnalyticsType(e.target.value);
+                  fetchAnalytics(e.target.value);
+                }}
+                className="border bg-white rounded p-1 text-sm text-gray-800"
+              >
+                <option value="daily">Daily</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
               </select>
             </div>
-            <div className="p-6">
-              <div className="flex space-x-4 mb-4">
-                {revenueExpenseData.summary.map((item, index) => (
-                  <div key={index}>
-                    <p className="text-sm text-gray-500">{item.label}</p>
-                    <p className="text-lg font-semibold">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="h-64">
-                <canvas ref={revenueChartRef} />
-              </div>
+            <div className="p-4 h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={(() => {
+                    const stats = analytics?.dateStats || [];
+                    if (analyticsType === "daily") {
+                      return stats.map((d) => ({
+                        name: `${d.dayName?.slice(0, 3)} ${d.day}`,
+                        count: d.count,
+                      }));
+                    }
+                    if (analyticsType === "monthly") {
+                      return stats.map((d) => ({
+                        name: d.monthName?.slice(0, 3) || `M${d.month}`,
+                        count: d.count,
+                      }));
+                    }
+                    if (analyticsType === "yearly") {
+                      return stats.map((d) => ({
+                        name: String(d.year),
+                        count: d.count,
+                      }));
+                    }
+                    return stats;
+                  })()}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 10 }}
+                    interval={analyticsType === "daily" ? 4 : 0}
+                    angle={analyticsType === "daily" ? -35 : 0}
+                    textAnchor={analyticsType === "daily" ? "end" : "middle"}
+                    height={analyticsType === "daily" ? 40 : 20}
+                  />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#F97316"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                    name="Tickets"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Priority Breakdown */}
           <div className="bg-white rounded-lg shadow">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Vendors</h3>
+              <h3 className="text-lg font-semibold">Priority Breakdown</h3>
             </div>
-            <div className="p-6">
-              <div className="h-64">
-                <canvas ref={vendorsChartRef} />
-              </div>
+            <div className="p-4 h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={(analytics?.priorityStats || []).map((p) => ({
+                    name: p.priority,
+                    count: p.count,
+                  }))}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#f3f4f6"
+                    vertical={false}
+                  />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]} name="Tickets">
+                    {(analytics?.priorityStats || []).map((entry, i) => (
+                      <Cell
+                        key={i}
+                        fill={
+                          entry.priority === "High"
+                            ? "#ef4444"
+                            : entry.priority === "Medium"
+                            ? "#f97316"
+                            : "#22c55e"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -1889,19 +1853,43 @@ const Dashboard = () => {
           </div>
 
           {/* Customers */}
+          {/* Replace the Customers div with: */}
           <div className="bg-white rounded-lg shadow h-[430px] flex flex-col">
             <div className="bg-primary text-white px-4 py-2 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Customers</h3>
+              <h3 className="text-lg font-semibold">Status Distribution</h3>
             </div>
-            <div className="p-6 flex-1">
-              <div className="relative h-full">
-                <span className="absolute right-0 top-0 bg-gray-900 text-white text-xs px-2 py-1 rounded">
-                  {customersData.revenueNote}
-                </span>
-                <div className="h-full">
-                  <canvas ref={customersChartRef} className="w-full h-full" />
-                </div>
-              </div>
+            <div className="p-4 flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={(analytics?.statusStats || []).map((s) => ({
+                      name: s.status,
+                      value: s.count,
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={110}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {(analytics?.statusStats || []).map((entry, i) => (
+                      <Cell
+                        key={i}
+                        fill={
+                          entry.status === "resolved"
+                            ? "#10b981"
+                            : entry.status === "in-progress"
+                            ? "#6366f1"
+                            : "#f59e0b"
+                        }
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>

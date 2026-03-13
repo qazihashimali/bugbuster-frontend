@@ -233,8 +233,12 @@ const Department = () => {
               <tbody>
                 {departments.map((department) => (
                   <tr key={department._id}>
-                    <td className="p-3 text-sm">{department.departmentCode}</td>
-                    <td className="p-3 text-sm">{department.departmentName}</td>
+                    <td className="p-3 text-sm">
+                      {department?.departmentCode}
+                    </td>
+                    <td className="p-3 text-sm">
+                      {department?.departmentName}
+                    </td>
                     <td className="p-3 flex justify-center space-x-2">
                       <button
                         onClick={() => handleViewDepartment(department)}
@@ -396,11 +400,11 @@ const Department = () => {
               <div>
                 <p className="mb-2">
                   <strong>Department Code:</strong>{" "}
-                  {selectedDepartment.departmentCode}
+                  {selectedDepartment?.departmentCode}
                 </p>
                 <p className="mb-2">
                   <strong>Department Name:</strong>{" "}
-                  {selectedDepartment.departmentName}
+                  {selectedDepartment?.departmentName}
                 </p>
                 <div className="flex justify-end mt-4">
                   <button

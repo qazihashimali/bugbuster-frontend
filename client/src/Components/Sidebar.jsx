@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { RiBuilding2Fill } from "react-icons/ri";
 import { BsFillBugFill } from "react-icons/bs";
 import { TiThList } from "react-icons/ti";
+import { FaUserGroup } from "react-icons/fa6";
 
 const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   const navigate = useNavigate();
@@ -104,6 +105,12 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       icon: <FaUsers />,
       route: "/users",
       allowedRoles: ["SuperAdmin"], // All roles can access
+    },
+    {
+      name: "My Team Tasks",
+      icon: <FaUserGroup />,
+      route: "/my-team",
+      allowedRoles: ["Admin", "EndUser", "ServiceProvider", "SuperAdmin"], // All roles can access
     },
     {
       name: "Logs",

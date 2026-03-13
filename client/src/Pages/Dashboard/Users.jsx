@@ -1,9 +1,78 @@
-import React, { useState, useEffect } from "react";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaEye, FaEdit, FaTrash, FaChartPie } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import Loading from "../../Components/Loading";
 import toast from "react-hot-toast";
+import { FaSitemap } from "react-icons/fa";
+import UserHierarchyModal from "../../Components/Userhierarchymodal";
+import UserStatsModal from "../../Components/UserStatsModal";
 
+import { BsThreeDotsVertical } from "react-icons/bs";
+
+const ActionMenu = ({ onDelete, onStats, onHierarchy }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const items = [
+    {
+      icon: <FaTrash size={13} />,
+      label: "Delete",
+      action: onDelete,
+      color: "text-red-500 hover:bg-red-50",
+    },
+    {
+      icon: <FaChartPie size={13} />,
+      label: "Stats",
+      action: onStats,
+      color: "text-indigo-500 hover:bg-indigo-50",
+    },
+    {
+      icon: <FaSitemap size={13} />,
+      label: "Hierarchy",
+      action: onHierarchy,
+      color: "text-emerald-600 hover:bg-emerald-50",
+    },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="text-gray-500 hover:text-gray-800 cursor-pointer p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+        title="More options"
+      >
+        <BsThreeDotsVertical size={15} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-8 z-30 bg-white border border-gray-100 rounded-xl shadow-lg py-1 w-36 animate-fade-in">
+          {items.map(({ icon, label, action, color }) => (
+            <button
+              key={label}
+              onClick={() => {
+                action();
+                setOpen(false);
+              }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${color}`}
+            >
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 const Users = () => {
   const user =
     (localStorage.getItem("user") &&
@@ -35,6 +104,10 @@ const Users = () => {
     departments: [],
     reportHim: [],
   });
+  const [isHierarchyOpen, setIsHierarchyOpen] = useState(false);
+  const [hierarchyUser, setHierarchyUser] = useState(null);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [statsUser, setStatsUser] = useState(null);
 
   const roleOptions = ["EndUser", "ServiceProvider", "Admin", "SuperAdmin"];
   const roleDisplay = roleOptions.reduce(
@@ -73,7 +146,7 @@ const Users = () => {
 
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : data.users || []);
-      console.log(data);
+      // console.log(data);
       if (Date.now() - start < 2000)
         await new Promise((resolve) =>
           setTimeout(resolve, 2000 - (Date.now() - start))
@@ -162,6 +235,8 @@ const Users = () => {
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
+    setIsDepartmentOpen(false);
+    setIsReportsToOpen(false);
     setFormData({
       name: user.name || "",
       email: user.email || "",
@@ -169,7 +244,7 @@ const Users = () => {
       phone: user.phone || "",
       branch: user.branch?._id || "",
       departments: user.departments?.map((d) => d._id) || [],
-      reportHim: user.reportHim || [],
+      reportHim: user.reportHim?.map((r) => r._id) || [],
     });
 
     fetchDropdowns(user.company); // pass the company name directly
@@ -351,6 +426,8 @@ const Users = () => {
       u.company === selectedUser?.company
   );
 
+  // console.log(reportToOptions, formData, users);
+
   const handleDepartmentToggle = (id) => {
     setFormData((prev) => ({
       ...prev,
@@ -375,6 +452,28 @@ const Users = () => {
             User Management
           </h1>
         </div>
+
+        {isHierarchyOpen && hierarchyUser && (
+          <UserHierarchyModal
+            userId={hierarchyUser._id}
+            userName={hierarchyUser.name}
+            onClose={() => {
+              setIsHierarchyOpen(false);
+              setHierarchyUser(null);
+            }}
+          />
+        )}
+
+        {isStatsOpen && statsUser && (
+          <UserStatsModal
+            userId={statsUser._id}
+            userName={statsUser.name}
+            onClose={() => {
+              setIsStatsOpen(false);
+              setStatsUser(null);
+            }}
+          />
+        )}
 
         <div className="p-3 sm:p-4 lg:p-6">
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -489,25 +588,39 @@ const Users = () => {
                                 .join(", ")
                             : "N/A"}
                         </td>
-                        <td className="p-3 flex justify-center space-x-2">
-                          <button
-                            onClick={() => handleViewUser(user)}
-                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
-                          >
-                            <FaEye size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleEditUser(user)}
-                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
-                          >
-                            <FaEdit size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user)}
-                            className="text-orange-600 cursor-pointer hover:text-orange-800 p-1"
-                          >
-                            <FaTrash size={16} />
-                          </button>
+                        <td className="p-3">
+                          <div className="flex justify-center items-center gap-1">
+                            {/* View */}
+                            <button
+                              onClick={() => handleViewUser(user)}
+                              className="text-orange-600 hover:text-orange-800 cursor-pointer p-1.5 hover:bg-orange-50 rounded-md transition-colors"
+                              title="View"
+                            >
+                              <FaEye size={15} />
+                            </button>
+
+                            {/* Edit */}
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="text-orange-600 hover:text-orange-800 cursor-pointer p-1.5 hover:bg-orange-50 rounded-md transition-colors"
+                              title="Edit"
+                            >
+                              <FaEdit size={15} />
+                            </button>
+
+                            {/* 3-dot menu */}
+                            <ActionMenu
+                              onDelete={() => handleDeleteUser(user)}
+                              onStats={() => {
+                                setStatsUser(user);
+                                setIsStatsOpen(true);
+                              }}
+                              onHierarchy={() => {
+                                setHierarchyUser(user);
+                                setIsHierarchyOpen(true);
+                              }}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -532,25 +645,30 @@ const Users = () => {
                         {user?.email || "N/A"}
                       </p>
                     </div>
-                    <div className="flex space-x-2 ml-3">
+                    <div className="flex items-center gap-1 ml-3">
                       <button
                         onClick={() => handleViewUser(user)}
-                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
+                        className="text-orange-600 hover:text-orange-800 cursor-pointer p-2 hover:bg-orange-50 rounded-md transition-colors"
                       >
-                        <FaEye size={16} />
+                        <FaEye size={15} />
                       </button>
                       <button
                         onClick={() => handleEditUser(user)}
-                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
+                        className="text-orange-600 hover:text-orange-800 cursor-pointer p-2 hover:bg-orange-50 rounded-md transition-colors"
                       >
-                        <FaEdit size={16} />
+                        <FaEdit size={15} />
                       </button>
-                      <button
-                        onClick={() => handleDeleteUser(user)}
-                        className="text-orange-600 cursor-pointer hover:text-orange-800 p-2"
-                      >
-                        <FaTrash size={16} />
-                      </button>
+                      <ActionMenu
+                        onDelete={() => handleDeleteUser(user)}
+                        onStats={() => {
+                          setStatsUser(user);
+                          setIsStatsOpen(true);
+                        }}
+                        onHierarchy={() => {
+                          setHierarchyUser(user);
+                          setIsHierarchyOpen(true);
+                        }}
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
@@ -568,7 +686,7 @@ const Users = () => {
                         {user?.phone || "N/A"}
                       </span>
                     </div>
-                    <div>
+                    {/* <div>
                       <span className="font-medium text-gray-700">House:</span>
                       <span className="ml-2 text-gray-600">
                         {user?.houseNo || "N/A"}
@@ -579,7 +697,7 @@ const Users = () => {
                       <span className="ml-2 text-gray-600">
                         {user?.block ? `${user.block.blockCode}` : "N/A"}
                       </span>
-                    </div>
+                    </div> */}
                     {user.branch && (
                       <div className="sm:col-span-2">
                         <span className="font-medium text-gray-700">
@@ -864,7 +982,11 @@ const Users = () => {
                   <div className="flex flex-col gap-4 sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6 pt-4">
                     <button
                       type="button"
-                      onClick={() => setIsModalOpen(false)}
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setIsDepartmentOpen(false);
+                        setIsReportsToOpen(false);
+                      }}
                       className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm order-2 sm:order-1"
                     >
                       Cancel
@@ -908,22 +1030,22 @@ const Users = () => {
                       {selectedUser?.phone || "N/A"}
                     </span>
                   </div>
-                  <div>
+                  {/* <div>
                     <span className="font-medium text-gray-700">
                       House Number:
                     </span>
                     <span className="ml-2 text-gray-600">
                       {selectedUser?.houseNo || "N/A"}
                     </span>
-                  </div>
-                  <div>
+                  </div> */}
+                  {/* <div>
                     <span className="font-medium text-gray-700">Block:</span>
                     <span className="ml-2 text-gray-600">
                       {selectedUser?.block
                         ? `(${selectedUser?.block?.blockCode}) ${selectedUser?.block?.blockName}`
                         : "N/A"}
                     </span>
-                  </div>
+                  </div> */}
                   <div>
                     <span className="font-medium text-gray-700">Branch:</span>
                     <span className="ml-2 text-gray-600">
@@ -934,11 +1056,15 @@ const Users = () => {
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">
-                      Department:
+                      Departments:
                     </span>
                     <span className="ml-2 text-gray-600">
-                      {selectedUser?.department
-                        ? `(${selectedUser.department.departmentCode}) ${selectedUser.department.departmentName}`
+                      {selectedUser?.departments?.length
+                        ? selectedUser.departments
+                            .map(
+                              (d) => `(${d.departmentCode}) ${d.departmentName}`
+                            )
+                            .join(", ")
                         : "N/A"}
                     </span>
                   </div>
@@ -956,7 +1082,11 @@ const Users = () => {
                 </div>
                 <div className="flex justify-end mt-6 pt-4">
                   <button
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setIsDepartmentOpen(false);
+                      setIsReportsToOpen(false);
+                    }}
                     className="bg-black cursor-pointer text-white px-4 py-2 rounded-md  text-sm"
                   >
                     Close

@@ -142,8 +142,11 @@ export default function Feedback() {
       const filtered = dropdowns.users.filter(
         (user) =>
           user.branch === formData.branch &&
-          user.department === formData.department
+          user.departments.some((dept) => dept === formData.department)
       );
+      console.log(filtered);
+      console.log(dropdowns.users);
+
       setDropdowns((prev) => ({ ...prev, filteredUsers: filtered }));
     } else {
       setDropdowns((prev) => ({ ...prev, filteredUsers: prev.users }));
@@ -153,7 +156,7 @@ export default function Feedback() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    console.log(`Input changed: ${name} = ${value}`);
+    // console.log(`Input changed: ${name} = ${value}`);
   };
 
   const validateForm = () => {
