@@ -13,6 +13,7 @@ import AddDescriptions from "./Pages/Dashboard/AddDescriptions";
 import Auth from "./Pages/Login";
 import Company from "./Pages/Dashboard/Company";
 import MyTeam from "./Pages/Dashboard/MyTeam";
+import AddDailyTasks from "./Pages/Dashboard/AddDailyTasks";
 
 const appRoutes = [
   { path: "/", element: <Auth /> },
@@ -30,6 +31,7 @@ const appRoutes = [
   { path: "/add-descriptions", element: <AddDescriptions /> },
   { path: "/companies", element: <Company /> },
   { path: "/my-team", element: <MyTeam /> },
+  { path: "/add-tasks", element: <AddDailyTasks /> },
 ];
 
 export default appRoutes;

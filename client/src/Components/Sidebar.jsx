@@ -124,6 +124,13 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       route: "/add-descriptions",
       allowedRoles: ["SuperAdmin", "Admin"], // All roles can access
     },
+    {
+      name: "Add Tasks",
+      icon: <MdDescription />,
+      route: "/add-tasks",
+      allowedRoles: ["SuperAdmin", "Admin", "EndUser", "ServiceProvider"], // All roles can access
+      allowedCompany: import.meta.env.VITE_ALLOWED_COMPANY,
+    },
     // {
     //   name: "Logout",
     //   icon: <FaSignOutAlt />,
