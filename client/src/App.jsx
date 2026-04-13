@@ -7,6 +7,7 @@ import Auth from "./Pages/Login";
 import { Route, Routes, useLocation } from "react-router-dom";
 import appRoutes from "./Routes";
 import toast, { Toaster } from "react-hot-toast";
+import Unauthorized from "./Pages/Dashboard/Unauthorized";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,8 +45,9 @@ function App() {
         <div className="flex-1 flex flex-col w-full sm:w-[75%] mx-auto">
           {!isAuthPage && <Navbar />}
 
-          <main className="flex-1 overflow-y-auto no-scrollbar bg-gray-100">
+          <main className="flex-1 overflow-y-auto  bg-gray-100">
             <Routes>
+              <Route path="/unauthorized" element={<Unauthorized />} />
               {appRoutes.map((route, index) => (
                 <Route key={index} path={route.path} element={route.element} />
               ))}

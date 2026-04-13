@@ -815,7 +815,7 @@ const Dashboard = () => {
 
           <div className="p-6">
             <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar">
+              <div className="overflow-x-auto">
                 <table className="w-full text-xs min-w-[1200px]">
                   <thead className="bg-gray-100 truncate">
                     <tr className="text-gray-800">
@@ -855,128 +855,147 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredIssues.map((issue) =>
-                      issue ? (
-                        <tr
-                          key={issue._id}
-                          className={`border-b border-gray-100 cursor-pointer  ${
-                            issue.status === "resolved"
-                              ? "bg-[#8b68b7] text-white"
-                              : ""
-                          }`}
-                          onClick={() => handleViewIssue(issue)}
+                    {isLoading ? (
+                      <tr>
+                        <td
+                          colSpan="10"
+                          className="p-6 text-center text-gray-600"
                         >
-                          <td
-                            className={`p-3 text-sm truncate ${
+                          <Loading />
+                        </td>
+                      </tr>
+                    ) : filteredIssues.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="10"
+                          className="p-6 text-center text-gray-600"
+                        >
+                          No tasks available
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredIssues.map((issue) =>
+                        issue ? (
+                          <tr
+                            key={issue._id}
+                            className={`border-b border-gray-100 cursor-pointer  ${
                               issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {issue.createdBy?.name || "N/A"}
-                          </td>
-                          <td
-                            className={`p-3 text-sm truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {issue.branch
-                              ? `${issue.branch.branchName}`
-                              : "N/A"}
-                          </td>
-                          <td
-                            className={`p-3 text-sm truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {issue.department
-                              ? `${issue.department.departmentName}`
-                              : "N/A"}
-                          </td>
-                          <td
-                            className={`p-3  ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {issue.assignedTo
-                              ? `${issue.assignedTo.name} (${issue.assignedTo.email})`
-                              : "N/A"}
-                          </td>
-                          <td
-                            className={`p-3 text-sm truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
+                                ? "bg-[#8b68b7] text-white"
+                                : ""
                             }`}
+                            onClick={() => handleViewIssue(issue)}
                           >
-                            {issue.descriptions?.length > 0
-                              ? issue.descriptions[0].description
-                              : "N/A"}
-                          </td>
-                          <td
-                            className={`p-3 truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {issue.status || "N/A"}
-                          </td>
-                          <td className="p-3 text-gray-600">
-                            {issue.priority ? (
-                              <span
-                                className={`inline-block w-20 text-center px-2 py-1 rounded text-white text-xs ${
-                                  issue.priority === "High"
-                                    ? "bg-[#BE2C30]"
-                                    : issue.priority === "Medium"
-                                    ? "bg-[#CC610B]"
-                                    : issue.priority === "Low"
-                                    ? "bg-[#2E8310]"
-                                    : "bg-gray-500"
-                                }`}
-                              >
-                                {issue.priority}
-                              </span>
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
-                          <td className="p-3 text-gray-600">
-                            {issue.attachment ? (
-                              <a
-                                href={getAttachmentUrl(issue.attachment)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                Download
-                              </a>
-                            ) : (
-                              "None"
-                            )}
-                          </td>
+                            <td
+                              className={`p-3 text-sm truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {issue.createdBy?.name || "N/A"}
+                            </td>
+                            <td
+                              className={`p-3 text-sm truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {issue.branch
+                                ? `${issue.branch.branchName}`
+                                : "N/A"}
+                            </td>
+                            <td
+                              className={`p-3 text-sm truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {issue.department
+                                ? `${issue.department.departmentName}`
+                                : "N/A"}
+                            </td>
+                            <td
+                              className={`p-3  ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {issue.assignedTo
+                                ? `${issue.assignedTo.name} (${issue.assignedTo.email})`
+                                : "N/A"}
+                            </td>
+                            <td
+                              className={`p-3 text-sm truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {issue.descriptions?.length > 0
+                                ? issue.descriptions[0].description
+                                : "N/A"}
+                            </td>
+                            <td
+                              className={`p-3 truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {issue.status || "N/A"}
+                            </td>
+                            <td className="p-3 text-gray-600">
+                              {issue.priority ? (
+                                <span
+                                  className={`inline-block w-20 text-center px-2 py-1 rounded text-white text-xs ${
+                                    issue.priority === "High"
+                                      ? "bg-[#BE2C30]"
+                                      : issue.priority === "Medium"
+                                      ? "bg-[#CC610B]"
+                                      : issue.priority === "Low"
+                                      ? "bg-[#2E8310]"
+                                      : "bg-gray-500"
+                                  }`}
+                                >
+                                  {issue.priority}
+                                </span>
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td className="p-3 text-gray-600">
+                              {issue.attachment ? (
+                                <a
+                                  href={getAttachmentUrl(issue.attachment)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Download
+                                </a>
+                              ) : (
+                                "None"
+                              )}
+                            </td>
 
-                          <td
-                            className={`p-3 truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {issue.feedbacks && issue.feedbacks.length > 0
-                              ? issue.feedbacks[issue.feedbacks.length - 1]
-                                  .feedback || "N/A"
-                              : "N/A"}
-                          </td>
+                            <td
+                              className={`p-3 truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {issue.feedbacks && issue.feedbacks.length > 0
+                                ? issue.feedbacks[issue.feedbacks.length - 1]
+                                    .feedback || "N/A"
+                                : "N/A"}
+                            </td>
 
-                          {/* <td
+                            {/* <td
                             className={`p-3 ${
                               issue.status === "resolved"
                                 ? "text-white"
@@ -985,33 +1004,27 @@ const Dashboard = () => {
                           >
                             {renderStars(issue.rating)}
                           </td> */}
-                          <td
-                            className={`p-3 text-sm truncate ${
-                              issue.status === "resolved"
-                                ? "text-white"
-                                : "text-gray-600"
-                            } `}
-                          >
-                            {Array.isArray(issue.comments) &&
-                            issue.comments.length > 0
-                              ? issue.comments[issue.comments.length - 1].text
-                              : "N/A"}
-                          </td>
-                        </tr>
-                      ) : null
+                            <td
+                              className={`p-3 text-sm truncate ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              } `}
+                            >
+                              {Array.isArray(issue.comments) &&
+                              issue.comments.length > 0
+                                ? issue.comments[issue.comments.length - 1].text
+                                : "N/A"}
+                            </td>
+                          </tr>
+                        ) : null
+                      )
                     )}
                   </tbody>
                 </table>
               </div>
               {isLoading && (
-                <div className="p-4 text-gray-600 text-center">
-                  <Loading />
-                </div>
-              )}
-              {!isLoading && filteredIssues.length === 0 && (
-                <div className="p-4 text-gray-600 text-center">
-                  No tasks available
-                </div>
+                <div className="p-4 text-gray-600 text-center"></div>
               )}
             </div>
           </div>
@@ -1019,7 +1032,7 @@ const Dashboard = () => {
         {/* Modal for Task Details */}
         {isModalOpen && selectedIssue && (
           <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg px-6 py-4 w-full max-w-3xl h-[80vh] overflow-y-auto no-scrollbar">
+            <div className="bg-white rounded-lg px-6 py-4 w-full max-w-3xl h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Task Details</h2>
               </div>

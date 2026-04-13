@@ -14,24 +14,190 @@ import Auth from "./Pages/Login";
 import Company from "./Pages/Dashboard/Company";
 import MyTeam from "./Pages/Dashboard/MyTeam";
 import AddDailyTasks from "./Pages/Dashboard/AddDailyTasks";
+import ViewDailyTasks from "./Pages/Dashboard/ViewDailyTasks";
+import ProtectedRoute from "./ProtectedRoute";
+import { ROLES } from "./Configs/Roles";
 
 const appRoutes = [
   { path: "/", element: <Auth /> },
-  { path: "/dashboard", element: <Dashboard /> },
-  { path: "/issue-desk", element: <IssueDesk /> },
-  { path: "/branch", element: <Branch /> },
-  { path: "/department", element: <Department /> },
-  { path: "/block", element: <Block /> },
-  { path: "/my-tasks", element: <Mytasks /> },
-  { path: "/assigned-tasks", element: <Assignedtasks /> },
-  { path: "/users", element: <Users /> },
-  { path: "/deleted-logs", element: <DeletedLogs /> },
-  { path: "/feedback", element: <Feedback /> },
-  { path: "/reviews", element: <Reviews /> },
-  { path: "/add-descriptions", element: <AddDescriptions /> },
-  { path: "/companies", element: <Company /> },
-  { path: "/my-team", element: <MyTeam /> },
-  { path: "/add-tasks", element: <AddDailyTasks /> },
+
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/issue-desk",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <IssueDesk />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/branch",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <Branch />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/department",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <Department />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/block",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <Block />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/my-tasks",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <Mytasks />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/assigned-tasks",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <Assignedtasks />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
+        <Users />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/deleted-logs",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
+        <DeletedLogs />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/feedback",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <Feedback />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/reviews",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <Reviews />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/add-descriptions",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <AddDescriptions />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/companies",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <Company />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/my-team",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <MyTeam />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/add-tasks",
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.SUPER_ADMIN,
+          ROLES.ADMIN,
+          ROLES.END_USER,
+          ROLES.SERVICE_PROVIDER,
+        ]}
+      >
+        <AddDailyTasks />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/view-tasks",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN]}>
+        <ViewDailyTasks />
+      </ProtectedRoute>
+    ),
+  },
 ];
 
 export default appRoutes;

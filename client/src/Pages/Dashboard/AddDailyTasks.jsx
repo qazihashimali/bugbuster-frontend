@@ -251,7 +251,7 @@ export default function DailyReport() {
 
             {/* Daily Tasks Section */}
             <div className="mt-8">
-              <h2 className="text-base font-semibold text-gray-700 mb-4 border-b pb-2">
+              <h2 className="text-base font-semibold text-gray-700 mb-4 border-b border-gray-300 pb-2">
                 Daily Tasks
               </h2>
 

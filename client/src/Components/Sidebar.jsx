@@ -6,6 +6,7 @@ import {
   FaUsers,
   FaCommentMedical,
   FaCommentDots,
+  FaTasks,
 } from "react-icons/fa";
 import { MdDashboard, MdDeleteSweep, MdDescription } from "react-icons/md";
 import { LuGitBranchPlus } from "react-icons/lu";
@@ -15,6 +16,7 @@ import { RiBuilding2Fill } from "react-icons/ri";
 import { BsFillBugFill } from "react-icons/bs";
 import { TiThList } from "react-icons/ti";
 import { FaUserGroup } from "react-icons/fa6";
+import { TbReportSearch } from "react-icons/tb";
 
 const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
   const navigate = useNavigate();
@@ -125,10 +127,17 @@ const Sidebar = ({ isOpen, setIsOpen, onLogout }) => {
       allowedRoles: ["SuperAdmin", "Admin"], // All roles can access
     },
     {
-      name: "Add Tasks",
-      icon: <MdDescription />,
+      name: "Add Daily Report",
+      icon: <FaTasks />,
       route: "/add-tasks",
       allowedRoles: ["SuperAdmin", "Admin", "EndUser", "ServiceProvider"], // All roles can access
+      allowedCompany: import.meta.env.VITE_ALLOWED_COMPANY,
+    },
+    {
+      name: "View Daily Report",
+      icon: <TbReportSearch />,
+      route: "/view-tasks",
+      allowedRoles: ["SuperAdmin", "Admin"], // All roles can access
       allowedCompany: import.meta.env.VITE_ALLOWED_COMPANY,
     },
     // {

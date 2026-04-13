@@ -23,7 +23,21 @@ body,
   flex-direction: column;
   min-height: 100vh;
 }
-
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
 /* Hide Scrollbar but Keep Scrolling */
 .no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
