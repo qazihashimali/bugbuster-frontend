@@ -166,10 +166,27 @@ export default function IssueDesk() {
     }
   };
 
+  // const handleFileChange = (e) => {
+  //   setFormData({ ...formData, attachment: e.target.files[0] });
+  // };
   const handleFileChange = (e) => {
-    setFormData({ ...formData, attachment: e.target.files[0] });
-  };
+    const file = e.target.files[0];
 
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 5MB");
+
+      // reset input
+      e.target.value = null;
+
+      return;
+    }
+
+    setFormData({ ...formData, attachment: file });
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -190,7 +207,10 @@ export default function IssueDesk() {
       formDataToSend.append("branch", formData.branch);
       formDataToSend.append("department", formData.department);
       formDataToSend.append("assignedTo", formData.assignedTo);
-      formDataToSend.append("description", formData.descriptions);
+      formDataToSend.append(
+        "description",
+        JSON.stringify(formData.descriptions)
+      );
       formDataToSend.append("priority", formData.priority);
       formDataToSend.append("status", formData.status);
       if (formData.attachment) {

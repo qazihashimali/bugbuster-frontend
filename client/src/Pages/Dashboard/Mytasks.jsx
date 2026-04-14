@@ -171,8 +171,11 @@ const MyTasks = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          // body: JSON.stringify({
+          //   furtherAssignedTo: [formData.assignedTo],
+          // }),
           body: JSON.stringify({
-            furtherAssignedTo: [formData.assignedTo],
+            furtherAssignedTo: formData.assignedTo ? [formData.assignedTo] : [],
           }),
         }
       );
@@ -276,10 +279,10 @@ const MyTasks = () => {
                           {issue?.userName || "N/A"}
                         </td>
                         <td className="p-3 text-sm">
-                          {issue.branch?.branchName || "N/A"}
+                          {issue?.branch?.branchName || "N/A"}
                         </td>
                         <td className="p-3">
-                          {issue.department?.departmentName || "N/A"}
+                          {issue?.department?.departmentName || "N/A"}
                         </td>
                         <td className="p-3 text-sm">
                           {issue?.status || "N/A"}
@@ -299,14 +302,14 @@ const MyTasks = () => {
                         <td
                           className="p-3 text-sm"
                           title={
-                            issue.descriptions?.length > 0
+                            issue?.descriptions?.length > 0
                               ? issue.descriptions
                                   .map((d) => d.description)
                                   .join(", ")
                               : "N/A"
                           }
                         >
-                          {issue.descriptions?.length > 0
+                          {issue?.descriptions?.length > 0
                             ? issue.descriptions[0].description
                             : "N/A"}
                         </td>

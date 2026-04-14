@@ -17,13 +17,7 @@ const MyTeam = () => {
   const [filterPriority, setFilterPriority] = useState("All");
 
   const roleOptions = ["EndUser", "ServiceProvider", "Admin", "SuperAdmin"];
-  const taskStatusOptions = [
-    "All",
-    "pending",
-    "in-progress",
-    "completed",
-    "cancelled",
-  ];
+  const taskStatusOptions = ["All", "pending", "in-progress", "resolved"];
   const priorityOptions = ["All", "High", "Medium", "Low"];
 
   const fetchTeam = async () => {
