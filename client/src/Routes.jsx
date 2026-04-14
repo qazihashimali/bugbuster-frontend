@@ -198,6 +198,16 @@ const appRoutes = [
       </ProtectedRoute>
     ),
   },
+  // {
+  //   path: "/view-tasks",
+  //   element: (
+  //     <ProtectedRoute
+  //       allowedRoles={[ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.SERVICE_PROVIDER]}
+  //     >
+  //       <ViewDailyTasks />
+  //     </ProtectedRoute>
+  //   ),
+  // },
 ];
 
 export default appRoutes;

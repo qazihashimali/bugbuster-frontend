@@ -2740,11 +2740,16 @@ const Dashboard = () => {
 
           <div className="p-6">
             <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
+              <div
+                className="overflow-x-auto overflow-y-auto"
+                style={{ maxHeight: "400px" }}
+              >
                 <table className="w-full text-xs min-w-[1200px]">
                   <thead className="bg-gray-100 truncate">
                     <tr className="text-gray-800">
-                      <th className="p-3 text-left text-sm font-medium">ID</th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Issue ID
+                      </th>
                       <th className="p-3 text-left text-sm font-medium">
                         Assigned By
                       </th>
@@ -2756,6 +2761,9 @@ const Dashboard = () => {
                       </th>
                       <th className="p-3 text-left text-sm font-medium">
                         Assigned To
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Further Assigned To
                       </th>
                       <th className="p-3 text-left text-sm font-medium">
                         Description
@@ -2868,10 +2876,41 @@ const Dashboard = () => {
                                   ? "text-white"
                                   : "text-gray-600"
                               }`}
+                              title={
+                                Array.isArray(issue.furtherAssignedTo) &&
+                                issue.furtherAssignedTo.length > 0
+                                  ? issue.furtherAssignedTo
+                                      .map((a) => `${a.name} (${a.email})`)
+                                      .join(", ")
+                                  : "N/A"
+                              }
                             >
-                              {issue.descriptions?.length > 0
-                                ? issue.descriptions[0].description
+                              {Array.isArray(issue.furtherAssignedTo) &&
+                              issue.furtherAssignedTo.length > 0
+                                ? issue.furtherAssignedTo
+                                    .map((a) => a.name || a)
+                                    .join(", ")
                                 : "N/A"}
+                            </td>
+                            <td
+                              className={`p-3 text-sm ${
+                                issue.status === "resolved"
+                                  ? "text-white"
+                                  : "text-gray-600"
+                              }`}
+                              title={
+                                issue.descriptions?.length > 0
+                                  ? issue.descriptions
+                                      .map((d) => d.description)
+                                      .join(", ")
+                                  : "N/A"
+                              }
+                            >
+                              <div className="max-w-[200px] truncate">
+                                {issue.descriptions?.length > 0
+                                  ? issue.descriptions[0].description
+                                  : "N/A"}
+                              </div>
                             </td>
                             <td
                               className={`p-3 truncate ${
@@ -2880,7 +2919,8 @@ const Dashboard = () => {
                                   : "text-gray-600"
                               } `}
                             >
-                              {issue.status || "N/A"}
+                              {issue.status.charAt(0).toUpperCase() +
+                                issue.status.slice(1) || "N/A"}
                             </td>
                             <td className="p-3 text-gray-600">
                               {issue.priority ? (
@@ -2910,7 +2950,7 @@ const Dashboard = () => {
                                   className="text-blue-600 hover:underline"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  Download
+                                  View
                                 </a>
                               ) : (
                                 "None"
@@ -2964,6 +3004,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
         {/* Modal for Task Details */}
         {isModalOpen && selectedIssue && (
           <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
@@ -2972,6 +3013,9 @@ const Dashboard = () => {
                 <h2 className="text-xl font-semibold">Task Details</h2>
               </div>
               <div>
+                <p>
+                  <strong>Issue Id:</strong> {selectedIssue.issueId || "N/A"}
+                </p>
                 <p>
                   <strong>Assigned By:</strong>{" "}
                   {selectedIssue.createdBy?.name || "N/A"}
@@ -2992,6 +3036,15 @@ const Dashboard = () => {
                   <strong>Assigned To:</strong>{" "}
                   {selectedIssue.assignedTo
                     ? `${selectedIssue.assignedTo.name} (${selectedIssue.assignedTo.email})`
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Further Assigned To:</strong>{" "}
+                  {Array.isArray(selectedIssue.furtherAssignedTo) &&
+                  selectedIssue.furtherAssignedTo.length > 0
+                    ? selectedIssue.furtherAssignedTo
+                        .map((a) => a.name || a)
+                        .join(", ")
                     : "N/A"}
                 </p>
                 <div className="mt-4">
@@ -3058,7 +3111,7 @@ const Dashboard = () => {
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline"
                       >
-                        Download
+                        View
                       </a>
                     ) : (
                       "None"

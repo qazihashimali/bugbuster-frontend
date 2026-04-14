@@ -58,7 +58,7 @@ const MyTasks = () => {
       }
 
       setIssues(data);
-      //console.log(data);
+      console.log("Task", data);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -230,6 +230,9 @@ const MyTasks = () => {
                   <thead className="bg-gray-100 truncate">
                     <tr>
                       <th className="p-3 text-left text-sm font-medium">
+                        Issue Id
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
                         Assigned By
                       </th>
                       <th className="p-3 text-left text-sm font-medium">
@@ -267,6 +270,9 @@ const MyTasks = () => {
                     {issues.map((issue) => (
                       <tr key={issue._id}>
                         <td className="p-3 text-sm">
+                          {issue?.issueId || "N/A"}
+                        </td>
+                        <td className="p-3 text-sm">
                           {issue?.userName || "N/A"}
                         </td>
                         <td className="p-3 text-sm">
@@ -290,8 +296,19 @@ const MyTasks = () => {
                             : "N/A"}
                         </td>
 
-                        <td className="p-3 text-sm">
-                          {issue.descriptions?.[0]?.title || "N/A"}
+                        <td
+                          className="p-3 text-sm"
+                          title={
+                            issue.descriptions?.length > 0
+                              ? issue.descriptions
+                                  .map((d) => d.description)
+                                  .join(", ")
+                              : "N/A"
+                          }
+                        >
+                          {issue.descriptions?.length > 0
+                            ? issue.descriptions[0].description
+                            : "N/A"}
                         </td>
 
                         <td className="p-3 flex justify-center space-x-2">

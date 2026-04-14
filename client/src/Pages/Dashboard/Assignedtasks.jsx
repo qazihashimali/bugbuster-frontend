@@ -247,7 +247,13 @@ const Assignedtasks = () => {
                   <thead className="bg-gray-100 truncate">
                     <tr>
                       <th className="p-3 text-left text-sm font-medium">
-                        Title
+                        Issue Id
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Assigned By
+                      </th>
+                      <th className="p-3 text-left text-sm font-medium">
+                        Assigned To
                       </th>
                       <th className="p-3 text-left text-sm font-medium">
                         Description
@@ -264,9 +270,7 @@ const Assignedtasks = () => {
                       <th className="p-3 text-left text-sm font-medium">
                         Priority
                       </th>
-                      <th className="p-3 text-left text-sm font-medium">
-                        Assigned To
-                      </th>
+
                       <th className="p-3 text-center text-sm font-medium">
                         Actions
                       </th>
@@ -278,7 +282,11 @@ const Assignedtasks = () => {
                         key={issue._id}
                         className="border-b border-gray-200 hover:bg-gray-50"
                       >
+                        <td className="p-3 text-sm">{issue?.issueId}</td>
                         <td className="p-3 text-sm">{issue?.userName}</td>
+                        <td className="p-3 text-sm">
+                          {issue.assignedTo?.name || "N/A"}
+                        </td>
                         <td className="p-3 text-sm">
                           {truncateDescription(
                             issue.descriptions?.[0]?.description
@@ -296,9 +304,7 @@ const Assignedtasks = () => {
                           {statusDisplay[issue?.status] || issue?.status}
                         </td>
                         <td className="p-3 text-sm">{issue.priority}</td>
-                        <td className="p-3 text-sm">
-                          {issue.assignedTo?.name || "N/A"}
-                        </td>
+
                         <td className="p-3 flex justify-center space-x-2">
                           <button
                             onClick={() => handleViewIssue(issue)}
