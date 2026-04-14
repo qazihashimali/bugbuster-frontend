@@ -103,8 +103,8 @@ const Branch = () => {
 
   const handleEditBranch = (branch) => {
     setSelectedBranch(branch);
-    setBranchCode(branch.branchCode);
-    setBranchName(branch.branchName);
+    setBranchCode(branch?.branchCode);
+    setBranchName(branch?.branchName);
     setIsEditing(true);
     setIsModalOpen(true);
   };
@@ -218,8 +218,8 @@ const Branch = () => {
               <tbody>
                 {branches.map((branch) => (
                   <tr key={branch._id} className="">
-                    <td className="p-3 text-sm">{branch.branchCode}</td>
-                    <td className="p-3 text-sm">{branch.branchName}</td>
+                    <td className="p-3 text-sm">{branch?.branchCode}</td>
+                    <td className="p-3 text-sm">{branch?.branchName}</td>
                     <td className="p-3 flex justify-center space-x-2">
                       <button
                         onClick={() => handleViewBranch(branch)}
