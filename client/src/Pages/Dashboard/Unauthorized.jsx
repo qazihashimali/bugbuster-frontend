@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { CgDanger } from "react-icons/cg";
 
-const Unauthorized = () => {
+const Unauthorized = ({ onLogout }) => {
   const navigate = useNavigate();
 
   return (
@@ -41,10 +41,10 @@ const Unauthorized = () => {
               Go Back
             </button>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => onLogout()}
               className="flex-1 px-4 py-2 bg-primary cursor-pointer text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
             >
-              Go to Home
+              Logout
             </button>
           </div>
         </div>

@@ -47,7 +47,10 @@ function App() {
 
           <main className="flex-1 overflow-y-auto  bg-gray-100">
             <Routes>
-              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route
+                path="/unauthorized"
+                element={<Unauthorized onLogout={handleLogout} />}
+              />
               {appRoutes.map((route, index) => (
                 <Route key={index} path={route.path} element={route.element} />
               ))}
