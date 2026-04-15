@@ -4,7 +4,7 @@ import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import Auth from "./Pages/Login";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import appRoutes from "./Routes";
 import toast, { Toaster } from "react-hot-toast";
 import Unauthorized from "./Pages/Dashboard/Unauthorized";
@@ -12,10 +12,12 @@ import Unauthorized from "./Pages/Dashboard/Unauthorized";
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    navigate("/");
     toast.success("We hope to see you again soon!");
   };
 
