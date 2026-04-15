@@ -674,13 +674,25 @@ const ViewDailyTasks = () => {
 
   const fmtDate = (iso) =>
     new Date(iso).toLocaleDateString("en-GB", {
+      weekday: "long",
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
 
-  const totalHours = (tasks) =>
-    tasks?.reduce((s, t) => s + (t.hours || 0), 0).toFixed(1);
+  const toHoursMin = (decimal) => {
+    const totalMins = Math.round(decimal * 60);
+    const h = Math.floor(totalMins / 60);
+    const m = totalMins % 60;
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  };
+
+  const totalHours = (tasks) => {
+    const total = tasks?.reduce((s, t) => s + (t.hours || 0), 0) ?? 0;
+    return toHoursMin(total);
+  };
 
   // ─── Flatten for export ───────────────────────────────────────────────────
   const flattenForExport = (data) => {
@@ -936,6 +948,7 @@ const ViewDailyTasks = () => {
                   Showing reports for{" "}
                   <span className="font-semibold text-gray-700">
                     {new Date().toLocaleDateString("en-GB", {
+                      weekday: "long", // 👈 adds day name
                       day: "2-digit",
                       month: "long",
                       year: "numeric",
@@ -1018,7 +1031,8 @@ const ViewDailyTasks = () => {
                       </td>
                       <td className="px-4 py-3">
                         <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-1 rounded-full">
-                          {totalHours(report.tasks)} hrs
+                          {totalHours(report.tasks)}{" "}
+                          {/* remove " hrs" suffix since it's now in the string */}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -1117,7 +1131,7 @@ const ViewDailyTasks = () => {
                       </td>
                       <td className="px-3 py-3">
                         <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-1 rounded-full">
-                          {task.hours}h
+                          {toHoursMin(task.hours)} {/* was: {task.hours}h */}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-gray-600 text-sm leading-relaxed">
