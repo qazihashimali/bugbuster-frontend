@@ -171,21 +171,38 @@ export default function IssueDesk() {
   // };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
     const maxSize = 5 * 1024 * 1024; // 5MB
 
-    if (file.size > maxSize) {
-      toast.error("File size must be less than 5MB");
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/pdf",
+      "application/vnd.ms-excel", // .xls
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+    ];
 
-      // reset input
+    // ❌ File type validation
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only images, PDF, and Excel files are allowed");
       e.target.value = null;
-
       return;
     }
 
-    setFormData({ ...formData, attachment: file });
+    //  File size validation
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 5MB");
+      e.target.value = null;
+      return;
+    }
+
+    // Save file
+    setFormData({
+      ...formData,
+      attachment: file,
+    });
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -200,7 +217,10 @@ export default function IssueDesk() {
     const start = Date.now();
     try {
       const token = localStorage.getItem("token");
-      if (!token) toast.error("No authentication token found");
+      if (!token) {
+        toast.error("No authentication token found");
+        return;
+      }
 
       const formDataToSend = new FormData();
       formDataToSend.append("userName", formData.userName);
@@ -229,7 +249,9 @@ export default function IssueDesk() {
       );
 
       const data = await response.json();
-      if (!response.ok) toast.error(data.message || "Failed to submit issue");
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit issue");
+      }
 
       // Reset
       setFormData({
@@ -446,12 +468,17 @@ export default function IssueDesk() {
                         name="attachment"
                         className="hidden"
                         onChange={handleFileChange}
-                        accept="image/jpeg,image/jpg,image/png,application/pdf"
+                        accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx"
                       />
                       <p className="mt-2 text-xs text-gray-500 break-words text-center">
                         {formData.attachment
                           ? formData.attachment.name
                           : "No file chosen"}
+                        <br />
+                        <span className="text-red-400">
+                          Allowed: JPG, PNG, PDF, Excel (XLS, XLSX) • Max size:
+                          5MB
+                        </span>
                       </p>
                     </div>
                   </div>

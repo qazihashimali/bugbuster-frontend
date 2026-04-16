@@ -60,6 +60,15 @@ const Auth = () => {
       }
 
       const data = await response.json();
+      if (response.status === 403) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch dropdown data");
+      }
       setDropdowns({
         branches: Array.isArray(data.branches) ? data.branches : [],
         departments: Array.isArray(data.departments) ? data.departments : [],
@@ -98,6 +107,17 @@ const Auth = () => {
       );
 
       const data = await res.json();
+
+      if (res.status === 403) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong");
+      }
+
       return data;
     } catch (error) {
       toast.error("Failed to fetch dropdown data", error);
@@ -141,7 +161,14 @@ const Auth = () => {
         });
       }
     } catch (err) {
-      toast.error(err.message);
+      if (!toast.isActive("error")) {
+        toast.error(
+          err.message === "Failed to fetch"
+            ? "No internet connection"
+            : err.message,
+          { id: "error" }
+        );
+      }
 
       setCompanyResults([]);
       setIsCompanyNotFound(true);
@@ -180,7 +207,14 @@ const Auth = () => {
         });
       }
     } catch (err) {
-      toast.error(err.message);
+      if (!toast.isActive("error")) {
+        toast.error(
+          err.message === "Failed to fetch"
+            ? "No internet connection"
+            : err.message,
+          { id: "error" }
+        );
+      }
     }
   }, []);
 
@@ -251,8 +285,17 @@ const Auth = () => {
         );
 
         const data = await response.json();
+
+        if (response.status === 403) {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+          return;
+        }
+
         if (!response.ok) {
-          toast.error(data.message || "Something went wrong");
+          throw new Error(data.message || "Something went wrong");
         }
         if (data.token && data.user) {
           localStorage.setItem("token", data.token);
@@ -262,7 +305,7 @@ const Auth = () => {
         }
       } else if (isForgotPassword && !showOtpInput) {
         if (!email) {
-          toast.error("Email is required");
+          throw new Error("Email is required");
         }
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/auth/forgot-password`,
@@ -274,7 +317,16 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok) toast.error(data.message || "Something went wrong");
+
+        if (response.status === 403) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
 
         setVerifiedEmail(email);
         setResendAttempts(data.resendAttempts || 0);
@@ -296,7 +348,16 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok) toast.error(data.message || "Something went wrong");
+
+        if (response.status === 403) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
 
         setIsLogin(true);
         setIsForgotPassword(false);
@@ -337,7 +398,16 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok) toast.error(data.message || "Something went wrong");
+
+        if (response.status === 403) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
 
         if (data && data.email) {
           setVerifiedEmail(email);
@@ -357,8 +427,16 @@ const Auth = () => {
         );
 
         const data = await response.json();
-        if (!response.ok) toast.error(data.message || "Something went wrong");
 
+        if (response.status === 403) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
         setIsLogin(true);
         setName("");
         setEmail("");
@@ -401,7 +479,16 @@ const Auth = () => {
       );
 
       const data = await response.json();
-      if (!response.ok) toast.error(data.message || "Something went wrong");
+
+      if (response.status === 403) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong");
+      }
 
       setResendAttempts(data.resendAttempts);
       setTimer(40);

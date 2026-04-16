@@ -552,7 +552,9 @@ export default function DailyReport() {
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) return toast.error("No authentication token found");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
 
       const payload = {
         userName,
@@ -583,8 +585,7 @@ export default function DailyReport() {
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.message || "Failed to submit report");
-        return;
+        throw new Error(data.error || "Failed to submit report");
       }
 
       setDepartment("");
@@ -597,7 +598,7 @@ export default function DailyReport() {
       toast.success("Daily report submitted successfully!");
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to submit report. Please try again.");
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
