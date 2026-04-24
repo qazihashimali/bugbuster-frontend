@@ -2016,6 +2016,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import ChatWidget from "../../Components/Chatwidget";
 
 const generalTasksData = [
   {
@@ -4111,6 +4112,13 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
+      <ChatWidget
+        userId={user?._id}
+        userName={user?.name}
+        token={localStorage.getItem("token")}
+        socketUrl={import.meta.env.VITE_BACKEND_URL}
+        apiBase={import.meta.env.VITE_BACKEND_URL}
+      />
     </div>
   );
 };
